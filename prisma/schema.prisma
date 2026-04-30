@@ -1,0 +1,373 @@
+generator client {
+  provider = "prisma-client-js"
+
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Better Auth required models ─────────────────────────────────────────────
+
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Custom fields collected at registration
+  phone String?
+  role  Role    @default(STUDENT)
+
+  // Better Auth relations
+  sessions Session[]
+  accounts Account[]
+
+  // App profile relations (only one will be populated per user based on role)
+  teacherProfile Teacher?
+  studentProfile Student?
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+  PRINCIPAL
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum TermName {
+  FIRST
+  SECOND
+  THIRD
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum ScoreComponent {
+  ASSIGNMENT1
+  ASSIGNMENT2
+  TEST1
+  TEST2
+  EXAM
+}
+
+// ─── School Identity ─────────────────────────────────────────────────────────
+
+model School {
+  id              String   @id @default(cuid())
+  name            String
+  email           String   @unique
+  address         String?
+  phone           String?
+  motto           String?
+  description     String?
+  logoUrl         String?
+  stampUrl        String?
+  principalName   String?
+  website         String?
+  resultCardPrice Float    @default(500)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  adminUserId String @unique
+}
+
+// ─── Academic Structure ───────────────────────────────────────────────────────
+
+model AcademicSession {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  isCurrent Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  terms Term[]
+}
+
+model Term {
+  id           String          @id @default(cuid())
+  name         TermName
+  sessionId    String
+  session      AcademicSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  isCurrent    Boolean         @default(false)
+  startDate    DateTime?
+  endDate      DateTime?
+  nextTermDate DateTime?
+
+  scores       Score[]
+  assessments  Assessment[]
+  payments     Payment[]
+  cardPassword TermCardPassword[]
+  scoreWindows ScoreWindow[]
+  termResults  TermResult[]
+
+  @@unique([sessionId, name])
+}
+
+model Class {
+  id    String @id @default(cuid())
+  name  String @unique
+  level String
+  arm   String
+
+  students          Student[]
+  formMasters       FormMaster[]
+  classSubjects     ClassSubject[]
+  termCardPasswords TermCardPassword[]
+}
+
+model Subject {
+  id   String  @id @default(cuid())
+  name String  @unique
+  code String? @unique
+
+  classSubjects ClassSubject[]
+}
+
+model ClassSubject {
+  id        String   @id @default(cuid())
+  classId   String
+  class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subjectId String
+  subject   Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  teacherId String?
+  teacher   Teacher? @relation(fields: [teacherId], references: [id], onDelete: SetNull)
+
+  scores Score[]
+
+  @@unique([classId, subjectId])
+}
+
+// ─── User Profiles ────────────────────────────────────────────────────────────
+
+model Teacher {
+  id      String  @id @default(cuid())
+  userId  String  @unique
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  staffId String? @unique
+
+  classSubjects ClassSubject[]
+  formMaster    FormMaster?
+}
+
+model FormMaster {
+  id        String  @id @default(cuid())
+  teacherId String  @unique
+  teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  classId   String
+  class     Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  @@unique([classId])
+}
+
+model Student {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  admissionNo   String    @unique
+  classId       String
+  class         Class     @relation(fields: [classId], references: [id])
+  dateOfBirth   DateTime?
+  gender        Gender?
+  guardianName  String?
+  guardianPhone String?
+  address       String?
+  photo         String?
+
+  scores      Score[]
+  assessments Assessment[]
+  payments    Payment[]
+  termResults TermResult[]
+}
+
+// ─── Academic Records ─────────────────────────────────────────────────────────
+
+model Score {
+  id             String       @id @default(cuid())
+  studentId      String
+  student        Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  classSubjectId String
+  classSubject   ClassSubject @relation(fields: [classSubjectId], references: [id], onDelete: Cascade)
+  termId         String
+  term           Term         @relation(fields: [termId], references: [id], onDelete: Cascade)
+
+  assignment1 Float @default(0)
+  assignment2 Float @default(0)
+  test1       Float @default(0)
+  test2       Float @default(0)
+  exam        Float @default(0)
+
+  total    Float?
+  grade    String?
+  remark   String?
+  position Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, classSubjectId, termId])
+}
+
+model Assessment {
+  id        String  @id @default(cuid())
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  termId    String
+  term      Term    @relation(fields: [termId], references: [id], onDelete: Cascade)
+
+  punctuality      String?
+  attitudeToWork   String?
+  neatness         String?
+  conduct          String?
+  socializing      String?
+  sportsActivities String?
+  leadershipSkills String?
+  handiwork        String?
+
+  daysPresent Int?
+  daysAbsent  Int?
+  totalDays   Int?
+
+  formMasterRemark String?
+  principalRemark  String?
+
+  nextTermBegins DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, termId])
+}
+
+// ─── Payment & Access Control ─────────────────────────────────────────────────
+
+model Payment {
+  id          String        @id @default(cuid())
+  studentId   String
+  student     Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  termId      String
+  term        Term          @relation(fields: [termId], references: [id], onDelete: Cascade)
+  amount      Float
+  reference   String        @unique
+  paystackRef String?
+  status      PaymentStatus @default(PENDING)
+  paidAt      DateTime?
+  createdAt   DateTime      @default(now())
+
+  @@unique([studentId, termId])
+}
+
+model TermCardPassword {
+  id     String @id @default(cuid())
+  termId String
+  term   Term   @relation(fields: [termId], references: [id], onDelete: Cascade)
+
+  // Add this field to make it class-specific
+  classId String
+  class   Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // A term and a class should have exactly one password
+  @@unique([termId, classId])
+}
+
+model ScoreWindow {
+  id        String         @id @default(cuid())
+  termId    String
+  term      Term           @relation(fields: [termId], references: [id], onDelete: Cascade)
+  component ScoreComponent
+  isOpen    Boolean        @default(false)
+  opensAt   DateTime?
+  closesAt  DateTime?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([termId, component])
+}
+
+model TermResult {
+  id        String  @id @default(cuid())
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  termId    String
+  term      Term    @relation(fields: [termId], references: [id], onDelete: Cascade)
+
+  // Compiled Data
+  average    Float
+  totalScore Float
+  rank       Int
+  attendance String? // e.g., "84/90"
+
+  // Form Master Remarks (Soft Skills)
+  punctuality String? // Outstanding, Good, etc.
+  neatness    String?
+  conduct     String?
+  fmRemark    String? // The long text remark
+
+  isApproved    Boolean @default(false)
+  approvedBy    String? // Form Master ID
+  signatureData String? // Stylized signature
+
+  // 2. Admin Layer (The "Stamp")
+  isStamped     Boolean   @default(false)
+  stampedBy     String? // Admin ID
+  stampedAt     DateTime?
+  schoolSealUrl String? // URL to the digital school stamp image
+
+  @@unique([studentId, termId])
+}
