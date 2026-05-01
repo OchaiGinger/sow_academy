@@ -5,7 +5,7 @@ import {
   School,
   Book,
   Calendar,
-  ClipboardUser,
+  Clipboard,
   UserCheck,
   KeyRound,
   Settings,
@@ -24,7 +24,11 @@ export const adminNavItems: NavItem[] = [
   { href: "/admin/classes", label: "Classes", icon: School },
   { href: "/admin/subjects", label: "Subjects", icon: Book },
   { href: "/admin/sessions", label: "Sessions & Terms", icon: Calendar },
-  { href: "/admin/assignments", label: "Class Assignments", icon: ClipboardUser },
+  {
+    href: "/admin/assignments",
+    label: "Class Assignments",
+    icon: Clipboard,
+  },
   { href: "/admin/form-masters", label: "Form Masters", icon: UserCheck },
   { href: "/admin/card-passwords", label: "Card Passwords", icon: KeyRound },
   { href: "/admin/settings", label: "School Settings", icon: Settings },
@@ -37,9 +41,13 @@ export const teacherNavItems: NavItem[] = [
 
 export const formMasterNavItems: NavItem[] = [
   { href: "/form-master", label: "Dashboard", icon: LayoutDashboard },
-  ...teacherNavItems.filter(item => item.href !== '/teacher'), // Inherit teacher links
+  ...teacherNavItems.filter((item) => item.href !== "/teacher"), // Inherit teacher links
   { href: "/form-master/results", label: "Class Results", icon: BookCheck },
-  { href: "/form-master/assessments", label: "Student Assessments", icon: ClipboardEdit },
+  {
+    href: "/form-master/assessments",
+    label: "Student Assessments",
+    icon: ClipboardEdit,
+  },
 ];
 
 export const studentNavItems: NavItem[] = [
@@ -48,8 +56,8 @@ export const studentNavItems: NavItem[] = [
 ];
 
 export const allNavItems = [
-    ...adminNavItems,
-    ...teacherNavItems,
-    ...formMasterNavItems,
-    ...studentNavItems,
+  ...adminNavItems,
+  ...teacherNavItems,
+  ...formMasterNavItems,
+  ...studentNavItems,
 ];

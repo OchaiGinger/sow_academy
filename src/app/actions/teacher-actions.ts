@@ -101,10 +101,6 @@ export async function togglePrincipalRole(
   }
 }
 
-/**
- * PRINCIPAL BULK STAMP
- * The "Official Seal" applied by the Principal.
- */
 export async function principalBulkStamp(classId: string, termId: string) {
   const session = await auth.api.getSession({ headers: await headers() });
 
@@ -117,9 +113,11 @@ export async function principalBulkStamp(classId: string, termId: string) {
 
   await db.termResult.updateMany({
     where: {
-      classId,
+      student: {
+        classId,
+      },
       termId,
-      isApproved: true, // Only stamp results teachers have finished
+      isApproved: true,
     },
     data: {
       isStamped: true,

@@ -50,12 +50,18 @@ export function UserNav({ user }: { user: Session["user"] }) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <div className="p-2">
-            <Badge variant="outline" className="text-xs h-auto px-1.5 py-0.5 border-accent/30 text-accent/80 capitalize">
-                {user.role.toLowerCase().replace('_', ' ')}
-            </Badge>
+          <Badge
+            variant="outline"
+            className="text-xs h-auto px-1.5 py-0.5 border-accent/30 text-accent/80 capitalize"
+          >
+            {(user.role ?? "user").toLowerCase().replace("_", " ")}
+          </Badge>
         </div>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut} className="text-danger cursor-pointer focus:bg-danger/10 focus:text-danger">
+        <DropdownMenuItem
+          onClick={handleSignOut}
+          className="text-danger cursor-pointer focus:bg-danger/10 focus:text-danger"
+        >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
         </DropdownMenuItem>

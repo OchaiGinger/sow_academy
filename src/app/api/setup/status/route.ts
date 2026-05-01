@@ -3,7 +3,7 @@ import { db } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const school = await prisma.school.findFirst({
+    const school = await db.school.findFirst({
       select: { id: true },
     });
     return NextResponse.json({ setupComplete: !!school });
