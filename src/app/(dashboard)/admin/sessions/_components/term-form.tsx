@@ -17,11 +17,13 @@ import {
   type TermFormData,
 } from "@/app/actions/session-action";
 
-enum TermName {
-  FIRST = "FIRST",
-  SECOND = "SECOND",
-  THIRD = "THIRD",
-}
+type TermName = TermFormData["name"];
+
+const TERM_NAMES = {
+  FIRST: "FIRST",
+  SECOND: "SECOND",
+  THIRD: "THIRD",
+} as const;
 
 interface TermFormProps {
   sessionId: string;
@@ -30,7 +32,7 @@ interface TermFormProps {
 }
 
 export function TermForm({ sessionId, onSuccess, initial }: TermFormProps) {
-  const [name, setName] = useState<TermName>(initial?.name ?? TermName.FIRST);
+  const [name, setName] = useState<TermName>(initial?.name ?? "FIRST");
   const [startDate, setStartDate] = useState(initial?.startDate ?? "");
   const [endDate, setEndDate] = useState(initial?.endDate ?? "");
   const [nextTermDate, setNextTermDate] = useState(initial?.nextTermDate ?? "");
@@ -64,9 +66,9 @@ export function TermForm({ sessionId, onSuccess, initial }: TermFormProps) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={TermName.FIRST}>First Term</SelectItem>
-            <SelectItem value={TermName.SECOND}>Second Term</SelectItem>
-            <SelectItem value={TermName.THIRD}>Third Term</SelectItem>
+            <SelectItem value={TERM_NAMES.FIRST}>First Term</SelectItem>
+            <SelectItem value={TERM_NAMES.SECOND}>Second Term</SelectItem>
+            <SelectItem value={TERM_NAMES.THIRD}>Third Term</SelectItem>
           </SelectContent>
         </Select>
       </div>
