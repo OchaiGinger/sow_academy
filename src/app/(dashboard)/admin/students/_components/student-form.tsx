@@ -101,7 +101,7 @@ export function StudentForm({
       } else {
         toast.error(res.error || "Failed to save records");
       }
-    } catch (error) {
+    } catch {
       toast.error("An unexpected error occurred");
     }
   }

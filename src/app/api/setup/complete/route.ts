@@ -74,7 +74,7 @@ export async function POST(req: Request) {
     });
     console.log("Setup completed successfully");
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Stringify the full error so Better Auth's nested fields
     // (body, status, cause) are visible in your server logs
     console.error("Setup completion failure:", JSON.stringify(error, null, 2));
@@ -82,7 +82,9 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         error:
-          error.message || "A critical error occurred during initialization.",
+          error instanceof Error
+            ? error.message
+            : "A critical error occurred during initialization.",
       },
       { status: 500 },
     );

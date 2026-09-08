@@ -48,8 +48,13 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json(student, { status: 201 });
-  } catch (error: any) {
-    if (error.code === "P2002") {
+  } catch (error: unknown) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === "P2002"
+    ) {
       return NextResponse.json(
         {
           error: "A student with this email or admission number already exists",

@@ -25,8 +25,10 @@ export function DashboardShell({
   // Sync with localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem("sidebar-collapsed");
-    if (saved !== null) setCollapsed(saved === "true");
-    setMounted(true);
+    requestAnimationFrame(() => {
+      if (saved !== null) setCollapsed(saved === "true");
+      setMounted(true);
+    });
   }, []);
 
   const toggleCollapsed = () => {

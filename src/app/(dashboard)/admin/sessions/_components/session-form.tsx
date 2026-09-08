@@ -39,7 +39,7 @@ export function SessionForm({ onSuccess, initial }: SessionFormProps) {
   });
 
   const {
-    formState: { isSubmitting, errors },
+    formState: { isSubmitting },
   } = form;
 
   // Separate state for server-level errors (not field errors)

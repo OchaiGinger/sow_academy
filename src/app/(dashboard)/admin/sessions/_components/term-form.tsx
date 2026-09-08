@@ -50,7 +50,7 @@ export function TermForm({ sessionId, onSuccess, initial }: TermFormProps) {
         await createTerm(sessionId, data);
       }
       onSuccess();
-    } catch (e) {
+    } catch {
       setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);

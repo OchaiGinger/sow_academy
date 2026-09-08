@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { getFormMasterClassData } from "@/app/actions/form-master-actions";
 import { ClassResultTable } from "./_components/class-result-table";
 import { GraduationCap } from "lucide-react";
+import type { ReportStudent } from "@/components/report-card/report-card-types";
 
 export default async function FormMasterResultsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -68,7 +69,7 @@ export default async function FormMasterResultsPage() {
           <div className="flex items-center gap-2 bg-emerald-950/50 border border-emerald-900/30 rounded-full px-3 py-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-xs text-emerald-400 font-medium">
-              {data.results.filter((r: any) => r.isApproved).length}/
+              {data.results.filter((r: ReportStudent) => r.isApproved).length}/
               {data.results.length} Signed
             </span>
           </div>

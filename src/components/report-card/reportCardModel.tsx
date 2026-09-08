@@ -5,8 +5,6 @@ import { useReactToPrint } from "react-to-print";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
@@ -16,14 +14,15 @@ import { ReportHeader } from "./header";
 import { AcademicRecord } from "./academic-record";
 import type { ClassSubject } from "./academic-record";
 import { SignatureArea } from "./signature-area";
+import type { ReportSchool, ReportStudent } from "./report-card-types";
 import {
   saveStudentReport,
   principalStampSingle,
 } from "@/app/actions/form-master-actions";
 
 interface ReportCardModalProps {
-  student: any;
-  school: any;
+  student: ReportStudent | null;
+  school: ReportSchool | null;
   termName: string;
   isOpen: boolean;
   onClose: () => void;
@@ -73,17 +72,16 @@ export function ReportCardModal({
     }
   }, [student, isOpen]);
 
-  if (!student) return null;
-
   const scoredNames = new Set(
-    (student.subjects ?? []).map((s: any) => s.name.trim().toLowerCase()),
+    student?.subjects.map((s) => s.name.trim().toLowerCase()) ?? [],
   );
-  const missingSubjects = allSubjects.filter(
-    (cs) => !scoredNames.has(cs.name.trim().toLowerCase()),
+  const missingSubjects = allSubjects.filter((cs) =>
+    !scoredNames.has(cs.name.trim().toLowerCase()),
   );
   const hasMissingSubjects = missingSubjects.length > 0;
 
   const handleAction = async () => {
+    if (!student) return;
     if (hasMissingSubjects) {
       toast.error("Complete scores before signing.");
       return;
@@ -191,6 +189,8 @@ export function ReportCardModal({
     },
   });
 
+  if (!student) return null;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl w-[95vw] h-[90vh] p-0 border-none bg-white overflow-y-auto">
@@ -249,7 +249,7 @@ export function ReportCardModal({
             {/* Form Master's Remark */}
             <div className="print-card border rounded-lg p-3">
               <h4 className="text-[10px] font-black uppercase mb-1.5 print:text-[6pt] print:mb-0.5">
-                Form Master's Remark
+                Form Master&apos;s Remark
               </h4>
               <p className="text-[10px] print:text-[6.5pt] text-slate-700 leading-snug">
                 {formData.fmRemark || "—"}

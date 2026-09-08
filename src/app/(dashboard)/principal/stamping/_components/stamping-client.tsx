@@ -7,12 +7,13 @@ import { bulkStampResults } from "@/app/actions/result-actions";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useRouter } from "next/navigation"; // ← add
+import type { StampingClass } from "@/components/report-card/report-card-types";
 
 export function StampingClient({
   classes,
   termId,
 }: {
-  classes: any[];
+  classes: StampingClass[];
   termId: string;
 }) {
   const [loadingId, setLoadingId] = useState<string | null>(null);

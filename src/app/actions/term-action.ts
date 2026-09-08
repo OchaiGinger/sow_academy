@@ -15,7 +15,7 @@ export async function getCurrentTermInfo() {
     const termName =
       term.name.charAt(0).toUpperCase() + term.name.slice(1).toLowerCase();
     return `${termName} Term ${term.session.name}`;
-  } catch (error) {
+  } catch {
     return "Session Error";
   }
 }

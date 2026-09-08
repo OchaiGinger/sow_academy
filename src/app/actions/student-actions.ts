@@ -67,9 +67,14 @@ export async function createStudent(rawInput: unknown) {
 
     revalidatePath("/admin/students");
     return { success: true, admissionNo };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("CREATE_STUDENT_ERROR:", error);
-    if (error.code === "P2002")
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === "P2002"
+    )
       return { success: false, error: "Email already exists." };
     return { success: false, error: "Failed to register student." };
   }
@@ -121,9 +126,14 @@ export async function updateStudent(studentId: string, rawInput: unknown) {
 
     revalidatePath("/admin/students");
     return { success: true, message: "Student record updated successfully." };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("UPDATE_STUDENT_ERROR:", error);
-    if (error.code === "P2002")
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === "P2002"
+    )
       return { success: false, error: "Email is already in use." };
     return { success: false, error: "Failed to update student records." };
   }

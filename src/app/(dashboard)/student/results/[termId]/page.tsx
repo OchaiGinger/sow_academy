@@ -133,6 +133,7 @@ export default async function StudentResultCardPage({
       : "To Be Announced";
 
   const studentForComponents = {
+    studentId: student.id,
     name: student.user.name,
     average,
     totalScore,
@@ -248,7 +249,7 @@ export default async function StudentResultCardPage({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2 flex flex-col gap-2">
                 <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  Form Master's Remark
+                  Form Master&apos;s Remark
                 </p>
                 <div className="w-full min-h-[110px] p-4 text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-xl italic leading-relaxed">
                   {studentForComponents.fmRemark || (

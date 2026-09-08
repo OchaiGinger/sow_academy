@@ -5,15 +5,19 @@ import { useState } from "react";
 import { ReportCardModal } from "@/components/report-card/reportCardModel";
 import { FileText, TrendingUp, TrendingDown, Medal } from "lucide-react";
 import type { ClassSubject } from "@/components/report-card/academic-record";
+import type {
+  ReportSchool,
+  ReportStudent,
+} from "@/components/report-card/report-card-types";
 
 interface Props {
-  initialData: any[];
-  school: any;
+  initialData: ReportStudent[];
+  school: ReportSchool | null;
   termName: string;
   termId: string;
   allSubjects: ClassSubject[];
   userRole?: string;
-  results?: any[];
+  results?: ReportStudent[];
 }
 
 export function ClassResultTable({
@@ -24,10 +28,12 @@ export function ClassResultTable({
   allSubjects,
   userRole,
 }: Props) {
-  const [selectedStudent, setSelectedStudent] = useState<any>(null);
+  const [selectedStudent, setSelectedStudent] = useState<ReportStudent | null>(
+    null,
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleOpenSheet = (student: any) => {
+  const handleOpenSheet = (student: ReportStudent) => {
     setSelectedStudent(student);
     setIsModalOpen(true);
   };
@@ -45,7 +51,7 @@ export function ClassResultTable({
     <>
       {/* ── MOBILE: Card List ── */}
       <div className="md:hidden space-y-2 p-3">
-        {initialData.map((row: any) => (
+        {initialData.map((row) => (
           <div
             key={row.studentId}
             className="flex items-center gap-3 rounded-xl border border-emerald-900/20 bg-black/20 px-3 py-3"
@@ -82,7 +88,7 @@ export function ClassResultTable({
             {allSubjects.length > 0 &&
               (() => {
                 const scoredNames = new Set(
-                  row.subjects.map((s: any) => s.name.trim().toLowerCase()),
+                  row.subjects.map((s) => s.name.trim().toLowerCase()),
                 );
                 const missing = allSubjects.filter(
                   (cs) => !scoredNames.has(cs.name.trim().toLowerCase()),
@@ -131,9 +137,9 @@ export function ClassResultTable({
             </tr>
           </thead>
           <tbody>
-            {initialData.map((row: any) => {
+            {initialData.map((row) => {
               const scoredNames = new Set(
-                row.subjects.map((s: any) => s.name.trim().toLowerCase()),
+                row.subjects.map((s) => s.name.trim().toLowerCase()),
               );
               const missingCount =
                 allSubjects.length > 0

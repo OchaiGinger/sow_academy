@@ -7,7 +7,7 @@ export async function GET() {
       select: { id: true },
     });
     return NextResponse.json({ setupComplete: !!school });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ setupComplete: false }, { status: 500 });
   }
 }

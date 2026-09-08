@@ -34,7 +34,7 @@ export function PasswordRow({
 
       // Reset the "Saved" checkmark after 2 seconds
       setTimeout(() => setIsSaved(false), 2000);
-    } catch (error) {
+    } catch {
       toast.error("Failed to update password");
     } finally {
       setIsPending(false);

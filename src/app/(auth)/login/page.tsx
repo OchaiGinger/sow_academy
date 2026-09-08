@@ -49,7 +49,7 @@ export default function LoginPage() {
     setServerError(null);
 
     try {
-      const { data, error } = await authClient.signIn.email({
+      const { error } = await authClient.signIn.email({
         email: values.email,
         password: values.password,
       });

@@ -33,7 +33,7 @@ export function FormMasterList({
       try {
         await removeFormMaster(id);
         toast.success("Assignment removed successfully");
-      } catch (error) {
+      } catch {
         toast.error("Failed to remove assignment");
       }
     }

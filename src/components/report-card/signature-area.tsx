@@ -1,14 +1,25 @@
 // signature-area.tsx
 import { DynamicSignature } from "./dynamic-signature";
 import { ShieldCheck } from "lucide-react";
+import type { ReportSchool, ReportStudent } from "./report-card-types";
 
-export function SignatureArea({ isApproved, isStamped, school, student }: any) {
+export function SignatureArea({
+  isApproved,
+  isStamped,
+  school,
+  student,
+}: {
+  isApproved: boolean;
+  isStamped: boolean;
+  school: ReportSchool | null;
+  student: ReportStudent;
+}) {
   return (
     <div className="border-t border-slate-200 pt-4 print:pt-3 grid grid-cols-1 sm:grid-cols-2 print:grid-cols-2 gap-6 print:gap-4">
       {/* Form Master Signature */}
       <div className="space-y-2 print:space-y-1.5">
         <p className="text-[10px] print:text-[8px] font-black uppercase tracking-widest text-slate-400">
-          Form Master's Signature
+          Form Master&apos;s Signature
         </p>
         <DynamicSignature
           teacherName={student.formMasterName ?? "Class Teacher"}
@@ -26,7 +37,7 @@ export function SignatureArea({ isApproved, isStamped, school, student }: any) {
       {/* Principal Stamp */}
       <div className="space-y-2 print:space-y-1.5">
         <p className="text-[10px] print:text-[8px] font-black uppercase tracking-widest text-slate-400">
-          Principal's Approval
+          Principal&apos;s Approval
         </p>
         {isStamped ? (
           <div className="flex items-center gap-3">

@@ -48,7 +48,7 @@ export function SubjectList({ initialSubjects, classes }: SubjectListProps) {
       try {
         await deleteSubject(id);
         toast.success("Subject deleted successfully");
-      } catch (error) {
+      } catch {
         toast.error("Failed to delete subject");
       }
     }

@@ -65,11 +65,19 @@ export async function createTeacher(rawInput: unknown) {
 
     revalidatePath("/admin/teachers");
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("CREATE_TEACHER_ERROR:", error);
-    if (error.code === "P2002")
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === "P2002"
+    )
       return { success: false, error: "Email or Staff ID already exists." };
-    return { success: false, error: error.message || "Unexpected error." };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unexpected error.",
+    };
   }
 }
 
@@ -78,7 +86,7 @@ export async function deleteTeacher(id: string) {
     await db.teacher.delete({ where: { id } });
     revalidatePath("/admin/teachers");
     return { success: true };
-  } catch (error) {
+  } catch {
     console.error("DELETE_ERROR:", error);
     return { success: false, error: "Failed to delete teacher." };
   }

@@ -10,12 +10,10 @@ import {
   Minus,
   FileText,
   Lock,
-  ChevronRight,
   BarChart3,
   Award,
   BookOpen,
 } from "lucide-react";
-import Link from "next/link";
 import { ResultUnlockButton } from "../_components/result-unblock-button";
 
 // ─── Grade helpers ────────────────────────────────────────────────────────────

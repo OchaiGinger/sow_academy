@@ -27,8 +27,10 @@ export function ResultUnlockButton({ termId, classId }: Props) {
     if (open) {
       setTimeout(() => inputRef.current?.focus(), 50);
     } else {
-      setCode("");
-      setError(null);
+      queueMicrotask(() => {
+        setCode("");
+        setError(null);
+      });
     }
   }, [open]);
 

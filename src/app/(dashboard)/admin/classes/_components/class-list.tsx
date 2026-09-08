@@ -9,10 +9,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, GraduationCap, Layers } from "lucide-react";
+import { Edit, Trash2, GraduationCap } from "lucide-react";
 import { deleteClass } from "@/app/actions/class-actions";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 
 interface ClassItem {
   id: string;

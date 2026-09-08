@@ -1,7 +1,14 @@
 // components/report-card/header.tsx
 import { MapPin, Phone, Globe, Award } from "lucide-react";
+import type { ReportSchool, ReportStudent } from "./report-card-types";
 
-export const ReportHeader = ({ school, student }: any) => {
+export const ReportHeader = ({
+  school,
+  student,
+}: {
+  school: ReportSchool | null;
+  student: ReportStudent;
+}) => {
   const average = student?.average ?? 0;
   const grade =
     average >= 75

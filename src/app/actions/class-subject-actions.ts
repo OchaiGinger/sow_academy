@@ -29,7 +29,7 @@ export async function assignSubjectToClass(data: {
 
     revalidatePath("/admin/classes");
     return { success: true };
-  } catch (error) {
+  } catch {
     return { success: false, error: "Failed to assign subject to class." };
   }
 }
