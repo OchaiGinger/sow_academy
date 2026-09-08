@@ -39,11 +39,21 @@ import { SessionForm } from "./session-form";
 import { TermForm } from "./term-form";
 import { ScoreWindowManager } from "./score-window-manager";
 import { cn } from "@/lib/utils";
-import type { Prisma } from "@prisma/client";
 
-type Sessions = Prisma.AcademicSessionGetPayload<{
-  include: { terms: true };
-}>[];
+type SessionTerm = {
+  id: string;
+  name: string;
+  isCurrent: boolean;
+  startDate: Date | null;
+  endDate: Date | null;
+};
+
+type Sessions = Array<{
+  id: string;
+  name: string;
+  isCurrent: boolean;
+  terms: SessionTerm[];
+}>;
 
 function formatDate(date: Date | string) {
   return new Date(date).toLocaleDateString("en-GB", {
