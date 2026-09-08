@@ -2,20 +2,26 @@
 import { db } from "@/lib/prisma";
 import { StampingClient } from "./_components/stamping-client";
 
+type StampingClass = {
+  id: string;
+  name: string;
+  _count: { students: number };
+};
+
 export default async function PrincipalStampingPage() {
   const currentTerm = await db.term.findFirst({ where: { isCurrent: true } });
   if (!currentTerm) return <div>No active term found.</div>;
 
-  const classes = await db.class.findMany({
+  const classes = (await db.class.findMany({
     select: {
       id: true,
       name: true,
       _count: { select: { students: true } },
     },
-  });
+  })) as StampingClass[];
 
   const classStats = await Promise.all(
-    classes.map(async (cls) => {
+    classes.map(async (cls: StampingClass) => {
       // ❌ Before: classId: cls.id  → doesn't exist on TermResult
       // ✅ After:  filter through the student relation instead
       const baseWhere = {
