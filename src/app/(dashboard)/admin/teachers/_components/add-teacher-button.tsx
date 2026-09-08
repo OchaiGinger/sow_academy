@@ -13,8 +13,14 @@ import {
 import { TeacherForm } from "./teacher-form";
 
 interface Props {
-  availableSubjects: any[];
+  availableSubjects: AvailableSubject[];
 }
+
+type AvailableSubject = {
+  id: string;
+  class: { name: string } | null;
+  subject: { name: string } | null;
+};
 
 export function AddTeacherButton({ availableSubjects }: Props) {
   const [open, setOpen] = useState(false);

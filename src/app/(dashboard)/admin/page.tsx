@@ -1,5 +1,6 @@
 import { StatsCard } from "@/components/shared/stats-card";
 import { db } from "@/lib/prisma";
+import { cn } from "@/lib/utils";
 
 type RecentStudent = {
   id: string;
@@ -137,4 +138,3 @@ export default async function AdminDashboard() {
   );
 }
 
-const cn = (...classes: any[]) => classes.filter(Boolean).join(" ");

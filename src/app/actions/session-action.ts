@@ -6,8 +6,17 @@ import { TermName } from "@prisma/client";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function handlePrismaError(e: any, context: string): never {
-  switch (e?.code) {
+function handlePrismaError(error: unknown, context: string): never {
+  const code =
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    typeof error.code === "string"
+      ? error.code
+      : undefined;
+  const message = error instanceof Error ? error.message : undefined;
+
+  switch (code) {
     case "P2002":
       throw new Error(`A ${context} with that name already exists.`);
     case "P2025":
@@ -20,7 +29,7 @@ function handlePrismaError(e: any, context: string): never {
       );
     default:
       throw new Error(
-        e?.message ?? `Failed to ${context.toLowerCase()}. Please try again.`,
+        message ?? `Failed to ${context.toLowerCase()}. Please try again.`,
       );
   }
 }
@@ -33,8 +42,10 @@ export async function getSessions() {
       orderBy: { name: "desc" },
       include: { terms: { orderBy: { name: "asc" } } },
     });
-  } catch (e: any) {
-    throw new Error(e?.message ?? "Failed to load sessions.");
+  } catch (e: unknown) {
+    throw new Error(
+      e instanceof Error ? e.message : "Failed to load sessions.",
+    );
   }
 }
 
@@ -45,7 +56,7 @@ export async function createSession(name: string) {
       select: { id: true },
     });
     revalidatePath("/admin/sessions");
-  } catch (e: any) {
+  } catch (e: unknown) {
     handlePrismaError(e, "session");
   }
 }
@@ -58,7 +69,7 @@ export async function updateSession(id: string, name: string) {
       select: { id: true },
     });
     revalidatePath("/admin/sessions");
-  } catch (e: any) {
+  } catch (e: unknown) {
     handlePrismaError(e, "session");
   }
 }
@@ -67,7 +78,7 @@ export async function deleteSession(id: string) {
   try {
     await db.academicSession.delete({ where: { id } });
     revalidatePath("/admin/sessions");
-  } catch (e: any) {
+  } catch (e: unknown) {
     handlePrismaError(e, "session");
   }
 }
@@ -79,7 +90,7 @@ export async function setCurrentSession(id: string) {
       db.academicSession.update({ where: { id }, data: { isCurrent: true } }),
     ]);
     revalidatePath("/admin/sessions");
-  } catch (e: any) {
+  } catch (e: unknown) {
     handlePrismaError(e, "session");
   }
 }
@@ -108,7 +119,7 @@ export async function createTerm(sessionId: string, data: TermFormData) {
       select: { id: true },
     });
     revalidatePath("/admin/sessions");
-  } catch (e: any) {
+  } catch (e: unknown) {
     handlePrismaError(e, "term");
   }
 }
@@ -126,7 +137,7 @@ export async function updateTerm(id: string, data: TermFormData) {
       select: { id: true },
     });
     revalidatePath("/admin/sessions");
-  } catch (e: any) {
+  } catch (e: unknown) {
     handlePrismaError(e, "term");
   }
 }
@@ -135,7 +146,7 @@ export async function deleteTerm(id: string) {
   try {
     await db.term.delete({ where: { id } });
     revalidatePath("/admin/sessions");
-  } catch (e: any) {
+  } catch (e: unknown) {
     handlePrismaError(e, "term");
   }
 }
@@ -147,7 +158,7 @@ export async function setCurrentTerm(id: string) {
       db.term.update({ where: { id }, data: { isCurrent: true } }),
     ]);
     revalidatePath("/admin/sessions");
-  } catch (e: any) {
+  } catch (e: unknown) {
     handlePrismaError(e, "term");
   }
 }

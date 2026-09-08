@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -14,10 +14,24 @@ import {
 import { StudentForm } from "./student-form";
 
 interface AddStudentButtonProps {
-  classes: any[];
-  initialData?: any; // If this exists, we are editing
+  classes: { id: string; name: string; level: string; arm: string }[];
+  initialData?: StudentFormData;
   mode?: "add" | "edit";
 }
+
+type StudentFormData = {
+  id: string;
+  name?: string;
+  email?: string;
+  password?: string;
+  phone?: string | null;
+  classId?: string;
+  gender?: "MALE" | "FEMALE";
+  guardianName?: string | null;
+  guardianPhone?: string | null;
+  address?: string | null;
+  dateOfBirth?: Date | string | null;
+};
 
 export function AddStudentButton({
   classes,

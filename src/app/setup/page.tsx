@@ -78,8 +78,10 @@ export default function SetupPage() {
         "School and Admin account created! Redirecting to login...",
       );
       setTimeout(() => router.push("/login"), 2000);
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to complete setup",
+      );
       setIsLoading(false);
     }
   };
@@ -272,7 +274,7 @@ export default function SetupPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label>Principal's Full Name *</Label>
+              <Label>Principal&apos;s Full Name *</Label>
               <Input
                 placeholder="Prof. Jane Doe"
                 {...form.register("principalName")}

@@ -24,8 +24,13 @@ export async function assignFormMaster(rawInput: unknown) {
 
     revalidatePath("/admin/form-masters");
     return { success: true };
-  } catch (error: any) {
-    if (error.code === "P2002") {
+  } catch (error: unknown) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === "P2002"
+    ) {
       return {
         success: false,
         error: "This teacher is already a Form Master for another class.",

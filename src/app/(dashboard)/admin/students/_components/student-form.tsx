@@ -33,7 +33,19 @@ interface StudentFormProps {
     arm: string;
   }[];
   onSuccess: () => void;
-  initialData?: any;
+  initialData?: {
+    id: string;
+    name?: string;
+    email?: string;
+    password?: string;
+    phone?: string | null;
+    classId?: string;
+    gender?: "MALE" | "FEMALE";
+    guardianName?: string | null;
+    guardianPhone?: string | null;
+    address?: string | null;
+    dateOfBirth?: Date | string | null;
+  };
 }
 
 export function StudentForm({
@@ -47,10 +59,18 @@ export function StudentForm({
     resolver: zodResolver(studentSchema),
     defaultValues: initialData
       ? {
-          ...initialData,
+          name: initialData.name ?? "",
+          email: initialData.email ?? "",
+          password: initialData.password ?? "",
+          phone: initialData.phone ?? "",
+          classId: initialData.classId ?? "",
+          gender: initialData.gender ?? "MALE",
+          guardianName: initialData.guardianName ?? "",
+          guardianPhone: initialData.guardianPhone ?? "",
+          address: initialData.address ?? "",
           dateOfBirth: initialData.dateOfBirth
             ? new Date(initialData.dateOfBirth)
-            : undefined,
+            : new Date(),
         }
       : {
           name: "",

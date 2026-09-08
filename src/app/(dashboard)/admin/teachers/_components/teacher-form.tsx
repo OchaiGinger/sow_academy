@@ -11,7 +11,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -22,8 +21,14 @@ import { useEffect } from "react";
 
 interface Props {
   onSuccess: () => void;
-  availableSubjects: any[];
+  availableSubjects: AvailableSubject[];
 }
+
+type AvailableSubject = {
+  id: string;
+  class: { name: string } | null;
+  subject: { name: string } | null;
+};
 
 export function TeacherForm({ onSuccess, availableSubjects = [] }: Props) {
   const form = useForm<TeacherFormValues>({

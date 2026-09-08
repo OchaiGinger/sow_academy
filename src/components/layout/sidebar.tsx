@@ -24,16 +24,16 @@ import {
   ScrollText,
   ChevronLeft,
   ChevronRight,
-  Menu,
   X,
+  type LucideIcon,
 } from "lucide-react";
 // ↑ removed unused Button import
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 
 interface NavItem {
   label: string;
   href: string;
-  icon: any;
+  icon: LucideIcon;
   roles: string[];
 }
 

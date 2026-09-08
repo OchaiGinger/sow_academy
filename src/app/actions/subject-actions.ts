@@ -4,7 +4,7 @@ import { db } from "@/lib/prisma";
 import { subjectSchema } from "@/lib/zodSchemas";
 import { revalidatePath } from "next/cache";
 
-export async function upsertSubject(rawInput: any) {
+export async function upsertSubject(rawInput: unknown) {
   const result = subjectSchema.safeParse(rawInput);
   if (!result.success) return { success: false, error: "Invalid data" };
 

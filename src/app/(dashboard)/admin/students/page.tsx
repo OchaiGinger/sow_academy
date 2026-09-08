@@ -177,7 +177,7 @@ export default async function StudentsAdminPage() {
                           phone: student.user.phone,
                           classId: student.classId,
                           dateOfBirth: student.dateOfBirth,
-                          gender: student.gender,
+                          gender: student.gender ?? "MALE",
                           guardianName: student.guardianName,
                           guardianPhone: student.guardianPhone,
                           address: student.address,

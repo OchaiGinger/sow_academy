@@ -57,14 +57,15 @@ export function SessionForm({ onSuccess, initial }: SessionFormProps) {
         await createSession(data.name);
       }
       onSuccess();
-    } catch (e: any) {
+    } catch (e: unknown) {
       // Show the real error — not a generic message
+      const error = e as { message?: string; cause?: unknown; code?: string };
       setServerError({
-        message: e?.message ?? "An unexpected error occurred.",
-        detail: e?.cause
-          ? String(e.cause)
-          : e?.code
-            ? `Error code: ${e.code}`
+        message: error.message ?? "An unexpected error occurred.",
+        detail: error.cause
+          ? String(error.cause)
+          : error.code
+            ? `Error code: ${error.code}`
             : undefined,
       });
     }

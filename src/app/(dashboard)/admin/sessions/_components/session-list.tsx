@@ -39,8 +39,11 @@ import { SessionForm } from "./session-form";
 import { TermForm } from "./term-form";
 import { ScoreWindowManager } from "./score-window-manager";
 import { cn } from "@/lib/utils";
+import type { Prisma } from "@prisma/client";
 
-type Sessions = any;
+type Sessions = Prisma.AcademicSessionGetPayload<{
+  include: { terms: true };
+}>[];
 
 function formatDate(date: Date | string) {
   return new Date(date).toLocaleDateString("en-GB", {
@@ -129,7 +132,7 @@ export function SessionList({
 
       {/* ── List ─────────────────────────────────────────────────────────── */}
       <div className="space-y-6 w-full">
-        {initialSessions.map((session: any) => (
+        {initialSessions.map((session) => (
           <div
             key={session.id}
             className="border rounded-xl bg-card shadow-sm overflow-hidden w-full"
@@ -220,7 +223,7 @@ export function SessionList({
 
             {/* TERMS */}
             <div className="divide-y divide-border/50">
-              {session.terms.map((term: any) => (
+              {session.terms.map((term) => (
                 <div
                   key={term.id}
                   className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 sm:px-6 hover:bg-muted/5 transition-colors w-full overflow-hidden"

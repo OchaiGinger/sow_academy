@@ -48,7 +48,7 @@ export default async function AdminTeachersPage() {
 
       <div className="border border-border-subtle rounded-sm bg-bg-surface overflow-hidden shadow-sm">
         {/* Now initialData matches the TeacherItem interface exactly */}
-        <TeacherList initialData={teachers as any} />
+        <TeacherList initialData={teachers} />
       </div>
     </div>
   );
