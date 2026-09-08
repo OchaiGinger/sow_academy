@@ -1,6 +1,13 @@
 import { StatsCard } from "@/components/shared/stats-card";
 import { db } from "@/lib/prisma";
 
+type RecentStudent = {
+  id: string;
+  admissionNo: string;
+  user: { name: string; createdAt: Date };
+  class: { name: string } | null;
+};
+
 export default async function AdminDashboard() {
   const [studentCount, teacherCount, classCount, recentStudents] =
     await Promise.all([
@@ -11,7 +18,7 @@ export default async function AdminDashboard() {
         take: 5,
         orderBy: { user: { createdAt: "desc" } },
         include: { user: true, class: true },
-      }),
+      }) as Promise<RecentStudent[]>,
     ]);
 
   return (
