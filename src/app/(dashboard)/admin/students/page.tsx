@@ -11,16 +11,35 @@ import {
 } from "@/components/ui/table";
 import { GraduationCap, Users, BookOpen, User } from "lucide-react";
 
+type AdminStudent = {
+  id: string;
+  admissionNo: string;
+  classId: string;
+  dateOfBirth: Date | null;
+  gender: "MALE" | "FEMALE" | null;
+  guardianName: string | null;
+  guardianPhone: string | null;
+  address: string | null;
+  user: {
+    name: string;
+    email: string;
+    phone: string | null;
+  };
+  class: { name: string } | null;
+};
+
 export default async function StudentsAdminPage() {
   const [students, classes] = await Promise.all([
     db.student.findMany({
       include: { user: true, class: true },
       orderBy: { user: { name: "asc" } },
-    }),
+    }) as Promise<AdminStudent[]>,
     db.class.findMany({ orderBy: { name: "asc" } }),
   ]);
 
-  const totalClasses = new Set(students.map((s) => s.classId).filter(Boolean))
+  const totalClasses = new Set(
+    students.map((s: AdminStudent) => s.classId).filter(Boolean),
+  )
     .size;
 
   return (
@@ -109,7 +128,7 @@ export default async function StudentsAdminPage() {
             </TableHeader>
             <TableBody>
               {students.length > 0 ? (
-                students.map((student) => (
+                students.map((student: AdminStudent) => (
                   <TableRow
                     key={student.id}
                     className="hover:bg-muted/5 transition-colors"
