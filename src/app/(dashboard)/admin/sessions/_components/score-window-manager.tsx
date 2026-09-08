@@ -9,7 +9,14 @@ import {
   getOrCreateScoreWindows,
   toggleScoreWindow,
 } from "@/app/actions/score-window-actions";
-import { ScoreComponent } from "@prisma/client";
+
+enum ScoreComponent {
+  ASSIGNMENT1 = "ASSIGNMENT1",
+  ASSIGNMENT2 = "ASSIGNMENT2",
+  TEST1 = "TEST1",
+  TEST2 = "TEST2",
+  EXAM = "EXAM",
+}
 
 interface Window {
   id: string;

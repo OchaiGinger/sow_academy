@@ -16,7 +16,12 @@ import {
   updateTerm,
   type TermFormData,
 } from "@/app/actions/session-action";
-import { TermName } from "@prisma/client";
+
+enum TermName {
+  FIRST = "FIRST",
+  SECOND = "SECOND",
+  THIRD = "THIRD",
+}
 
 interface TermFormProps {
   sessionId: string;
