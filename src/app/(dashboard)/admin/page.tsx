@@ -56,7 +56,7 @@ export default async function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border-subtle">
-                  {recentStudents.map((student) => (
+                  {recentStudents.map((student: RecentStudent) => (
                     <tr
                       key={student.id}
                       className="hover:bg-bg-elevated transition-colors text-text-primary"
