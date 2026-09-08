@@ -270,7 +270,9 @@ export function ReportCardModal({
           {/* Next term footer */}
           <div className="print-footer mt-3 text-[9px] print:text-[6pt] text-center border-t pt-1.5">
             <span className="font-semibold">Next Term Begins:</span>{" "}
-            {new Date(student.nextTermDate).toDateString()}
+             {student.nextTermDate
+                ? new Date(student.nextTermDate).toDateString()
+                : "To Be Announced"}
           </div>
         </div>
 

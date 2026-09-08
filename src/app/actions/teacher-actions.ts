@@ -86,7 +86,7 @@ export async function deleteTeacher(id: string) {
     await db.teacher.delete({ where: { id } });
     revalidatePath("/admin/teachers");
     return { success: true };
-  } catch {
+  } catch (error) {
     console.error("DELETE_ERROR:", error);
     return { success: false, error: "Failed to delete teacher." };
   }

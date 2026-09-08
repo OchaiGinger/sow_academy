@@ -23,7 +23,7 @@ export function SignatureArea({
         </p>
         <DynamicSignature
           teacherName={student.formMasterName ?? "Class Teacher"}
-          teacherId={student.formMasterId}
+           teacherId={student.formMasterId ?? undefined}
           role="Form Master"
           isApproved={isApproved}
         />
