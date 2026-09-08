@@ -19,7 +19,7 @@ export default async function AdminFormMastersPage() {
     }),
   ]);
 
-  const teachers = teachersRaw.map((t) => ({
+  const teachers = teachersRaw.map((t: { id: string; user: { name: string } }) => ({
     id: t.id,
     name: t.user.name,
   }));

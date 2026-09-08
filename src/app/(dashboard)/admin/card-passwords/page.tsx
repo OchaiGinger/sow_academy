@@ -9,6 +9,16 @@ type ClassWithPassword = {
 
 export default async function AdminCardPasswordsPage() {
   const activeTerm = await db.term.findFirst({ where: { isCurrent: true } });
+
+  if (!activeTerm) {
+    return (
+      <div className="p-6">
+        <h1 className="text-2xl font-bold mb-4">Exam Passwords</h1>
+        <p className="text-muted-foreground">No active term is configured.</p>
+      </div>
+    );
+  }
+
   const classes: ClassWithPassword[] = await db.class.findMany({
     include: {
       termCardPasswords: {
@@ -37,7 +47,7 @@ export default async function AdminCardPasswordsPage() {
                 key={cls.id}
                 classId={cls.id}
                 className={cls.name}
-                termId={activeTerm?.id!}
+                termId={activeTerm.id}
                 initialPassword={cls.termCardPasswords[0]?.password || ""}
               />
             ))}
