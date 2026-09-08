@@ -1,9 +1,15 @@
 import { db } from "@/lib/prisma";
 import { PasswordRow } from "./_components/password-row";
 
+type ClassWithPassword = {
+  id: string;
+  name: string;
+  termCardPasswords: Array<{ password: string }>;
+};
+
 export default async function AdminCardPasswordsPage() {
   const activeTerm = await db.term.findFirst({ where: { isCurrent: true } });
-  const classes = await db.class.findMany({
+  const classes: ClassWithPassword[] = await db.class.findMany({
     include: {
       termCardPasswords: {
         where: { termId: activeTerm?.id },
