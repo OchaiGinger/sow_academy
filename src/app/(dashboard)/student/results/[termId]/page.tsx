@@ -114,9 +114,8 @@ export default async function StudentResultCardPage({
 
   // ── Derived values ─────────────────────────────────────────────────────────
   const computedTotal = scores.reduce(
-    (sum, s) =>
-      sum +
-      (s.total ?? s.assignment1 + s.assignment2 + s.test1 + s.test2 + s.exam),
+    (sum: number, s: { total?: number | null; assignment1: number; assignment2: number; test1: number; test2: number; exam: number }) =>
+      sum + (s.total ?? s.assignment1 + s.assignment2 + s.test1 + s.test2 + s.exam),
     0,
   );
   const computedAvg = scores.length > 0 ? computedTotal / scores.length : 0;
