@@ -92,7 +92,7 @@ export default async function StudentResultsPage() {
         where: { classId: student.classId },
         select: { termId: true },
       })
-    ).map((cp) => cp.termId),
+    ).map((cp: { termId: string }) => cp.termId),
   );
 
   // ── Summary stats across all terms ────────────────────────────────────────
