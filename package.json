@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "set ESLINT_IGNORE_BUILD_ERRORS=true&& next build",
+    "build": "set ESLINT_IGNORE_BUILD_ERRORS=true&& npx prisma generate --schema=prisma/schema.prisma && next build",
     "start": "next start",
     "lint": "eslint"
   },
