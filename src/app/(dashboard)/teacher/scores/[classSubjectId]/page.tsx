@@ -15,7 +15,15 @@ export default async function ScoreEntryPage({
     getOpenWindowsForCurrentTerm(),
   ]);
 
-  if (!data) return notFound();
+  if (!data) {
+    return (
+      <div className="p-6">
+        <div className="rounded-lg border border-yellow-900/40 bg-yellow-950/20 px-4 py-3 text-sm text-yellow-400">
+          No active term found. Please set an active term to enter scores.
+        </div>
+      </div>
+    );
+  }
 
   const openSet = new Set(openWindows.map((w) => w.component));
 

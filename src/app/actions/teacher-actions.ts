@@ -49,7 +49,7 @@ export async function createTeacher(rawInput: unknown) {
           }),
         ]);
 
-        const staffId = `STF/${new Date().getFullYear()}/${(count + 1).toString().padStart(3, "0")}`;
+        const staffId = `SOWA/STF/${new Date().getFullYear().toString().slice(-2)}/${(count + 1).toString().padStart(3, "0")}`;
 
         await tx.teacher.create({
           data: {

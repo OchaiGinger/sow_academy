@@ -24,28 +24,24 @@ export async function createStudent(rawInput: unknown) {
   } = result.data;
 
   try {
-    // 1. Check if email already exists
     const existing = await db.user.findUnique({ where: { email } });
     if (existing) return { success: false, error: "Email already exists." };
 
-    // 2. Generate Admission Number
     const count = await db.student.count();
-    const year = new Date().getFullYear();
-    const admissionNo = `ADM/${year}/${(count + 1).toString().padStart(3, "0")}`;
+    const year = new Date().getFullYear().toString().slice(-2);
+    const admissionNo = `SOWA/ST/${year}/${(count + 1).toString().padStart(3, "0")}`;
 
-    // 3. Create User via Better Auth (only accepts built-in fields)
     const user = await auth.api.signUpEmail({
       headers: await headers(),
       body: {
         email,
-        password: admissionNo, // Better Auth hashes this with scrypt
+        password: admissionNo,
         name,
       },
     });
 
     if (!user) throw new Error("Failed to create auth user");
 
-    // 4. Set role + phone, then create Student profile atomically
     await db.$transaction([
       db.user.update({
         where: { id: user.user.id },

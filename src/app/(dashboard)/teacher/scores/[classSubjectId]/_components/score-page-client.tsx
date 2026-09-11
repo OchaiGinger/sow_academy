@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation"; // ADD
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import ResultSheetPreview from "./result-sheet-preview";
 import { ScoreEntrySheet } from "./score-entry-sheet";
@@ -27,14 +27,23 @@ interface Props {
 export function ScorePageClient({
   classSubject,
   currentTerm,
-  students,
+  students: serverStudents,
   classSubjectId,
   termId,
   openWindows,
 }: Props) {
-  const router = useRouter(); // ADD
+  const router = useRouter();
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [students, setStudents] = useState(serverStudents);
+
+  useEffect(() => {
+    setStudents(serverStudents);
+  }, [serverStudents]);
+
+  const refreshData = useCallback(async () => {
+    await router.refresh();
+  }, [router]);
 
   const rows = withTotals(
     students.map((s) => {
@@ -52,6 +61,12 @@ export function ScorePageClient({
       };
     }),
   );
+
+  const handleSaved = useCallback(async () => {
+    setSheetOpen(false);
+    await refreshData();
+  }, [refreshData]);
+
   function openSheet(student: Student) {
     setSelectedStudent(student);
     setSheetOpen(true);
@@ -98,11 +113,7 @@ export function ScorePageClient({
               classSubjectId={classSubjectId}
               termId={termId}
               openWindows={openWindows}
-              onSaved={() => {
-                // CHANGE
-                setSheetOpen(false);
-                router.refresh(); // re-fetches server data instantly
-              }}
+              onSaved={handleSaved}
             />
           )}
         </SheetContent>

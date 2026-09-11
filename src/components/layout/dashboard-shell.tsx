@@ -1,5 +1,6 @@
 "use client";
 
+import { Toaster } from "sonner";
 import { useState, useEffect } from "react";
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
@@ -80,6 +81,7 @@ export function DashboardShell({
         <div className="p-4 md:p-8 flex-1 animate-in fade-in slide-in-from-bottom-2 duration-500">
           {children}
         </div>
+        <Toaster position="top-right" richColors />
       </main>
     </div>
   );
