@@ -74,4 +74,15 @@ export type TeacherFormValues = z.infer<typeof teacherSchema>;
 export type FormMasterFormValues = z.infer<typeof formMasterSchema>;
 export type SubjectFormValues = z.infer<typeof subjectSchema>;
 export type ClassFormValues = z.infer<typeof classSchema>;
-export type StudentFormValues = z.infer<typeof studentSchema>;
+export type StudentFormValues = {
+  name: string;
+  email: string;
+  classId: string;
+  dateOfBirth: Date;
+  gender: "MALE" | "FEMALE";
+  guardianName: string;
+  guardianPhone: string;
+  password?: string;
+  phone?: string;
+  address?: string;
+};
