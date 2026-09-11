@@ -37,7 +37,7 @@ export const studentSchema = z.object({
   phone: z.string().optional(),
   classId: z.string().min(1, "Please select a class"),
   // Standard z.date() then refined for required check
-  dateOfBirth: z.date().refine((date) => date !== null && date !== undefined, {
+  dateOfBirth: z.coerce.date().refine((date) => date !== null && date !== undefined, {
     message: "Date of birth is required",
   }),
   gender: z.enum(["MALE", "FEMALE"]),
