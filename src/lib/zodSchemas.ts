@@ -37,7 +37,7 @@ export const studentSchema = z.object({
   phone: z.string().optional(),
   classId: z.string().min(1, "Please select a class"),
   // Standard z.date() then refined for required check
-  dateOfBirth: z.coerce.date().refine((date) => date !== null && date !== undefined, {
+  dateOfBirth: z.date().refine((date) => date !== null && date !== undefined, {
     message: "Date of birth is required",
   }),
   gender: z.enum(["MALE", "FEMALE"]),
@@ -74,15 +74,4 @@ export type TeacherFormValues = z.infer<typeof teacherSchema>;
 export type FormMasterFormValues = z.infer<typeof formMasterSchema>;
 export type SubjectFormValues = z.infer<typeof subjectSchema>;
 export type ClassFormValues = z.infer<typeof classSchema>;
-export type StudentFormValues = {
-  name: string;
-  email: string;
-  classId: string;
-  dateOfBirth: Date;
-  gender: "MALE" | "FEMALE";
-  guardianName: string;
-  guardianPhone: string;
-  password?: string;
-  phone?: string;
-  address?: string;
-};
+export type StudentFormValues = z.infer<typeof studentSchema>;
