@@ -29,6 +29,12 @@ export const teacherSchema = z.object({
   // Strict array definition to prevent the "undefined" TS error
   classSubjectIds: z.array(z.string()),
 });
+export const updateTeacherSchema = teacherSchema
+  .omit({ password: true })
+  .extend({
+    // Only re-hash and persist when an admin actually types a new one
+    password: z.string().min(6, "Password must be at least 6 characters").optional().or(z.literal("")),
+  });
 
 export const studentSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -71,6 +77,7 @@ export const ScoreWindowSchema = z.object({
 export type ScoreWindowInput = z.infer<typeof ScoreWindowSchema>;
 export type ScoreInput = z.infer<typeof ScoreInputSchema>;
 export type TeacherFormValues = z.infer<typeof teacherSchema>;
+export type UpdateTeacherFormValues = z.infer<typeof updateTeacherSchema>;
 export type FormMasterFormValues = z.infer<typeof formMasterSchema>;
 export type SubjectFormValues = z.infer<typeof subjectSchema>;
 export type ClassFormValues = z.infer<typeof classSchema>;

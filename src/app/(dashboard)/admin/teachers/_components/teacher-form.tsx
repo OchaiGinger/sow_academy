@@ -2,7 +2,12 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { teacherSchema, type TeacherFormValues } from "@/lib/zodSchemas";
+import {
+  teacherSchema,
+  updateTeacherSchema,
+  type TeacherFormValues,
+  type UpdateTeacherFormValues,
+} from "@/lib/zodSchemas";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -14,7 +19,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { createTeacher } from "@/app/actions/teacher-actions";
+import { createTeacher, updateTeacher } from "@/app/actions/teacher-actions";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
@@ -22,6 +27,14 @@ import { useEffect } from "react";
 interface Props {
   onSuccess: () => void;
   availableSubjects: AvailableSubject[];
+  initialData?: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string | null;
+    staffId: string | null;
+    classSubjectIds: string[];
+  };
 }
 
 type AvailableSubject = {
@@ -30,17 +43,33 @@ type AvailableSubject = {
   subject: { name: string } | null;
 };
 
-export function TeacherForm({ onSuccess, availableSubjects = [] }: Props) {
-  const form = useForm<TeacherFormValues>({
-    resolver: zodResolver(teacherSchema),
+export function TeacherForm({
+  onSuccess,
+  availableSubjects = [],
+  initialData,
+}: Props) {
+  const isEditMode = !!initialData;
+
+  const form = useForm<TeacherFormValues | UpdateTeacherFormValues>({
+    resolver: zodResolver(
+      isEditMode ? updateTeacherSchema : teacherSchema,
+    ) as never,
     mode: "onBlur", // Validates when the user clicks out of an input
-    defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      password: "",
-      classSubjectIds: [],
-    },
+    defaultValues: initialData
+      ? {
+          name: initialData.name,
+          email: initialData.email,
+          phone: initialData.phone ?? "",
+          password: "",
+          classSubjectIds: initialData.classSubjectIds,
+        }
+      : {
+          name: "",
+          email: "",
+          phone: "",
+          password: "",
+          classSubjectIds: [],
+        },
   });
   const { isSubmitting, errors } = form.formState;
 
@@ -51,14 +80,17 @@ export function TeacherForm({ onSuccess, availableSubjects = [] }: Props) {
     }
   }, [errors]);
 
-  async function onSubmit(values: TeacherFormValues) {
-    const res = await createTeacher(values);
+  async function onSubmit(values: TeacherFormValues | UpdateTeacherFormValues) {
+    const res = isEditMode
+      ? await updateTeacher(initialData.id, values)
+      : await createTeacher(values);
 
     if (res.success) {
-      toast.success("Teacher created successfully!");
+      toast.success(
+        isEditMode ? "Teacher updated successfully!" : "Teacher created successfully!",
+      );
       form.reset();
       onSuccess();
-      window.location.reload();
     } else {
       // Check if the error is about the email to highlight the specific field
       if (res.error?.toLowerCase().includes("email")) {
@@ -136,17 +168,19 @@ export function TeacherForm({ onSuccess, availableSubjects = [] }: Props) {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs uppercase font-bold">
-                Password
-              </FormLabel>
-              <FormControl>
-                <Input
-                  type="password"
-                  placeholder="******"
-                  {...field}
-                  disabled={isSubmitting}
-                />
-              </FormControl>
+                <FormLabel className="text-xs uppercase font-bold">
+                  {isEditMode ? "New Password" : "Password"}
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder={
+                      isEditMode ? "Leave blank to keep current" : "******"
+                    }
+                    {...field}
+                    disabled={isSubmitting}
+                  />
+                </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -201,6 +235,8 @@ export function TeacherForm({ onSuccess, availableSubjects = [] }: Props) {
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Processing...
             </>
+          ) : isEditMode ? (
+            "Save Changes"
           ) : (
             "Register Teacher"
           )}

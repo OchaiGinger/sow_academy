@@ -24,6 +24,14 @@ import {
   deleteTeacher,
   togglePrincipalRole,
 } from "@/app/actions/teacher-actions";
+import { useState } from "react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { TeacherForm } from "./teacher-form";
 import { toast } from "sonner";
 
 // Define the exact structure expected from the Database
@@ -42,9 +50,26 @@ interface TeacherItem {
   _count: {
     classSubjects: number;
   };
+  classSubjects: { id: string }[];
 }
 
-export function TeacherList({ initialData }: { initialData: TeacherItem[] }) {
+type AvailableSubject = {
+  id: string;
+  class: { name: string } | null;
+  subject: { name: string } | null;
+  teacherId: string | null;
+};
+
+export function TeacherList({
+  initialData,
+  allSubjects,
+}: {
+  initialData: TeacherItem[];
+  allSubjects: AvailableSubject[];
+}) {
+  const [editingTeacher, setEditingTeacher] = useState<TeacherItem | null>(
+    null,
+  );
   const handleTogglePrincipal = async (userId: string, currentRole: string) => {
     const isPromoting = currentRole !== "PRINCIPAL";
     const confirmMsg = isPromoting
@@ -185,6 +210,8 @@ export function TeacherList({ initialData }: { initialData: TeacherItem[] }) {
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+                  onClick={() => setEditingTeacher(teacher)}
+                  title="Edit Teacher"
                 >
                   <Edit className="h-3.5 w-3.5" />
                 </Button>
@@ -204,5 +231,39 @@ export function TeacherList({ initialData }: { initialData: TeacherItem[] }) {
         )}
       </TableBody>
     </Table>
+
+    {/* EDIT SHEET */}
+    <Sheet
+      open={!!editingTeacher}
+      onOpenChange={(open) => !open && setEditingTeacher(null)}
+    >
+      <SheetContent className="sm:max-w-md overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle className="uppercase tracking-widest font-bold">
+            Edit Teacher Profile
+          </SheetTitle>
+        </SheetHeader>
+        {editingTeacher && (
+          <div className="mt-6">
+            <TeacherForm
+              availableSubjects={allSubjects.filter(
+                (cs) =>
+                  cs.teacherId === null ||
+                  cs.teacherId === editingTeacher.id,
+              )}
+              initialData={{
+                id: editingTeacher.id,
+                name: editingTeacher.user.name,
+                email: editingTeacher.user.email,
+                phone: editingTeacher.user.phone,
+                staffId: editingTeacher.staffId,
+                classSubjectIds: editingTeacher.classSubjects.map((cs) => cs.id),
+              }}
+              onSuccess={() => setEditingTeacher(null)}
+            />
+          </div>
+        )}
+      </SheetContent>
+    </Sheet>
   );
 }

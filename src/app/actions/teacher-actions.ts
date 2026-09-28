@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/prisma";
-import { teacherSchema } from "@/lib/zodSchemas";
+import { teacherSchema, updateTeacherSchema } from "@/lib/zodSchemas";
 import { revalidatePath } from "next/cache";
 import { hashPassword } from "better-auth/crypto";
 import { auth } from "@/lib/auth";
@@ -81,9 +81,92 @@ export async function createTeacher(rawInput: unknown) {
   }
 }
 
+export async function updateTeacher(teacherId: string, rawInput: unknown) {
+  const result = updateTeacherSchema.safeParse(rawInput);
+  if (!result.success)
+    return { success: false, error: result.error.issues[0].message };
+
+  const { name, email, phone, password, classSubjectIds } = result.data;
+
+  try {
+    const existingTeacher = await db.teacher.findUnique({
+      where: { id: teacherId },
+      select: { id: true, userId: true },
+    });
+
+    if (!existingTeacher)
+      return { success: false, error: "Teacher profile not found." };
+
+    // A different user must not already own this email
+    const emailOwner = await db.user.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+
+    if (emailOwner && emailOwner.id !== existingTeacher.userId)
+      return { success: false, error: "A user with this email already exists." };
+
+    // Changing the email must not leave the old credential account pointing at
+    // a stale accountId, so it has to move in lockstep with the User row.
+    const hashedPassword = password ? await hashPassword(password) : null;
+
+    await db.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: existingTeacher.userId },
+        data: { name, email, phone: phone || null },
+      });
+
+      if (hashedPassword) {
+        await tx.account.updateMany({
+          where: { userId: existingTeacher.userId, providerId: "credential" },
+          data: { password: hashedPassword, accountId: email },
+        });
+      } else {
+        await tx.account.updateMany({
+          where: { userId: existingTeacher.userId, providerId: "credential" },
+          data: { accountId: email },
+        });
+      }
+
+      // set replaces the whole allocation, so unchecking frees the subject
+      await tx.teacher.update({
+        where: { id: teacherId },
+        data: { classSubjects: { set: classSubjectIds.map((id) => ({ id })) } },
+      });
+    });
+
+    revalidatePath("/admin/teachers");
+    return { success: true };
+  } catch (error: unknown) {
+    console.error("UPDATE_TEACHER_ERROR:", error);
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === "P2002"
+    )
+      return { success: false, error: "Email or Staff ID already exists." };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unexpected error.",
+    };
+  }
+}
+
 export async function deleteTeacher(id: string) {
   try {
-    await db.teacher.delete({ where: { id } });
+    // Deleting only the Teacher row leaves the linked User (and its credential
+    // Account) behind, which permanently blocks re-using that email address.
+    // Removing the User cascades to Teacher, Account and Session.
+    const teacher = await db.teacher.findUnique({
+      where: { id },
+      select: { userId: true },
+    });
+
+    if (!teacher) return { success: true };
+
+    await db.user.delete({ where: { id: teacher.userId } });
+
     revalidatePath("/admin/teachers");
     return { success: true };
   } catch (error) {
