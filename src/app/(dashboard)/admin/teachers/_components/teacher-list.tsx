@@ -106,7 +106,8 @@ export function TeacherList({
   };
 
   return (
-    <Table>
+    <>
+      <Table>
       <TableHeader className="bg-bg-elevated">
         <TableRow>
           <TableHead className="text-[10px] uppercase tracking-widest font-bold">
@@ -265,5 +266,6 @@ export function TeacherList({
         )}
       </SheetContent>
     </Sheet>
+    </>
   );
 }
