@@ -32,6 +32,8 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { TeacherForm } from "./teacher-form";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 import { toast } from "sonner";
 
 // Define the exact structure expected from the Database
@@ -70,6 +72,17 @@ export function TeacherList({
   const [editingTeacher, setEditingTeacher] = useState<TeacherItem | null>(
     null,
   );
+  const [query, setQuery] = useState("");
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const filteredTeachers = normalizedQuery
+    ? initialData.filter(
+        (t) =>
+          t.user.name.toLowerCase().includes(normalizedQuery) ||
+          t.user.email.toLowerCase().includes(normalizedQuery) ||
+          (t.staffId ?? "").toLowerCase().includes(normalizedQuery),
+      )
+    : initialData;
   const handleTogglePrincipal = async (userId: string, currentRole: string) => {
     const isPromoting = currentRole !== "PRINCIPAL";
     const confirmMsg = isPromoting
@@ -107,6 +120,17 @@ export function TeacherList({
 
   return (
     <>
+      <div className="border-b border-border-subtle p-3 bg-bg-surface">
+        <div className="relative max-w-sm">
+          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-tertiary" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by name, email or staff ID..."
+            className="h-8 pl-8 text-xs"
+          />
+        </div>
+      </div>
       <Table>
       <TableHeader className="bg-bg-elevated">
         <TableRow>
@@ -134,8 +158,17 @@ export function TeacherList({
               No teacher profiles found in the system.
             </TableCell>
           </TableRow>
+        ) : filteredTeachers.length === 0 ? (
+          <TableRow>
+            <TableCell
+              colSpan={4}
+              className="text-center py-12 text-text-tertiary italic"
+            >
+              No teachers match &quot;{query}&quot;.
+            </TableCell>
+          </TableRow>
         ) : (
-          initialData.map((teacher) => (
+          filteredTeachers.map((teacher) => (
             <TableRow
               key={teacher.id}
               className="hover:bg-bg-elevated/50 transition-colors"

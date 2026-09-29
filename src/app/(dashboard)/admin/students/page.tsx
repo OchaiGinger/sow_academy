@@ -1,32 +1,7 @@
 import { db } from "@/lib/prisma";
-import { Badge } from "@/components/ui/badge";
 import { AddStudentButton } from "./_components/add-student-button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { GraduationCap, Users, BookOpen, User } from "lucide-react";
-
-type AdminStudent = {
-  id: string;
-  admissionNo: string;
-  classId: string;
-  dateOfBirth: Date | null;
-  gender: "MALE" | "FEMALE" | null;
-  guardianName: string | null;
-  guardianPhone: string | null;
-  address: string | null;
-  user: {
-    name: string;
-    email: string;
-    phone: string | null;
-  };
-  class: { name: string } | null;
-};
+import { StudentList, type AdminStudent } from "./_components/student-list";
+import { GraduationCap, Users, BookOpen } from "lucide-react";
 
 export default async function StudentsAdminPage() {
   const [students, classes] = await Promise.all([
@@ -39,8 +14,7 @@ export default async function StudentsAdminPage() {
 
   const totalClasses = new Set(
     students.map((s: AdminStudent) => s.classId).filter(Boolean),
-  )
-    .size;
+  ).size;
 
   return (
     <div className="max-w-7xl mx-auto py-4 px-4 md:py-8 md:px-6 space-y-8 overflow-x-hidden">
@@ -98,126 +72,8 @@ export default async function StudentsAdminPage() {
         </div>
       </div>
 
-      {/* --- TABLE CONTAINER (Responsive Fix) --- */}
       <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          {/* Internal scroll for small screens */}
-          <Table className="w-full table-fixed min-w-[800px]">
-            {/* Prevents column collapse */}
-            <TableHeader className="bg-muted/50">
-              <TableRow>
-                <TableHead className="w-[120px] px-4 py-3 text-[10px] font-bold uppercase tracking-widest">
-                  ID
-                </TableHead>
-                <TableHead className="w-[250px] px-4 py-3 text-[10px] font-bold uppercase tracking-widest">
-                  Student
-                </TableHead>
-                <TableHead className="w-[120px] px-4 py-3 text-[10px] font-bold uppercase tracking-widest">
-                  Class
-                </TableHead>
-                <TableHead className="w-[100px] px-4 py-3 text-[10px] font-bold uppercase tracking-widest">
-                  Gender
-                </TableHead>
-                <TableHead className="w-[180px] px-4 py-3 text-[10px] font-bold uppercase tracking-widest">
-                  Guardian
-                </TableHead>
-                <TableHead className="w-[100px] px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-right">
-                  Action
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {students.length > 0 ? (
-                students.map((student: AdminStudent) => (
-                  <TableRow
-                    key={student.id}
-                    className="hover:bg-muted/5 transition-colors"
-                  >
-                    <TableCell className="px-4 py-4 font-mono text-xs font-bold text-blue-600">
-                      {student.admissionNo}
-                    </TableCell>
-
-                    <TableCell className="px-4 py-4">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold shrink-0">
-                          <User size={14} />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-semibold text-sm truncate">
-                            {student.user.name}
-                          </p>
-                          <p className="text-[10px] text-muted-foreground truncate">
-                            {student.user.email}
-                          </p>
-                        </div>
-                      </div>
-                    </TableCell>
-
-                    <TableCell className="px-4 py-4">
-                      <Badge
-                        variant="outline"
-                        className="bg-muted/50 text-[10px] font-bold uppercase"
-                      >
-                        {student.class?.name ?? "N/A"}
-                      </Badge>
-                    </TableCell>
-
-                    <TableCell className="px-4 py-4">
-                      <span
-                        className={`text-[10px] font-bold px-2 py-1 rounded-full ${
-                          student.gender === "MALE"
-                            ? "bg-blue-100 text-blue-700"
-                            : "bg-pink-100 text-pink-700"
-                        }`}
-                      >
-                        {student.gender}
-                      </span>
-                    </TableCell>
-
-                    <TableCell className="px-4 py-4">
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium truncate">
-                          {student.guardianName}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground font-mono">
-                          {student.guardianPhone}
-                        </p>
-                      </div>
-                    </TableCell>
-
-                    <TableCell className="px-4 py-4 text-right">
-                      <AddStudentButton
-                        mode="edit"
-                        classes={classes}
-                        initialData={{
-                          id: student.id,
-                          name: student.user.name,
-                          email: student.user.email,
-                          phone: student.user.phone,
-                          classId: student.classId,
-                          dateOfBirth: student.dateOfBirth,
-                          gender: student.gender ?? "MALE",
-                          guardianName: student.guardianName,
-                          guardianPhone: student.guardianPhone,
-                          address: student.address,
-                        }}
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    className="h-32 text-center text-muted-foreground italic text-sm"
-                  >
-                    No student records found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+        <StudentList students={students} classes={classes} />
       </div>
 
       <p className="text-xs text-muted-foreground text-right">
