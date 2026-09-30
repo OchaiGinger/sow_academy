@@ -88,7 +88,7 @@ export function TeacherForm({
     if (res.success) {
       if (isEditMode) {
         toast.success("Teacher updated successfully!");
-      } else if (res.emailSent) {
+      } else if ("emailSent" in res && res.emailSent) {
         toast.success("Teacher created and welcome email sent");
       } else {
         toast.success("Teacher created, but the welcome email failed to send");

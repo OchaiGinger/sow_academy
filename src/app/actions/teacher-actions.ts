@@ -79,8 +79,11 @@ export async function createTeacher(rawInput: unknown) {
         email,
       },
       {
-        staffId: created.staffId,
-        actionUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? process.env.BETTER_AUTH_URL}/admin/teachers`,
+        title: "Welcome to Seat of Wisdom Academy",
+        message: `Your staff profile has been created. Your Staff ID is ${created.staffId}. Sign in with the email ${email} to begin.`,
+        actionUrl: `${
+          process.env.NEXT_PUBLIC_APP_URL ?? process.env.BETTER_AUTH_URL
+        }/admin/teachers`,
       },
     );
 

@@ -1,6 +1,11 @@
 import { Novu } from "@novu/api";
 
-const novu = new Novu({ secretKey: process.env.NOVU_SECRET_KEY });
+let client: Novu | null = null;
+
+function getNovu() {
+  if (!client) client = new Novu({ secretKey: process.env.NOVU_SECRET_KEY });
+  return client;
+}
 
 export type MailRecipient = {
   subscriberId: string;
@@ -22,7 +27,7 @@ export async function sendMail(
   }
 
   try {
-    await novu.trigger({
+    await getNovu().trigger({
       workflowId,
       to,
       payload,

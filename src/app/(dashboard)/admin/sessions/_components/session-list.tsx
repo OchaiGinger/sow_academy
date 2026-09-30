@@ -92,7 +92,7 @@ export function SessionList({
         open={sheet !== null}
         onOpenChange={(open) => !open && closeSheet()}
       >
-        <SheetContent className="overflow-y-auto w-full sm:max-w-[60vw]">
+        <SheetContent className="overflow-y-auto w-full sm:max-w-[60vw] max-h-[90vh]">
           {sheet?.type === "addTerm" && (
             <>
               <SheetHeader>
