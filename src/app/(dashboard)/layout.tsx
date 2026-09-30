@@ -46,6 +46,7 @@ export default async function DashboardLayout({
       role={userRole}
       isFormMaster={isFormMaster}
       isPrincipal={isPrincipal}
+      userId={session.user.id}
     >
       {children}
     </DashboardShell>
