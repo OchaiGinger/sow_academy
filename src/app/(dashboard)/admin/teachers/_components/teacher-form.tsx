@@ -86,9 +86,13 @@ export function TeacherForm({
       : await createTeacher(values);
 
     if (res.success) {
-      toast.success(
-        isEditMode ? "Teacher updated successfully!" : "Teacher created successfully!",
-      );
+      if (isEditMode) {
+        toast.success("Teacher updated successfully!");
+      } else if (res.emailSent) {
+        toast.success("Teacher created and welcome email sent");
+      } else {
+        toast.success("Teacher created, but the welcome email failed to send");
+      }
       form.reset();
       onSuccess();
     } else {

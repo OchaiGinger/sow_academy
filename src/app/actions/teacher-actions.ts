@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { hashPassword } from "better-auth/crypto";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { sendMail, splitName } from "@/lib/novu";
 
 export async function createTeacher(rawInput: unknown) {
   const result = teacherSchema.safeParse(rawInput);
@@ -27,7 +28,9 @@ export async function createTeacher(rawInput: unknown) {
         error: "A user with this email already exists.",
       };
 
-    await db.$transaction(
+    const { firstName, lastName } = splitName(name);
+
+    const created = await db.$transaction(
       async (tx) => {
         const [count, user] = await Promise.all([
           tx.teacher.count(),
@@ -59,12 +62,30 @@ export async function createTeacher(rawInput: unknown) {
           },
           select: { id: true },
         });
+
+        return { userId: user.id, staffId };
       },
       { timeout: 10000 },
     );
 
+    // Fired after commit so the teacher is never emailed about an account
+    // that failed to persist. A mail failure must not undo the signup.
+    const mail = await sendMail(
+      "teacher-welcome-email",
+      {
+        subscriberId: created.userId,
+        firstName,
+        lastName,
+        email,
+      },
+      {
+        staffId: created.staffId,
+        actionUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? process.env.BETTER_AUTH_URL}/admin/teachers`,
+      },
+    );
+
     revalidatePath("/admin/teachers");
-    return { success: true };
+    return { success: true, emailSent: mail.success };
   } catch (error: unknown) {
     console.error("CREATE_TEACHER_ERROR:", error);
     if (
