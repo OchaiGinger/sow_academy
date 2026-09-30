@@ -12,6 +12,14 @@ import { Button } from "@/components/ui/button";
 import { Edit, Trash2, GraduationCap } from "lucide-react";
 import { deleteClass } from "@/app/actions/class-actions";
 import { toast } from "sonner";
+import { useState } from "react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { ClassForm } from "./class-form";
 
 interface ClassItem {
   id: string;
@@ -21,6 +29,8 @@ interface ClassItem {
 }
 
 export function ClassList({ initialClasses }: { initialClasses: ClassItem[] }) {
+  const [editingClass, setEditingClass] = useState<ClassItem | null>(null);
+
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this class?")) {
       await deleteClass(id);
@@ -29,6 +39,7 @@ export function ClassList({ initialClasses }: { initialClasses: ClassItem[] }) {
   };
 
   return (
+    <>
     <div className="w-full">
       {/* --- MOBILE VIEW (Cards) --- */}
       <div className="grid grid-cols-1 gap-4 md:hidden p-4">
@@ -52,7 +63,13 @@ export function ClassList({ initialClasses }: { initialClasses: ClassItem[] }) {
                 </div>
               </div>
               <div className="flex gap-1">
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setEditingClass(cls)}
+                  title="Edit Class"
+                >
                   <Edit className="h-4 w-4" />
                 </Button>
                 <Button
@@ -106,6 +123,7 @@ export function ClassList({ initialClasses }: { initialClasses: ClassItem[] }) {
                     variant="ghost"
                     size="sm"
                     className="h-8 px-2 text-text-secondary hover:text-primary"
+                    onClick={() => setEditingClass(cls)}
                   >
                     <Edit className="h-4 w-4 mr-2" />
                     Edit
@@ -126,5 +144,30 @@ export function ClassList({ initialClasses }: { initialClasses: ClassItem[] }) {
         </Table>
       </div>
     </div>
+
+      <Sheet
+        open={!!editingClass}
+        onOpenChange={(open) => !open && setEditingClass(null)}
+      >
+        <SheetContent className="sm:max-w-md overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle className="font-bold">Edit Class</SheetTitle>
+          </SheetHeader>
+          <div className="mt-6">
+            {editingClass && (
+              <ClassForm
+                initialData={{
+                  id: editingClass.id,
+                  name: editingClass.name,
+                  level: editingClass.level,
+                  arm: editingClass.arm,
+                }}
+                onSuccess={() => setEditingClass(null)}
+              />
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }

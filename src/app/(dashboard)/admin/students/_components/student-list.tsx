@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -11,8 +11,10 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, User } from "lucide-react";
+import { Search, User, ChevronDown, ChevronRight, Users } from "lucide-react";
 import { AddStudentButton } from "./add-student-button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Button } from "@/components/ui/button";
 
 export type AdminStudent = {
   id: string;
@@ -28,7 +30,7 @@ export type AdminStudent = {
     email: string;
     phone: string | null;
   };
-  class: { name: string } | null;
+  class: { name: string; level: string; arm: string } | null;
 };
 
 interface Props {
@@ -38,15 +40,59 @@ interface Props {
 
 export function StudentList({ students, classes }: Props) {
   const [query, setQuery] = useState("");
+  const [openClasses, setOpenClasses] = useState<Set<string>>(new Set(classes.map(c => c.id)));
 
   const normalizedQuery = query.trim().toLowerCase();
-  const filteredStudents = normalizedQuery
-    ? students.filter((s) =>
-        [s.user.name, s.user.email, s.admissionNo, s.guardianName ?? ""].some(
-          (field) => field.toLowerCase().includes(normalizedQuery),
-        ),
-      )
-    : students;
+  const filteredStudents = useMemo(() => {
+    if (!normalizedQuery) return students;
+    return students.filter((s) =>
+      [s.user.name, s.user.email, s.admissionNo, s.guardianName ?? ""].some(
+        (field) => field.toLowerCase().includes(normalizedQuery),
+      ),
+    );
+  }, [students, normalizedQuery]);
+
+  // Group students by class
+  const studentsByClass = useMemo(() => {
+    const grouped: Record<string, AdminStudent[]> = {};
+    filteredStudents.forEach((student) => {
+      const classId = student.classId || "unassigned";
+      if (!grouped[classId]) grouped[classId] = [];
+      grouped[classId].push(student);
+    });
+    return grouped;
+  }, [filteredStudents]);
+
+  // Sort classes by level and arm
+  const sortedClasses = useMemo(() => {
+    return [...classes].sort((a, b) => {
+      const levelOrder = { "JSS1": 1, "JSS2": 2, "JSS3": 3, "SS1": 4, "SS2": 5, "SS3": 6 };
+      const levelA = levelOrder[a.level as keyof typeof levelOrder] || 99;
+      const levelB = levelOrder[b.level as keyof typeof levelOrder] || 99;
+      if (levelA !== levelB) return levelA - levelB;
+      return a.arm.localeCompare(b.arm);
+    });
+  }, [classes]);
+
+  const toggleClass = (classId: string) => {
+    setOpenClasses(prev => {
+      const next = new Set(prev);
+      if (next.has(classId)) next.delete(classId);
+      else next.add(classId);
+      return next;
+    });
+  };
+
+  const toggleAllClasses = (expand: boolean) => {
+    if (expand) {
+      setOpenClasses(new Set(classes.map(c => c.id)));
+    } else {
+      setOpenClasses(new Set());
+    }
+  };
+
+  const unassignedStudents = studentsByClass["unassigned"] || [];
+  const hasUnassigned = unassignedStudents.length > 0;
 
   return (
     <>
