@@ -81,6 +81,7 @@ export function DashboardShell({
         <Topbar
           onMobileMenuOpen={() => setMobileOpen(true)}
           userId={userId}
+          role={role}
         />
         
         <div className="p-4 md:p-8 flex-1 animate-in fade-in slide-in-from-bottom-2 duration-500">

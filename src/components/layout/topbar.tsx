@@ -6,13 +6,15 @@ import { useEffect, useState } from "react";
 import { getCurrentTermInfo } from "@/app/actions/term-action";
 import { Menu } from "lucide-react";
 import NotificationInbox from "./notification-inbox";
+import { AnnouncementButton } from "./announcement-button";
 
 interface TopbarProps {
   onMobileMenuOpen: () => void;
   userId: string;
+  role: string;
 }
 
-export function Topbar({ onMobileMenuOpen, userId }: TopbarProps) {
+export function Topbar({ onMobileMenuOpen, userId, role }: TopbarProps) {
   const pathname = usePathname();
   const params = useParams();
   const [termDisplay, setTermDisplay] = useState<string | null>(null);
@@ -63,6 +65,7 @@ export function Topbar({ onMobileMenuOpen, userId }: TopbarProps) {
 
       <div className="flex items-center gap-4">
         <NotificationInbox subscriberId={userId} />
+        {role === "ADMIN" && <AnnouncementButton />}
         <div className="flex items-center gap-2">
           <Badge
             variant="outline"
