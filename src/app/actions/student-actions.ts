@@ -76,6 +76,31 @@ export async function createStudent(rawInput: unknown) {
   }
 }
 
+export async function deleteStudent(id: string) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session || session.user.role !== "ADMIN")
+    return { success: false, error: "Only an admin can delete students." };
+
+  try {
+    const student = await db.student.findUnique({
+      where: { id },
+      select: { userId: true, admissionNo: true },
+    });
+
+    if (!student) return { success: true };
+
+    // Removing only the Student row would leave the User (and its credential
+    // Account) behind, which permanently blocks re-using that email address.
+    await db.user.delete({ where: { id: student.userId } });
+
+    revalidatePath("/admin/students");
+    return { success: true, admissionNo: student.admissionNo };
+  } catch (error) {
+    console.error("DELETE_STUDENT_ERROR:", error);
+    return { success: false, error: "Failed to delete student." };
+  }
+}
+
 export async function updateStudent(studentId: string, rawInput: unknown) {
   const result = studentSchema.safeParse(rawInput);
   if (!result.success)

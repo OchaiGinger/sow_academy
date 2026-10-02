@@ -8,6 +8,39 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { sendMail, splitName } from "@/lib/novu";
 
+/**
+ * A class-subject may only be allocated if it is unassigned, or already held by
+ * the teacher being edited. The picker only offers those, but the check is
+ * repeated here so a stale tab or crafted request cannot take a subject that
+ * belongs to someone else.
+ */
+async function assertSubjectsClaimable(
+  classSubjectIds: string[],
+  teacherId?: string,
+) {
+  if (classSubjectIds.length === 0) return { ok: true as const };
+
+  const claimed = await db.classSubject.findMany({
+    where: { id: { in: classSubjectIds } },
+    select: { id: true, teacherId: true },
+  });
+
+  if (claimed.length !== classSubjectIds.length)
+    return { ok: false as const, error: "One or more subjects no longer exist." };
+
+  const takenByOther = claimed.filter(
+    (cs) => cs.teacherId !== null && cs.teacherId !== teacherId,
+  );
+
+  if (takenByOther.length > 0)
+    return {
+      ok: false as const,
+      error: "One or more of those subjects are already assigned to another teacher.",
+    };
+
+  return { ok: true as const };
+}
+
 export async function createTeacher(rawInput: unknown) {
   const result = teacherSchema.safeParse(rawInput);
   if (!result.success)
@@ -27,6 +60,9 @@ export async function createTeacher(rawInput: unknown) {
         success: false,
         error: "A user with this email already exists.",
       };
+
+    const claimable = await assertSubjectsClaimable(classSubjectIds);
+    if (!claimable.ok) return { success: false, error: claimable.error };
 
     const { firstName, lastName } = splitName(name);
 
@@ -129,6 +165,9 @@ export async function updateTeacher(teacherId: string, rawInput: unknown) {
 
     if (emailOwner && emailOwner.id !== existingTeacher.userId)
       return { success: false, error: "A user with this email already exists." };
+
+    const claimable = await assertSubjectsClaimable(classSubjectIds, teacherId);
+    if (!claimable.ok) return { success: false, error: claimable.error };
 
     // Changing the email must not leave the old credential account pointing at
     // a stale accountId, so it has to move in lockstep with the User row.
