@@ -11,7 +11,8 @@ export async function assignFormMaster(rawInput: unknown) {
   const result = formMasterSchema.safeParse(rawInput);
   if (!result.success) return { success: false, error: "Invalid data" };
 
-  const { teacherId, classIds } = result.data;
+  const { teacherId } = result.data;
+  const classIds = [...new Set(result.data.classIds)];
 
   try {
     await db.$transaction(
@@ -36,7 +37,16 @@ export async function assignFormMaster(rawInput: unknown) {
       "code" in error &&
       error.code === "P2002"
     ) {
-      return { success: false, error: "One or more class assignments conflicted. Please try again." };
+      const target = "meta" in error && error.meta && typeof error.meta === "object" && "target" in error.meta
+        ? JSON.stringify(error.meta.target)
+        : "";
+      if (target.toLowerCase().includes("teacherid")) {
+        return {
+          success: false,
+          error: "The database still has the old one-class-per-teacher restriction. Apply the latest Prisma migrations, then retry.",
+        };
+      }
+      return { success: false, error: "One or more classes are already assigned. Refresh and try again." };
     }
     return { success: false, error: "An error occurred." };
   }

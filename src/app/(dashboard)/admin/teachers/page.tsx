@@ -26,7 +26,9 @@ export default async function AdminTeachersPage() {
       orderBy: { user: { name: "asc" } },
     }),
     db.classSubject.findMany({
-      include: {
+      select: {
+        id: true,
+        teacherId: true,
         class: { select: { name: true } },
         subject: { select: { name: true } },
       },
