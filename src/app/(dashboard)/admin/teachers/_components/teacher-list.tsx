@@ -184,7 +184,7 @@ export function TeacherList({
                     </div>
                   </AccordionTrigger>
 
-                  <div className="flex shrink-0 items-center">
+                  <div className="flex w-28 shrink-0 items-center justify-between">
                     <Button
                       variant="ghost"
                       size="icon"
