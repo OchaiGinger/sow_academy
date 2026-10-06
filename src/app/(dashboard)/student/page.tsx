@@ -32,6 +32,16 @@ export default async function StudentDashboard() {
     },
   });
 
+  const registeredSubjects = await db.classSubject.count({
+    where: {
+      classId: student.classId,
+      OR: [
+        { isElective: false },
+        { studentEnrollments: { some: { studentId: student.id } } },
+      ],
+    },
+  });
+
   const isReleased = !!activeTerm?.cardPassword.length;
 
   return (
@@ -67,7 +77,7 @@ export default async function StudentDashboard() {
 
       {/* Stats Grid - Responsive Column Spans */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatsCard label="Registered Subjects" value="-" />
+        <StatsCard label="Registered Subjects" value={registeredSubjects} />
         <StatsCard label="Term Average" value="0.0" trend="neutral" />
         <StatsCard label="Class Rank" value="-" />
         <StatsCard

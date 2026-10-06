@@ -25,12 +25,17 @@ interface SubjectItem {
   id: string;
   name: string;
   code: string | null;
-  classSubjects?: { classId: string }[];
+  classSubjects?: {
+    classId: string;
+    isElective: boolean;
+    studentEnrollments: { studentId: string }[];
+  }[];
 }
 
 interface ClassOption {
   id: string;
   name: string;
+  students: { id: string; name: string }[];
 }
 
 interface SubjectListProps {
@@ -91,6 +96,11 @@ export function SubjectList({ initialSubjects, classes }: SubjectListProps) {
                       >
                         {subject.name}
                       </span>
+                      {subject.classSubjects?.some((offering) => offering.isElective) && (
+                        <span className="mt-1 w-fit rounded bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-amber-800">
+                          Elective
+                        </span>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="px-2">
@@ -142,8 +152,14 @@ export function SubjectList({ initialSubjects, classes }: SubjectListProps) {
                   id: editingSubject.id,
                   name: editingSubject.name,
                   code: editingSubject.code || "",
-                  classIds:
-                    editingSubject.classSubjects?.map((cs) => cs.classId) || [],
+                  isElective: Boolean(editingSubject.classSubjects?.some((cs) => cs.isElective)),
+                  classIds: editingSubject.classSubjects
+                    ?.filter((cs) => !cs.isElective)
+                    .map((cs) => cs.classId) || [],
+                  electiveClassId: editingSubject.classSubjects?.find((cs) => cs.isElective)?.classId || "",
+                  studentIds: editingSubject.classSubjects
+                    ?.find((cs) => cs.isElective)
+                    ?.studentEnrollments.map((enrollment) => enrollment.studentId) || [],
                 }}
                 onSuccess={() => setEditingSubject(null)}
               />

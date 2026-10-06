@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { subjectSchema, type SubjectFormValues } from "@/lib/zodSchemas";
 import { Button } from "@/components/ui/button";
@@ -16,26 +16,53 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox"; // Make sure to install this shadcn component
 import { upsertSubject } from "@/app/actions/subject-actions";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Props {
   initialData?: SubjectFormValues;
   onSuccess: () => void;
-  classes: { id: string; name: string }[]; // Pass classes from the parent
+  classes: {
+    id: string;
+    name: string;
+    students: { id: string; name: string }[];
+  }[];
 }
 
 export function SubjectForm({ initialData, onSuccess, classes }: Props) {
   const form = useForm<SubjectFormValues>({
     resolver: zodResolver(subjectSchema),
-    defaultValues: initialData || { name: "", code: "", classIds: [] },
+    defaultValues: initialData || {
+      name: "",
+      code: "",
+      isElective: false,
+      classIds: [],
+      electiveClassId: "",
+      studentIds: [],
+    },
   });
+  const isElective = useWatch({ control: form.control, name: "isElective" });
+  const electiveClassId = useWatch({ control: form.control, name: "electiveClassId" });
+  const studentIds = useWatch({ control: form.control, name: "studentIds" });
+  const selectedClass = classes.find((cls) => cls.id === electiveClassId);
 
   async function onSubmit(values: SubjectFormValues) {
-    const result = await upsertSubject(values);
-    if (result.success) {
-      toast.success("Saved successfully");
-      onSuccess();
-    } else {
-      toast.error(result.error);
+    try {
+      const result = await upsertSubject(values);
+      if (result.success) {
+        toast.success("Saved successfully");
+        onSuccess();
+      } else {
+        toast.error(result.error);
+      }
+    } catch {
+      toast.error("Failed to save subject");
     }
   }
 
@@ -70,50 +97,120 @@ export function SubjectForm({ initialData, onSuccess, classes }: Props) {
           )}
         />
 
-        {/* Classes Multi-Select Area */}
         <FormField
           control={form.control}
-          name="classIds"
-          render={() => (
+          name="isElective"
+          render={({ field }) => (
             <FormItem>
-              <FormLabel>Assigned Classes</FormLabel>
-              <div className="grid grid-cols-2 gap-2 border rounded-md p-4 max-h-40 overflow-y-auto">
-                {classes.map((cls) => (
-                  <FormField
-                    key={cls.id}
-                    control={form.control}
-                    name="classIds"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value?.includes(cls.id)}
-                            onCheckedChange={(checked) => {
-                              return checked
-                                ? field.onChange([...field.value, cls.id])
-                                : field.onChange(
-                                    field.value?.filter(
-                                      (value) => value !== cls.id,
-                                    ),
-                                  );
-                            }}
-                          />
-                        </FormControl>
-                        <FormLabel className="font-normal cursor-pointer">
-                          {cls.name}
-                        </FormLabel>
-                      </FormItem>
-                    )}
-                  />
-                ))}
-              </div>
-              <FormMessage />
+              <label className="flex items-center gap-3 rounded-md border p-3 text-sm cursor-pointer">
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={(checked) => {
+                    field.onChange(checked === true);
+                    form.setValue("classIds", []);
+                    form.setValue("electiveClassId", "");
+                    form.setValue("studentIds", []);
+                  }}
+                />
+                <span>Elective subject (only selected students take it)</span>
+              </label>
             </FormItem>
           )}
         />
 
-        <Button type="submit" className="w-full">
-          Save Subject
+        {isElective ? (
+          <>
+            <FormField
+              control={form.control}
+              name="electiveClassId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Class offering this elective</FormLabel>
+                  <Select
+                    value={field.value}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      form.setValue("studentIds", []);
+                    }}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a class" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {classes.map((cls) => (
+                        <SelectItem key={cls.id} value={cls.id}>{cls.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {electiveClassId && (
+                <FormField
+                  control={form.control}
+                  name="studentIds"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Students taking this subject</FormLabel>
+                      <FormControl>
+                        <div className="max-h-52 space-y-2 overflow-y-auto rounded-md border p-3">
+                          {selectedClass?.students.length ? selectedClass.students.map((student) => (
+                            <label key={student.id} className="flex cursor-pointer items-center gap-3 text-sm">
+                              <Checkbox
+                                checked={studentIds.includes(student.id)}
+                                onCheckedChange={(checked) => {
+                                  field.onChange(checked === true
+                                    ? [...field.value, student.id]
+                                    : field.value.filter((id) => id !== student.id));
+                                }}
+                              />
+                              <span>{student.name}</span>
+                            </label>
+                          )) : (
+                            <p className="text-sm text-muted-foreground">No students are currently assigned to this class.</p>
+                          )}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+            )}
+          </>
+        ) : (
+          <FormField
+            control={form.control}
+            name="classIds"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Assigned Classes</FormLabel>
+                <FormControl>
+                  <div className="grid max-h-40 grid-cols-2 gap-2 overflow-y-auto rounded-md border p-4">
+                    {classes.map((cls) => (
+                      <label key={cls.id} className="flex cursor-pointer items-center gap-3 text-sm">
+                        <Checkbox
+                          checked={field.value.includes(cls.id)}
+                          onCheckedChange={(checked) => field.onChange(checked === true
+                            ? [...field.value, cls.id]
+                            : field.value.filter((id) => id !== cls.id))}
+                        />
+                        <span>{cls.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving…</> : "Save Subject"}
         </Button>
       </form>
     </Form>

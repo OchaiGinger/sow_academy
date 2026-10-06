@@ -16,6 +16,7 @@ interface Props {
   termName: string;
   termId: string;
   allSubjects: ClassSubject[];
+  subjectsByStudent?: Record<string, ClassSubject[]>;
   userRole?: string;
   results?: ReportStudent[];
 }
@@ -26,6 +27,7 @@ export function ClassResultTable({
   termName,
   termId,
   allSubjects,
+  subjectsByStudent,
   userRole,
 }: Props) {
   const [selectedStudent, setSelectedStudent] = useState<ReportStudent | null>(
@@ -51,7 +53,16 @@ export function ClassResultTable({
     <>
       {/* ── MOBILE: Card List ── */}
       <div className="md:hidden space-y-2 p-3">
-        {initialData.map((row) => (
+        {initialData.map((row) => {
+          const eligibleSubjects = subjectsByStudent?.[row.studentId] ?? allSubjects;
+          const scoredNames = new Set(
+            row.subjects.map((subject) => subject.name.trim().toLowerCase()),
+          );
+          const missingSubjects = eligibleSubjects.filter(
+            (subject) => !scoredNames.has(subject.name.trim().toLowerCase()),
+          ).length;
+
+          return (
           <div
             key={row.studentId}
             className="flex items-center gap-3 rounded-xl border border-emerald-900/20 bg-black/20 px-3 py-3"
@@ -85,24 +96,15 @@ export function ClassResultTable({
             </div>
 
             {/* Subjects completion indicator */}
-            {allSubjects.length > 0 &&
-              (() => {
-                const scoredNames = new Set(
-                  row.subjects.map((s) => s.name.trim().toLowerCase()),
-                );
-                const missing = allSubjects.filter(
-                  (cs) => !scoredNames.has(cs.name.trim().toLowerCase()),
-                ).length;
-                return missing > 0 ? (
-                  <span className="shrink-0 text-[10px] font-bold text-amber-400 bg-amber-400/10 border border-amber-400/30 rounded-lg px-1.5 py-0.5">
-                    {missing} missing
-                  </span>
-                ) : (
-                  <span className="shrink-0 text-[10px] font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/30 rounded-lg px-1.5 py-0.5">
-                    ✓ Complete
-                  </span>
-                );
-              })()}
+            {eligibleSubjects.length > 0 && (missingSubjects > 0 ? (
+              <span className="shrink-0 text-[10px] font-bold text-amber-400 bg-amber-400/10 border border-amber-400/30 rounded-lg px-1.5 py-0.5">
+                {missingSubjects} missing
+              </span>
+            ) : (
+              <span className="shrink-0 text-[10px] font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/30 rounded-lg px-1.5 py-0.5">
+                ✓ Complete
+              </span>
+            ))}
 
             {/* Action icon */}
             <button
@@ -113,7 +115,8 @@ export function ClassResultTable({
               <FileText className="w-4 h-4" />
             </button>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* ── DESKTOP: Table ── */}
@@ -142,8 +145,8 @@ export function ClassResultTable({
                 row.subjects.map((s) => s.name.trim().toLowerCase()),
               );
               const missingCount =
-                allSubjects.length > 0
-                  ? allSubjects.filter(
+                (subjectsByStudent?.[row.studentId] ?? allSubjects).length > 0
+                  ? (subjectsByStudent?.[row.studentId] ?? allSubjects).filter(
                       (cs) => !scoredNames.has(cs.name.trim().toLowerCase()),
                     ).length
                   : 0;
@@ -213,7 +216,9 @@ export function ClassResultTable({
         termId={termId}
         isOpen={isModalOpen}
         userRole={userRole}
-        allSubjects={allSubjects}
+        allSubjects={selectedStudent
+          ? subjectsByStudent?.[selectedStudent.studentId] ?? allSubjects
+          : allSubjects}
         onClose={() => setIsModalOpen(false)}
       />
     </>

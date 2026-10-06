@@ -76,16 +76,36 @@ export default async function StudentResultCardPage({
   if (!student) redirect("/student");
 
   // ── Parallel fetches using unwrapped termId ────────────────────────────────
-  const [term, scores, assessment, termResult, school, formMaster, classSize] =
+  const [term, scores, eligibleClassSubjects, assessment, termResult, school, formMaster, classSize] =
     await Promise.all([
       db.term.findUnique({
         where: { id: termId },
         include: { session: true },
       }),
       db.score.findMany({
-        where: { studentId: student.id, termId: termId },
+        where: {
+          studentId: student.id,
+          termId,
+          classSubject: {
+            OR: [
+              { isElective: false },
+              { studentEnrollments: { some: { studentId: student.id } } },
+            ],
+          },
+        },
         include: { classSubject: { include: { subject: true } } },
         orderBy: { classSubject: { subject: { name: "asc" } } },
+      }),
+      db.classSubject.findMany({
+        where: {
+          classId: student.classId,
+          OR: [
+            { isElective: false },
+            { studentEnrollments: { some: { studentId: student.id } } },
+          ],
+        },
+        include: { subject: true },
+        orderBy: { subject: { name: "asc" } },
       }),
       db.assessment.findUnique({
         where: {
@@ -118,7 +138,9 @@ export default async function StudentResultCardPage({
       sum + (s.total ?? s.assignment1 + s.assignment2 + s.test1 + s.test2 + s.exam),
     0,
   );
-  const computedAvg = scores.length > 0 ? computedTotal / scores.length : 0;
+  const computedAvg = eligibleClassSubjects.length > 0
+    ? computedTotal / eligibleClassSubjects.length
+    : 0;
 
   const average = termResult?.average ?? computedAvg;
   const totalScore = termResult?.totalScore ?? computedTotal;
@@ -139,19 +161,22 @@ export default async function StudentResultCardPage({
     rank: rank ?? 0,
     totalInClass: classSize,
 
-    subjects: scores.map((s: { total?: number | null; assignment1: number; assignment2: number; test1: number; test2: number; exam: number; grade?: string | null; classSubject: { subject: { name: string } } }) => {
-      const raw =
-        s.total ?? s.assignment1 + s.assignment2 + s.test1 + s.test2 + s.exam;
+    subjects: eligibleClassSubjects.map((classSubject) => {
+      const score = scores.find((item) => item.classSubjectId === classSubject.id);
+      const raw = score
+        ? score.total ?? score.assignment1 + score.assignment2 + score.test1 + score.test2 + score.exam
+        : 0;
       return {
-        name: s.classSubject.subject.name,
-        a1: s.assignment1,
-        a2: s.assignment2,
-        t1: s.test1,
-        t2: s.test2,
-        caTotal: s.assignment1 + s.assignment2 + s.test1 + s.test2,
-        exam: s.exam,
+        name: classSubject.subject.name,
+        isPending: !score,
+        a1: score?.assignment1 ?? 0,
+        a2: score?.assignment2 ?? 0,
+        t1: score?.test1 ?? 0,
+        t2: score?.test2 ?? 0,
+        caTotal: (score?.assignment1 ?? 0) + (score?.assignment2 ?? 0) + (score?.test1 ?? 0) + (score?.test2 ?? 0),
+        exam: score?.exam ?? 0,
         total: raw,
-        grade: s.grade ?? resolveGrade(raw).grade,
+        grade: score?.grade ?? resolveGrade(raw).grade,
       };
     }),
 
@@ -227,7 +252,7 @@ export default async function StudentResultCardPage({
               {[
                 { label: "Total Score", value: totalScore.toFixed(1) },
                 { label: "Average", value: `${average.toFixed(1)}%` },
-                { label: "Subjects", value: String(scores.length) },
+                { label: "Subjects", value: String(eligibleClassSubjects.length) },
                 {
                   label: "Class Rank",
                   value: rank ? `${rank} / ${classSize}` : "—",

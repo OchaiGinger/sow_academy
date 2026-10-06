@@ -3,16 +3,35 @@ import { AddSubjectButton } from "./_components/add-subject-button";
 import { SubjectList } from "./_components/subject-list";
 
 export default async function AdminSubjectsPage() {
-  const classes = await db.class.findMany({
-    select: { id: true, name: true },
+  const classesRaw = await db.class.findMany({
+    select: {
+      id: true,
+      name: true,
+      students: {
+        select: { id: true, user: { select: { name: true } } },
+        orderBy: { user: { name: "asc" } },
+      },
+    },
     orderBy: { name: "asc" },
   });
+  const classes = classesRaw.map((cls) => ({
+    id: cls.id,
+    name: cls.name,
+    students: cls.students.map((student) => ({
+      id: student.id,
+      name: student.user.name,
+    })),
+  }));
 
   const subjects = await db.subject.findMany({
     orderBy: { name: "asc" },
     include: {
       classSubjects: {
-        select: { classId: true },
+        select: {
+          classId: true,
+          isElective: true,
+          studentEnrollments: { select: { studentId: true } },
+        },
       },
     },
   });

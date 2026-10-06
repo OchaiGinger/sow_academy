@@ -12,7 +12,21 @@ export const subjectSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(2, "Subject name is required"),
   code: z.string().min(2, "Subject code is required").toUpperCase(),
-  classIds: z.array(z.string()).min(1, "Select at least one class"), // Added this
+  isElective: z.boolean(),
+  classIds: z.array(z.string()),
+  electiveClassId: z.string().optional(),
+  studentIds: z.array(z.string()),
+}).superRefine((values, ctx) => {
+  if (values.isElective) {
+    if (!values.electiveClassId) {
+      ctx.addIssue({ code: "custom", path: ["electiveClassId"], message: "Select a class" });
+    }
+    if (values.studentIds.length === 0) {
+      ctx.addIssue({ code: "custom", path: ["studentIds"], message: "Select at least one student" });
+    }
+  } else if (values.classIds.length === 0) {
+    ctx.addIssue({ code: "custom", path: ["classIds"], message: "Select at least one class" });
+  }
 });
 
 export const formMasterSchema = z.object({

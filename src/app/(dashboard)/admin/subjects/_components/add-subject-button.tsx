@@ -15,6 +15,7 @@ import { SubjectForm } from "./subject-form";
 interface ClassOption {
   id: string;
   name: string;
+  students: { id: string; name: string }[];
 }
 
 export function AddSubjectButton({ classes }: { classes: ClassOption[] }) {

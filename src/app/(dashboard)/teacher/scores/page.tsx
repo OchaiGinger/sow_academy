@@ -16,7 +16,7 @@ export default async function TeacherScoresPage() {
         include: {
           class: true,
           subject: true,
-          _count: { select: { scores: true } },
+          _count: { select: { scores: true, studentEnrollments: true } },
         },
         orderBy: { class: { name: "asc" } },
       },
@@ -57,7 +57,10 @@ export default async function TeacherScoresPage() {
                 <p className="text-sm font-bold text-white">
                   {cs.subject.name}
                 </p>
-                <p className="text-xs text-emerald-700">{cs.class.name}</p>
+                <p className="text-xs text-emerald-700">
+                  {cs.class.name}
+                  {cs.isElective ? ` · Elective · ${cs._count.studentEnrollments} enrolled` : ""}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">

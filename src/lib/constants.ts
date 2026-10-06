@@ -32,6 +32,7 @@ export const adminNavItems: NavItem[] = [
   },
   { href: "/admin/form-masters", label: "Form Masters", icon: UserCheck },
   { href: "/admin/card-passwords", label: "Card Passwords", icon: KeyRound },
+  { href: "/admin/id-cards", label: "ID Cards", icon: CreditCard },
   { href: "/admin/settings", label: "School Settings", icon: Settings },
 ];
 

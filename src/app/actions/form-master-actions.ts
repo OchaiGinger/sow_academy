@@ -102,7 +102,14 @@ export async function getFormMasterClassData(userId: string, requestedClassId?: 
                 user: { select: { name: true } },
                 scores: {
                   where: { termId: currentTerm.id },
-                  include: { classSubject: { include: { subject: true } } },
+                  include: {
+                    classSubject: {
+                      include: {
+                        subject: true,
+                        studentEnrollments: { select: { studentId: true } },
+                      },
+                    },
+                  },
                 },
                 termResults: {
                   where: { termId: currentTerm.id },
@@ -121,14 +128,20 @@ export async function getFormMasterClassData(userId: string, requestedClassId?: 
     // This is the source of truth for what should appear on every report card.
     const classSubjects = await db.classSubject.findMany({
       where: { classId: formMasterRecord.class.id },
-      include: { subject: true },
+      include: {
+        subject: true,
+        studentEnrollments: { select: { studentId: true } },
+      },
       orderBy: { subject: { name: "asc" } },
     });
 
     const totalInClass = formMasterRecord.class.students.length;
 
     const compiledResults = formMasterRecord.class.students.map((student) => {
-      const termScores = student.scores;
+      const termScores = student.scores.filter((score) =>
+        !score.classSubject.isElective ||
+        score.classSubject.studentEnrollments.some((enrollment) => enrollment.studentId === student.id),
+      );
       const totalSum = termScores.reduce((acc, s) => acc + (s.total ?? 0), 0);
       const avg = termScores.length > 0 ? totalSum / termScores.length : 0;
 
@@ -189,10 +202,17 @@ export async function getFormMasterClassData(userId: string, requestedClassId?: 
       termId: currentTerm.id,
       results,
       classSubjects: classSubjects.map((cs) => ({
-        // ← NEW
         id: cs.id,
         name: cs.subject.name,
       })),
+      subjectsByStudent: Object.fromEntries(
+        formMasterRecord.class.students.map((student) => [
+          student.id,
+          classSubjects
+            .filter((cs) => !cs.isElective || cs.studentEnrollments.some((enrollment) => enrollment.studentId === student.id))
+            .map((cs) => ({ id: cs.id, name: cs.subject.name })),
+        ]),
+      ),
     };
   } catch (e) {
     console.error("[getFormMasterClassData]", e);

@@ -11,6 +11,7 @@ import { AlertTriangle } from "lucide-react";
 
 export interface ScoredSubject {
   name: string;
+  isPending?: boolean;
   a1: number;
   a2: number;
   t1: number;
@@ -42,7 +43,10 @@ const GRADE_COLOR: Record<string, string> = {
 
 export const AcademicRecord = ({ subjects, allSubjects }: Props) => {
   const scoredMap = new Map(
-    subjects.map((s) => [s.name.trim().toLowerCase(), s]),
+    subjects.map((s) => [
+      s.name.trim().toLowerCase(),
+      s.isPending ? null : s,
+    ]),
   );
 
   const rows: Array<{ name: string; scored: ScoredSubject | null }> =
@@ -51,7 +55,10 @@ export const AcademicRecord = ({ subjects, allSubjects }: Props) => {
           name: cs.name,
           scored: scoredMap.get(cs.name.trim().toLowerCase()) ?? null,
         }))
-      : subjects.map((s) => ({ name: s.name, scored: s }));
+      : subjects.map((s) => ({
+          name: s.name,
+          scored: s.isPending ? null : s,
+        }));
 
   const missingCount = rows.filter((r) => r.scored === null).length;
 

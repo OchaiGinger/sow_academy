@@ -1,13 +1,5 @@
 "use client";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +27,12 @@ import { TeacherForm } from "./teacher-form";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 // Define the exact structure expected from the Database
 interface TeacherItem {
@@ -132,145 +130,124 @@ export function TeacherList({
           />
         </div>
       </div>
-      <Table>
-      <TableHeader className="bg-bg-elevated">
-        <TableRow>
-          <TableHead className="text-[10px] uppercase tracking-widest font-bold">
-            Teacher
-          </TableHead>
-          <TableHead className="text-[10px] uppercase tracking-widest font-bold">
-            Staff ID
-          </TableHead>
-          <TableHead className="text-[10px] uppercase tracking-widest font-bold text-center">
-            Workload
-          </TableHead>
-          <TableHead className="text-right text-[10px] uppercase tracking-widest font-bold">
-            Actions
-          </TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody className="text-sm">
+      <Accordion type="multiple" className="divide-y divide-border-subtle">
         {initialData.length === 0 ? (
-          <TableRow>
-            <TableCell
-              colSpan={4}
-              className="text-center py-12 text-text-tertiary italic"
-            >
-              No teacher profiles found in the system.
-            </TableCell>
-          </TableRow>
+          <p className="py-12 text-center text-sm italic text-text-tertiary">
+            No teacher profiles found in the system.
+          </p>
         ) : filteredTeachers.length === 0 ? (
-          <TableRow>
-            <TableCell
-              colSpan={4}
-              className="text-center py-12 text-text-tertiary italic"
-            >
-              No teachers match &quot;{query}&quot;.
-            </TableCell>
-          </TableRow>
+          <p className="py-12 text-center text-sm italic text-text-tertiary">
+            No teachers match &quot;{query}&quot;.
+          </p>
         ) : (
-          filteredTeachers.map((teacher) => (
-            <TableRow
-              key={teacher.id}
-              className="hover:bg-bg-elevated/50 transition-colors"
-            >
-              <TableCell className="flex items-center gap-3 py-4">
-                <Avatar className="h-8 w-8 rounded-sm border border-border-subtle">
-                  <AvatarImage src={teacher.user.image || ""} />
-                  <AvatarFallback className="rounded-sm bg-primary/10 text-primary text-xs font-bold">
-                    {teacher.user.name.substring(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-text-primary">
-                      {teacher.user.name}
-                    </span>
-                    {teacher.user.role === "PRINCIPAL" && (
-                      <Badge className="bg-primary/10 text-primary border-none text-[8px] h-4 uppercase font-bold px-1.5">
-                        Principal
-                      </Badge>
-                    )}
-                    {teacher.formMasters.length > 0 && (
-                      <Badge className="bg-amber-50 text-amber-700 border border-amber-200 text-[8px] h-4 uppercase font-bold px-1.5">
-                        Form Master — {teacher.formMasters.map(({ class: assignedClass }) => assignedClass.name).join(", ")}
-                      </Badge>
+          filteredTeachers.map((teacher) => {
+            const assignedSubjects = allSubjects.filter(
+              (subject) => subject.teacherId === teacher.id,
+            );
+
+            return (
+              <AccordionItem key={teacher.id} value={teacher.id} className="border-0">
+                <div className="flex items-center gap-2 px-3 transition-colors hover:bg-bg-elevated/50 sm:px-4">
+                  <AccordionTrigger className="min-w-0 flex-1 gap-3 py-4 text-left hover:no-underline">
+                    <div className="flex min-w-0 flex-1 items-center gap-3">
+                      <Avatar className="h-9 w-9 shrink-0 rounded-sm border border-border-subtle">
+                        <AvatarImage src={teacher.user.image || ""} />
+                        <AvatarFallback className="rounded-sm bg-primary/10 text-xs font-bold text-primary">
+                          {teacher.user.name.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-bold text-text-primary">{teacher.user.name}</span>
+                          {teacher.user.role === "PRINCIPAL" && (
+                            <Badge className="h-4 border-none bg-primary/10 px-1.5 text-[8px] font-bold uppercase text-primary">Principal</Badge>
+                          )}
+                          {teacher.formMasters.length > 0 && (
+                            <Badge className="h-auto border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[8px] font-bold uppercase text-amber-700">
+                              Form Master — {teacher.formMasters.map(({ class: assignedClass }) => assignedClass.name).join(", ")}
+                            </Badge>
+                          )}
+                        </div>
+                        <span className="mt-0.5 flex items-center gap-1 truncate text-[10px] text-text-tertiary">
+                          <Mail className="h-2.5 w-2.5 shrink-0" /> {teacher.user.email}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="hidden shrink-0 items-center gap-1.5 font-mono text-xs font-bold text-primary sm:flex">
+                      <Hash className="h-3 w-3 text-text-tertiary" />
+                      {teacher.staffId || "---"}
+                    </div>
+                    <div className="mr-2 inline-flex shrink-0 items-center gap-2 rounded border border-border-subtle bg-bg-elevated px-2 py-1">
+                      <BookOpen className="h-3 w-3 text-primary" />
+                      <span className="text-xs font-bold">{assignedSubjects.length}</span>
+                      <span className="hidden text-[10px] text-text-tertiary sm:inline">subjects</span>
+                    </div>
+                  </AccordionTrigger>
+
+                  <div className="flex shrink-0 items-center">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={`h-8 w-8 ${teacher.user.role === "PRINCIPAL" ? "bg-primary/10 text-primary hover:bg-primary/20" : "text-text-tertiary hover:text-primary"}`}
+                      onClick={() => handleTogglePrincipal(teacher.user.id, teacher.user.role)}
+                      title={teacher.user.role === "PRINCIPAL" ? "Revoke Principal Role" : "Make Principal"}
+                    >
+                      {teacher.user.role === "PRINCIPAL" ? <ShieldCheck className="h-4 w-4" /> : <ShieldAlert className="h-4 w-4" />}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+                      onClick={() => setEditingTeacher(teacher)}
+                      title="Edit Teacher"
+                    >
+                      <Edit className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                      onClick={() => handleDelete(teacher.id)}
+                      title="Delete Teacher"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+
+                <AccordionContent className="bg-bg-elevated/30 px-4 sm:px-6">
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-text-secondary">Assigned subjects</h3>
+                      <span className="text-[10px] text-text-tertiary sm:hidden">Staff ID: {teacher.staffId || "---"}</span>
+                      <span className="text-[10px] font-semibold text-text-tertiary">
+                        {assignedSubjects.length} subject{assignedSubjects.length === 1 ? "" : "s"} · {teacher.formMasters.length} form-master class{teacher.formMasters.length === 1 ? "" : "es"}
+                      </span>
+                    </div>
+                    {assignedSubjects.length > 0 ? (
+                      <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                        {assignedSubjects.map((subject) => (
+                          <li key={subject.id} className="flex items-start gap-2 rounded-md border border-border-subtle bg-bg-surface p-3">
+                            <BookOpen className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-semibold text-text-primary">{subject.subject?.name ?? "Subject"}</p>
+                              <p className="truncate text-xs text-text-tertiary">{subject.class?.name ?? "Class not assigned"}</p>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="rounded-md border border-dashed border-border-subtle p-4 text-center text-sm text-text-tertiary">
+                        No subjects assigned to this teacher yet.
+                      </p>
                     )}
                   </div>
-                  <span className="text-[10px] text-text-tertiary flex items-center gap-1">
-                    <Mail className="h-2.5 w-2.5" /> {teacher.user.email}
-                  </span>
-                </div>
-              </TableCell>
-
-              <TableCell>
-                <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-primary">
-                  <Hash className="h-3 w-3 text-text-tertiary" />
-                  {teacher.staffId || "---"}
-                </div>
-              </TableCell>
-
-              <TableCell className="text-center">
-                <div className="inline-flex items-center gap-2 bg-bg-elevated px-2 py-1 rounded border border-border-subtle">
-                  <BookOpen className="h-3 w-3 text-primary" />
-                  <span className="text-xs font-bold">
-                    {teacher._count.classSubjects}
-                  </span>
-                </div>
-              </TableCell>
-
-              <TableCell className="text-right space-x-1">
-                {/* PRINCIPAL TOGGLE */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={`h-8 w-8 ${
-                    teacher.user.role === "PRINCIPAL"
-                      ? "text-primary bg-primary/10 hover:bg-primary/20"
-                      : "text-text-tertiary hover:text-primary"
-                  }`}
-                  onClick={() =>
-                    handleTogglePrincipal(teacher.user.id, teacher.user.role)
-                  }
-                  title={
-                    teacher.user.role === "PRINCIPAL"
-                      ? "Revoke Principal Role"
-                      : "Make Principal"
-                  }
-                >
-                  {teacher.user.role === "PRINCIPAL" ? (
-                    <ShieldCheck className="h-4 w-4" />
-                  ) : (
-                    <ShieldAlert className="h-4 w-4" />
-                  )}
-                </Button>
-
-                {/* EDIT BUTTON */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
-                  onClick={() => setEditingTeacher(teacher)}
-                  title="Edit Teacher"
-                >
-                  <Edit className="h-3.5 w-3.5" />
-                </Button>
-
-                {/* DELETE BUTTON */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                  onClick={() => handleDelete(teacher.id)}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })
         )}
-      </TableBody>
-    </Table>
+      </Accordion>
 
     {/* EDIT SHEET */}
     <Sheet

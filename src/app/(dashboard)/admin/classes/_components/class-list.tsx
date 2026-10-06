@@ -33,8 +33,12 @@ export function ClassList({ initialClasses }: { initialClasses: ClassItem[] }) {
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this class?")) {
-      await deleteClass(id);
-      toast.success("Class deleted");
+      const res = await deleteClass(id);
+      if (res.success) {
+        toast.success("Class deleted");
+      } else {
+        toast.error(res.error || "Failed to delete class.");
+      }
     }
   };
 

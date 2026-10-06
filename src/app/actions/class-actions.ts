@@ -30,6 +30,35 @@ export async function upsertClass(data: {
 }
 
 export async function deleteClass(id: string) {
-  await db.class.delete({ where: { id } });
-  revalidatePath("/admin/classes");
+  try {
+    const cls = await db.class.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        students: { select: { id: true } },
+        classSubjects: { select: { id: true } },
+        formMasters: { select: { id: true } },
+      },
+    });
+
+    if (!cls) return { success: false, error: "Class not found." };
+
+    const blockers: string[] = [];
+    if (cls.students.length > 0) blockers.push(`${cls.students.length} students`);
+    if (cls.classSubjects.length > 0) blockers.push(`${cls.classSubjects.length} subjects`);
+    if (cls.formMasters.length > 0) blockers.push("a form master");
+
+    if (blockers.length > 0) {
+      return {
+        success: false,
+        error: `Cannot delete class because it still has: ${blockers.join(", ")}. Please reassign or remove them first.`,
+      };
+    }
+
+    await db.class.delete({ where: { id } });
+    revalidatePath("/admin/classes");
+    return { success: true };
+  } catch {
+    return { success: false, error: "Failed to delete class." };
+  }
 }
