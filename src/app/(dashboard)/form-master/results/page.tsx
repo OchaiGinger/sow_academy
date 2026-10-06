@@ -6,12 +6,18 @@ import { getFormMasterClassData } from "@/app/actions/form-master-actions";
 import { ClassResultTable } from "./_components/class-result-table";
 import { GraduationCap } from "lucide-react";
 import type { ReportStudent } from "@/components/report-card/report-card-types";
+import Link from "next/link";
 
-export default async function FormMasterResultsPage() {
+export default async function FormMasterResultsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ classId?: string }>;
+}) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
 
-  const data = await getFormMasterClassData(session.user.id);
+  const { classId } = await searchParams;
+  const data = await getFormMasterClassData(session.user.id, classId);
 
   if (!data) {
     return (
@@ -75,6 +81,28 @@ export default async function FormMasterResultsPage() {
           </div>
         </div>
       </div>
+
+      {data.classes.length > 1 && (
+        <nav aria-label="Select class" className="flex flex-wrap gap-2">
+          {data.classes.map((assignedClass) => (
+            <Link
+              key={assignedClass.id}
+              href={`/form-master/results?classId=${encodeURIComponent(assignedClass.id)}`}
+              aria-current={assignedClass.id === data.classId ? "page" : undefined}
+              className={`rounded-lg border px-3 py-2 text-sm transition-colors ${
+                assignedClass.id === data.classId
+                  ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-300"
+                  : "border-emerald-900/30 text-emerald-700 hover:bg-emerald-950/40 hover:text-emerald-400"
+              }`}
+            >
+              {assignedClass.name}
+              <span className="ml-2 text-xs opacity-70">
+                {assignedClass.studentCount}
+              </span>
+            </Link>
+          ))}
+        </nav>
+      )}
 
       <ClassResultTable
         initialData={data.results}

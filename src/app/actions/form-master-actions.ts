@@ -11,18 +11,23 @@ export async function assignFormMaster(rawInput: unknown) {
   const result = formMasterSchema.safeParse(rawInput);
   if (!result.success) return { success: false, error: "Invalid data" };
 
-  const { teacherId, classId } = result.data;
+  const { teacherId, classIds } = result.data;
 
   try {
-    const existing = await db.formMaster.findUnique({ where: { classId } });
-
-    if (existing) {
-      await db.formMaster.update({ where: { classId }, data: { teacherId } });
-    } else {
-      await db.formMaster.create({ data: { teacherId, classId } });
-    }
+    await db.$transaction(
+      classIds.map((classId) =>
+        db.formMaster.upsert({
+          where: { classId },
+          update: { teacherId },
+          create: { teacherId, classId },
+        }),
+      ),
+    );
 
     revalidatePath("/admin/form-masters");
+    revalidatePath("/admin/teachers");
+    revalidatePath("/form-master");
+    revalidatePath("/form-master/results");
     return { success: true };
   } catch (error: unknown) {
     if (
@@ -31,10 +36,7 @@ export async function assignFormMaster(rawInput: unknown) {
       "code" in error &&
       error.code === "P2002"
     ) {
-      return {
-        success: false,
-        error: "This teacher is already a Form Master for another class.",
-      };
+      return { success: false, error: "One or more class assignments conflicted. Please try again." };
     }
     return { success: false, error: "An error occurred." };
   }
@@ -45,7 +47,7 @@ export async function removeFormMaster(id: string) {
   revalidatePath("/admin/form-masters");
 }
 
-export async function getFormMasterClassData(userId: string) {
+export async function getFormMasterClassData(userId: string, requestedClassId?: string) {
   try {
     const school = (await db.school.findFirst()) ?? {
       name: "SCHOOL NAME",
@@ -64,8 +66,31 @@ export async function getFormMasterClassData(userId: string) {
     });
     if (!teacher) return null;
 
-    const formMasterRecord = await db.formMaster.findUnique({
+    const formMasterRecords = await db.formMaster.findMany({
       where: { teacherId: teacher.id },
+      select: {
+        classId: true,
+        class: {
+          select: {
+            id: true,
+            name: true,
+            _count: { select: { students: true } },
+          },
+        },
+      },
+      orderBy: { class: { name: "asc" } },
+    });
+
+    if (formMasterRecords.length === 0) return null;
+
+    const selectedClassId = formMasterRecords.some(
+      (record) => record.classId === requestedClassId,
+    )
+      ? requestedClassId!
+      : formMasterRecords[0].classId;
+
+    const formMasterRecord = await db.formMaster.findFirst({
+      where: { teacherId: teacher.id, classId: selectedClassId },
       include: {
         class: {
           include: {
@@ -150,6 +175,11 @@ export async function getFormMasterClassData(userId: string) {
 
     return {
       school,
+      classes: formMasterRecords.map((record) => ({
+        id: record.class.id,
+        name: record.class.name,
+        studentCount: record.class._count.students,
+      })),
       classId: formMasterRecord.class.id, // ← NEW
       className: formMasterRecord.class.name,
       termName: currentTerm.name,

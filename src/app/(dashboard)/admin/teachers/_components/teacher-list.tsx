@@ -53,6 +53,7 @@ interface TeacherItem {
     classSubjects: number;
   };
   classSubjects: { id: string }[];
+  formMasters: { class: { name: string } }[];
 }
 
 type AvailableSubject = {
@@ -188,6 +189,11 @@ export function TeacherList({
                     {teacher.user.role === "PRINCIPAL" && (
                       <Badge className="bg-primary/10 text-primary border-none text-[8px] h-4 uppercase font-bold px-1.5">
                         Principal
+                      </Badge>
+                    )}
+                    {teacher.formMasters.length > 0 && (
+                      <Badge className="bg-amber-50 text-amber-700 border border-amber-200 text-[8px] h-4 uppercase font-bold px-1.5">
+                        Form Master — {teacher.formMasters.map(({ class: assignedClass }) => assignedClass.name).join(", ")}
                       </Badge>
                     )}
                   </div>

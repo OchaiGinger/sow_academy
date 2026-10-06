@@ -33,9 +33,9 @@ export default async function DashboardLayout({
     try {
       const teacherRecord = await db.teacher.findUnique({
         where: { userId: session.user.id },
-        select: { formMaster: { select: { id: true } } },
+        select: { formMasters: { select: { id: true } } },
       });
-      isFormMaster = !!teacherRecord?.formMaster;
+      isFormMaster = (teacherRecord?.formMasters.length ?? 0) > 0;
     } catch (err) {
       console.error("[DashboardLayout] teacher lookup failed:", err);
     }

@@ -199,12 +199,12 @@ model Teacher {
   staffId String? @unique
 
   classSubjects ClassSubject[]
-  formMaster    FormMaster?
+  formMasters   FormMaster[]
 }
 
 model FormMaster {
   id        String  @id @default(cuid())
-  teacherId String  @unique
+  teacherId String
   teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   classId   String
   class     Class   @relation(fields: [classId], references: [id], onDelete: Cascade)

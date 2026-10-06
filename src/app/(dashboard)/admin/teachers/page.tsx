@@ -6,21 +6,22 @@ export default async function AdminTeachersPage() {
   const [teachers, availableSubjects] = await Promise.all([
     db.teacher.findMany({
       select: {
-        id: true, // Teacher Record ID
-        userId: true, // Link to User
+        id: true,
+        userId: true,
         staffId: true,
         user: {
           select: {
-            id: true, // CRITICAL: User ID for the action
+            id: true,
             name: true,
             email: true,
             phone: true,
             image: true,
-            role: true, // CRITICAL: Needed to check PRINCIPAL status
+            role: true,
           },
         },
         _count: { select: { classSubjects: true } },
         classSubjects: { select: { id: true } },
+        formMasters: { select: { class: { select: { name: true } } } },
       },
       orderBy: { user: { name: "asc" } },
     }),

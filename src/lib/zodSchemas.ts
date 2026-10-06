@@ -18,7 +18,7 @@ export const subjectSchema = z.object({
 export const formMasterSchema = z.object({
   id: z.string().optional(),
   teacherId: z.string().min(1, "Please select a teacher"),
-  classId: z.string().min(1, "Please select a class"),
+  classIds: z.array(z.string()).min(1, "Please select at least one class"),
 });
 
 export const teacherSchema = z.object({
