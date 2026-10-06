@@ -5,7 +5,7 @@ export default async function AdminIdCardsPage() {
   const students = await db.student.findMany({
     include: {
       user: { select: { name: true, email: true, phone: true } },
-      class: { select: { name: true; level: true; arm: true } },
+      class: { select: { name: true, level: true, arm: true } },
     },
     orderBy: { admissionNo: "asc" },
   });

@@ -45,6 +45,9 @@ export async function assignFormMaster(rawInput: unknown) {
 export async function removeFormMaster(id: string) {
   await db.formMaster.delete({ where: { id } });
   revalidatePath("/admin/form-masters");
+  revalidatePath("/admin/teachers");
+  revalidatePath("/form-master");
+  revalidatePath("/form-master/results");
 }
 
 export async function getFormMasterClassData(userId: string, requestedClassId?: string) {

@@ -14,6 +14,7 @@ import {
   ClipboardEdit,
   Trophy,
   User,
+  CreditCard,
 } from "lucide-react";
 import type { NavItem } from "@/types";
 

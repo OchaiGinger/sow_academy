@@ -3,6 +3,7 @@ import { db } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { PageHeader } from "@/components/shared/page-header";
+import Link from "next/link";
 
 export default async function FormMasterDashboard() {
   const session = await auth.api.getSession({
@@ -41,12 +42,16 @@ export default async function FormMasterDashboard() {
           <h2 className="text-lg font-semibold">Your Classes</h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {formMasters.map(({ id, class: assignedClass }) => (
-              <div key={id} className="rounded-lg border bg-bg-surface p-4">
+              <Link
+                key={id}
+                href={`/form-master/results?classId=${encodeURIComponent(assignedClass.id)}`}
+                className="rounded-lg border bg-bg-surface p-4 transition-colors hover:border-primary/50"
+              >
                 <p className="font-semibold">{assignedClass.name}</p>
                 <p className="mt-1 text-sm text-text-secondary">
                   {assignedClass._count.students} students
                 </p>
-              </div>
+              </Link>
             ))}
           </div>
         </section>
