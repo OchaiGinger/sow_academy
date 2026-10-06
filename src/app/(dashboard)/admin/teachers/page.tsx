@@ -21,7 +21,7 @@ export default async function AdminTeachersPage() {
         },
         _count: { select: { classSubjects: true } },
         classSubjects: { select: { id: true } },
-        formMasters: { select: { class: { select: { name: true } } } },
+        formMaster: { select: { class: { select: { name: true } } } },
       },
       orderBy: { user: { name: "asc" } },
     }),
@@ -57,10 +57,9 @@ export default async function AdminTeachersPage() {
       </div>
 
       <div className="border border-border-subtle rounded-sm bg-bg-surface overflow-hidden shadow-sm">
-        {/* Now initialData matches the TeacherItem interface exactly */}
         <TeacherList
           initialData={teachers}
-          allSubjects={availableSubjects}
+          availableSubjects={unallocatedSubjects}
         />
       </div>
     </div>

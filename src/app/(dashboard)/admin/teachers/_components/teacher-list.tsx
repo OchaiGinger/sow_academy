@@ -63,10 +63,10 @@ type AvailableSubject = {
 
 export function TeacherList({
   initialData,
-  allSubjects,
+  availableSubjects,
 }: {
   initialData: TeacherItem[];
-  allSubjects: AvailableSubject[];
+  availableSubjects: AvailableSubject[];
 }) {
   const [editingTeacher, setEditingTeacher] = useState<TeacherItem | null>(
     null,
@@ -263,11 +263,7 @@ export function TeacherList({
         {editingTeacher && (
           <div className="mt-6">
             <TeacherForm
-              availableSubjects={allSubjects.filter(
-                (cs) =>
-                  cs.teacherId === null ||
-                  cs.teacherId === editingTeacher.id,
-              )}
+              availableSubjects={availableSubjects}
               initialData={{
                 id: editingTeacher.id,
                 name: editingTeacher.user.name,

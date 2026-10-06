@@ -112,11 +112,16 @@ export function SubjectForm({ initialData, onSuccess, classes }: Props) {
                     form.setValue("studentIds", []);
                   }}
                 />
-                <span>Elective subject (only selected students take it)</span>
+                <span>Make this an elective subject</span>
               </label>
             </FormItem>
           )}
         />
+        {!isElective && (
+          <p className="-mt-4 text-xs text-muted-foreground">
+            Turn this on to choose a class, then select which students in that class take the subject.
+          </p>
+        )}
 
         {isElective ? (
           <>
@@ -155,7 +160,9 @@ export function SubjectForm({ initialData, onSuccess, classes }: Props) {
                   name="studentIds"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Students taking this subject</FormLabel>
+                      <FormLabel>
+                        Students from {selectedClass?.name ?? "this class"} taking this elective
+                      </FormLabel>
                       <FormControl>
                         <div className="max-h-52 space-y-2 overflow-y-auto rounded-md border p-3">
                           {selectedClass?.students.length ? selectedClass.students.map((student) => (
