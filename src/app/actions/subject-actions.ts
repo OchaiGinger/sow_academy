@@ -15,8 +15,9 @@ export async function upsertSubject(rawInput: unknown) {
   const result = subjectSchema.safeParse(rawInput);
   if (!result.success) return { success: false, error: result.error.issues[0].message };
 
-  const { id, name, code, isElective, classIds, electiveClassId, studentIds } = result.data;
-  const offeringClassIds = isElective ? [electiveClassId!] : classIds;
+  const { id, name, code, offerings } = result.data;
+  const selectedOfferings = offerings.filter((offering) => offering.enabled);
+  const offeringClassIds = selectedOfferings.map((offering) => offering.classId);
 
   try {
     const saved = await db.$transaction(async (tx) => {
@@ -32,13 +33,18 @@ export async function upsertSubject(rawInput: unknown) {
         throw new Error("One or more selected classes no longer exist.");
       }
 
-      if (isElective) {
+      for (const offering of selectedOfferings) {
+        if (!offering.isElective) continue;
+        const uniqueStudentIds = new Set(offering.studentIds);
+        if (uniqueStudentIds.size !== offering.studentIds.length) {
+          throw new Error("A student can only be selected once for a class elective.");
+        }
         const students = await tx.student.findMany({
-          where: { id: { in: studentIds }, classId: electiveClassId },
+          where: { id: { in: offering.studentIds }, classId: offering.classId },
           select: { id: true },
         });
-        if (students.length !== studentIds.length) {
-          throw new Error("Selected students must belong to the chosen class.");
+        if (students.length !== offering.studentIds.length) {
+          throw new Error("Selected students must belong to the class offering this elective.");
         }
       }
 
@@ -62,7 +68,8 @@ export async function upsertSubject(rawInput: unknown) {
         });
       }
 
-      for (const classId of offeringClassIds) {
+      for (const classOffering of selectedOfferings) {
+        const { classId, isElective, studentIds } = classOffering;
         const existingOffering = existingOfferings.find(
           (offering) => offering.classId === classId,
         );

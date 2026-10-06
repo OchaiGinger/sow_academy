@@ -50,7 +50,7 @@ interface TeacherItem {
   _count: {
     classSubjects: number;
   };
-  classSubjects: { id: string }[];
+  classSubjects: { id: string; class: { name: string }; subject: { name: string } }[];
   formMasters: { class: { name: string } }[];
 }
 
@@ -141,9 +141,7 @@ export function TeacherList({
           </p>
         ) : (
           filteredTeachers.map((teacher) => {
-            const assignedSubjects = allSubjects.filter(
-              (subject) => subject.teacherId === teacher.id,
-            );
+            const assignedSubjects = teacher.classSubjects;
 
             return (
               <AccordionItem key={teacher.id} value={teacher.id} className="border-0">

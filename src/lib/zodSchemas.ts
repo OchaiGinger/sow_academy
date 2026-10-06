@@ -12,21 +12,28 @@ export const subjectSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(2, "Subject name is required"),
   code: z.string().min(2, "Subject code is required").toUpperCase(),
-  isElective: z.boolean(),
-  classIds: z.array(z.string()),
-  electiveClassId: z.string().optional(),
-  studentIds: z.array(z.string()),
+  offerings: z.array(z.object({
+    classId: z.string().min(1),
+    enabled: z.boolean(),
+    isElective: z.boolean(),
+    studentIds: z.array(z.string()),
+  })),
 }).superRefine((values, ctx) => {
-  if (values.isElective) {
-    if (!values.electiveClassId) {
-      ctx.addIssue({ code: "custom", path: ["electiveClassId"], message: "Select a class" });
-    }
-    if (values.studentIds.length === 0) {
-      ctx.addIssue({ code: "custom", path: ["studentIds"], message: "Select at least one student" });
-    }
-  } else if (values.classIds.length === 0) {
-    ctx.addIssue({ code: "custom", path: ["classIds"], message: "Select at least one class" });
+  const enabledOfferings = values.offerings.filter((offering) => offering.enabled);
+  if (enabledOfferings.length === 0) {
+    ctx.addIssue({ code: "custom", path: ["offerings"], message: "Select at least one class for this subject" });
   }
+
+  const seenClassIds = new Set<string>();
+  values.offerings.forEach((offering, index) => {
+    if (seenClassIds.has(offering.classId)) {
+      ctx.addIssue({ code: "custom", path: ["offerings", index, "classId"], message: "A class can only be selected once" });
+    }
+    seenClassIds.add(offering.classId);
+    if (offering.enabled && offering.isElective && offering.studentIds.length === 0) {
+      ctx.addIssue({ code: "custom", path: ["offerings", index, "studentIds"], message: "Select at least one student for this elective" });
+    }
+  });
 });
 
 export const formMasterSchema = z.object({

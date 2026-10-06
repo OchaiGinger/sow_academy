@@ -17,13 +17,6 @@ import { Checkbox } from "@/components/ui/checkbox"; // Make sure to install thi
 import { upsertSubject } from "@/app/actions/subject-actions";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface Props {
   initialData?: SubjectFormValues;
@@ -38,19 +31,18 @@ interface Props {
 export function SubjectForm({ initialData, onSuccess, classes }: Props) {
   const form = useForm<SubjectFormValues>({
     resolver: zodResolver(subjectSchema),
-    defaultValues: initialData || {
+    defaultValues: initialData ?? {
       name: "",
       code: "",
-      isElective: false,
-      classIds: [],
-      electiveClassId: "",
-      studentIds: [],
+      offerings: classes.map((cls) => ({
+        classId: cls.id,
+        enabled: false,
+        isElective: false,
+        studentIds: [],
+      })),
     },
   });
-  const isElective = useWatch({ control: form.control, name: "isElective" });
-  const electiveClassId = useWatch({ control: form.control, name: "electiveClassId" });
-  const studentIds = useWatch({ control: form.control, name: "studentIds" });
-  const selectedClass = classes.find((cls) => cls.id === electiveClassId);
+  const offerings = useWatch({ control: form.control, name: "offerings" });
 
   async function onSubmit(values: SubjectFormValues) {
     try {
@@ -97,124 +89,84 @@ export function SubjectForm({ initialData, onSuccess, classes }: Props) {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="isElective"
-          render={({ field }) => (
-            <FormItem>
-              <label className="flex items-center gap-3 rounded-md border p-3 text-sm cursor-pointer">
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={(checked) => {
-                    field.onChange(checked === true);
-                    form.setValue("classIds", []);
-                    form.setValue("electiveClassId", "");
-                    form.setValue("studentIds", []);
-                  }}
-                />
-                <span>Make this an elective subject</span>
-              </label>
-            </FormItem>
-          )}
-        />
-        {!isElective && (
-          <p className="-mt-4 text-xs text-muted-foreground">
-            Turn this on to choose a class, then select which students in that class take the subject.
+        <FormItem>
+          <FormLabel>Class offerings</FormLabel>
+          <p className="text-xs text-muted-foreground">
+            Select each class where this subject is offered. Existing class assignments and elective students are preselected when editing.
           </p>
-        )}
+          <div className="max-h-[55vh] space-y-3 overflow-y-auto pr-1">
+            {classes.map((cls, index) => {
+              const offering = offerings?.[index];
+              const isEnabled = offering?.enabled ?? false;
+              const isElective = offering?.isElective ?? false;
+              const studentIds = offering?.studentIds ?? [];
 
-        {isElective ? (
-          <>
-            <FormField
-              control={form.control}
-              name="electiveClassId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Class offering this elective</FormLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      form.setValue("studentIds", []);
-                    }}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a class" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {classes.map((cls) => (
-                        <SelectItem key={cls.id} value={cls.id}>{cls.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              return (
+                <div key={cls.id} className="space-y-3 rounded-md border p-3">
+                  <label className="flex cursor-pointer items-center gap-3 text-sm font-medium">
+                    <Checkbox
+                      checked={isEnabled}
+                      onCheckedChange={(checked) =>
+                        form.setValue(`offerings.${index}.enabled`, checked === true, { shouldDirty: true, shouldValidate: true })
+                      }
+                    />
+                    <span>{cls.name}</span>
+                    {isEnabled && isElective && (
+                      <span className="ml-auto rounded bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-amber-800">Elective</span>
+                    )}
+                  </label>
 
-            {electiveClassId && (
-                <FormField
-                  control={form.control}
-                  name="studentIds"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Students from {selectedClass?.name ?? "this class"} taking this elective
-                      </FormLabel>
-                      <FormControl>
-                        <div className="max-h-52 space-y-2 overflow-y-auto rounded-md border p-3">
-                          {selectedClass?.students.length ? selectedClass.students.map((student) => (
-                            <label key={student.id} className="flex cursor-pointer items-center gap-3 text-sm">
-                              <Checkbox
-                                checked={studentIds.includes(student.id)}
-                                onCheckedChange={(checked) => {
-                                  field.onChange(checked === true
-                                    ? [...field.value, student.id]
-                                    : field.value.filter((id) => id !== student.id));
-                                }}
-                              />
-                              <span>{student.name}</span>
-                            </label>
-                          )) : (
-                            <p className="text-sm text-muted-foreground">No students are currently assigned to this class.</p>
+                  {isEnabled && (
+                    <div className="ml-7 space-y-3">
+                      <label className="flex cursor-pointer items-center gap-2 text-sm">
+                        <Checkbox
+                          checked={isElective}
+                          onCheckedChange={(checked) => {
+                            form.setValue(`offerings.${index}.isElective`, checked === true, { shouldDirty: true, shouldValidate: true });
+                            if (checked !== true) {
+                              form.setValue(`offerings.${index}.studentIds`, [], { shouldDirty: true });
+                            }
+                          }}
+                        />
+                        <span>Make elective for {cls.name}</span>
+                      </label>
+
+                      {isElective && (
+                        <div className="space-y-2">
+                          <p className="text-xs font-medium">Select the students from {cls.name} taking this elective</p>
+                          <div className="max-h-44 space-y-2 overflow-y-auto rounded-md border p-3">
+                            {cls.students.length ? cls.students.map((student) => (
+                              <label key={student.id} className="flex cursor-pointer items-center gap-3 text-sm">
+                                <Checkbox
+                                  checked={studentIds.includes(student.id)}
+                                  onCheckedChange={(checked) => {
+                                    const nextIds = checked === true
+                                      ? [...studentIds, student.id]
+                                      : studentIds.filter((id) => id !== student.id);
+                                    form.setValue(`offerings.${index}.studentIds`, nextIds, { shouldDirty: true, shouldValidate: true });
+                                  }}
+                                />
+                                <span>{student.name}</span>
+                              </label>
+                            )) : (
+                              <p className="text-sm text-muted-foreground">No students are currently assigned to this class.</p>
+                            )}
+                          </div>
+                          {form.formState.errors.offerings?.[index]?.studentIds?.message && (
+                            <p className="text-sm font-medium text-destructive">{form.formState.errors.offerings[index]?.studentIds?.message}</p>
                           )}
                         </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                      )}
+                    </div>
                   )}
-                />
-            )}
-          </>
-        ) : (
-          <FormField
-            control={form.control}
-            name="classIds"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Assigned Classes</FormLabel>
-                <FormControl>
-                  <div className="grid max-h-40 grid-cols-2 gap-2 overflow-y-auto rounded-md border p-4">
-                    {classes.map((cls) => (
-                      <label key={cls.id} className="flex cursor-pointer items-center gap-3 text-sm">
-                        <Checkbox
-                          checked={field.value.includes(cls.id)}
-                          onCheckedChange={(checked) => field.onChange(checked === true
-                            ? [...field.value, cls.id]
-                            : field.value.filter((id) => id !== cls.id))}
-                        />
-                        <span>{cls.name}</span>
-                      </label>
-                    ))}
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+                </div>
+              );
+            })}
+          </div>
+          {form.formState.errors.offerings?.message && (
+            <p className="text-sm font-medium text-destructive">{form.formState.errors.offerings.message}</p>
+          )}
+        </FormItem>
 
         <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving…</> : "Save Subject"}

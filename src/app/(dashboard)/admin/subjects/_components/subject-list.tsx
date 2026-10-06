@@ -152,14 +152,19 @@ export function SubjectList({ initialSubjects, classes }: SubjectListProps) {
                   id: editingSubject.id,
                   name: editingSubject.name,
                   code: editingSubject.code || "",
-                  isElective: Boolean(editingSubject.classSubjects?.some((cs) => cs.isElective)),
-                  classIds: editingSubject.classSubjects
-                    ?.filter((cs) => !cs.isElective)
-                    .map((cs) => cs.classId) || [],
-                  electiveClassId: editingSubject.classSubjects?.find((cs) => cs.isElective)?.classId || "",
-                  studentIds: editingSubject.classSubjects
-                    ?.find((cs) => cs.isElective)
-                    ?.studentEnrollments.map((enrollment) => enrollment.studentId) || [],
+                  offerings: classes.map((cls) => {
+                    const offering = editingSubject.classSubjects?.find(
+                      (classSubject) => classSubject.classId === cls.id,
+                    );
+                    return {
+                      classId: cls.id,
+                      enabled: Boolean(offering),
+                      isElective: offering?.isElective ?? false,
+                      studentIds: offering?.studentEnrollments.map(
+                        (enrollment) => enrollment.studentId,
+                      ) ?? [],
+                    };
+                  }),
                 }}
                 onSuccess={() => setEditingSubject(null)}
               />
