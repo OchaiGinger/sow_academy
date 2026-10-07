@@ -12,8 +12,13 @@ import { toast } from "sonner";
 /*  Config: change these in one place                                         */
 /* -------------------------------------------------------------------------- */
 
-const SCHOOL_NAME = "SOWA Academy";
 const SESSION_LABEL = "2025/2026";
+
+type SchoolBranding = {
+  name: string;
+  email: string;
+  logoUrl: string | null;
+};
 
 type StudentForCard = {
   id: string;
@@ -87,18 +92,26 @@ function Code39({ value }: { value: string }) {
 
 const CARD_CSS = `
 .idc-card{position:relative;width:85.6mm;height:54mm;box-sizing:border-box;border-radius:3mm;overflow:hidden;background:#fff;border:0.25mm solid #0f3d3e;display:flex;flex-direction:column;font-family:"Inter",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:#10231f;break-inside:avoid;page-break-inside:avoid;text-align:left}
+.idc-mark{position:absolute;left:0;right:0;top:11mm;bottom:0;display:flex;align-items:center;justify-content:center;z-index:0;pointer-events:none}
+.idc-mark img{width:34mm;height:34mm;object-fit:contain;opacity:.09;filter:grayscale(1)}
+.idc-mark i{font-style:normal;font-weight:900;font-size:60pt;color:#0f3d3e;opacity:.06;line-height:1}
+.idc-head,.idc-body,.idc-foot{position:relative;z-index:1}
 .idc-head{height:11mm;flex:none;background:#0f3d3e;color:#fff;display:flex;align-items:center;gap:2.5mm;padding:0 4mm}
-.idc-crest{width:7mm;height:7mm;flex:none;border-radius:50%;background:#e0a526;color:#0f3d3e;font-weight:800;font-size:9pt;display:flex;align-items:center;justify-content:center}
+.idc-crest{width:7mm;height:7mm;flex:none;border-radius:50%;background:#e0a526;color:#0f3d3e;font-weight:800;font-size:9pt;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.idc-crest img{width:100%;height:100%;object-fit:contain;background:#fff;display:block}
 .idc-school{font-weight:800;font-size:9.5pt;letter-spacing:.02em;line-height:1.1}
 .idc-sub{font-size:5.5pt;opacity:.8;letter-spacing:.06em;margin-top:.3mm}
 .idc-body{flex:1;min-height:0;display:flex;gap:4mm;padding:3mm 4mm 0}
 .idc-photo{width:20mm;height:24mm;flex:none;border-radius:1.5mm;border:0.4mm solid #e0a526;background:#e8efed;color:#0f3d3e;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16pt;overflow:hidden}
 .idc-photo img{width:100%;height:100%;object-fit:cover;display:block}
-.idc-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:1.8mm}
-.idc-name{font-weight:800;font-size:10.5pt;line-height:1.15;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-transform:capitalize}
+.idc-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:1.4mm}
+.idc-row{display:flex;gap:3mm}
+.idc-field{min-width:0}
+.idc-name{font-weight:800;font-size:10pt;line-height:1.15;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-transform:capitalize}
 .idc-field{display:flex;flex-direction:column;line-height:1.2}
 .idc-field small{font-size:5.5pt;color:#5b716c}
 .idc-field b{font-size:8pt;font-weight:650}
+.idc-field.idc-email b{font-size:6.5pt;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .idc-foot{height:12mm;flex:none;padding:1.5mm 4mm 2mm;display:flex;align-items:flex-end;gap:3mm}
 .idc-barcode{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:.4mm}
 .idc-barcode svg{width:100%;height:6mm;display:block}
@@ -123,14 +136,37 @@ function initials(name: string) {
   return ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase();
 }
 
-function IdCard({ student }: { student: StudentForCard }) {
+function IdCard({
+  student,
+  school,
+  logo,
+}: {
+  student: StudentForCard;
+  school: SchoolBranding;
+  logo?: string;
+}) {
   return (
     <div className="idc-card">
+      <div className="idc-mark" aria-hidden>
+        {logo ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={logo} alt="" />
+        ) : (
+          <i>{school.name.charAt(0)}</i>
+        )}
+      </div>
       <div className="idc-head">
-        <div className="idc-crest">{SCHOOL_NAME.charAt(0)}</div>
+        <div className="idc-crest">
+          {logo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logo} alt="" />
+          ) : (
+            school.name.charAt(0)
+          )}
+        </div>
         <div>
-          <div className="idc-school">{SCHOOL_NAME}</div>
-          <div className="idc-sub">Student identity card</div>
+          <div className="idc-school">{school.name}</div>
+          <div className="idc-sub">{school.email || "Student identity card"}</div>
         </div>
       </div>
 
@@ -145,13 +181,19 @@ function IdCard({ student }: { student: StudentForCard }) {
         </div>
         <div className="idc-info">
           <div className="idc-name">{student.user.name.toLowerCase()}</div>
-          <div className="idc-field">
-            <small>Class</small>
-            <b>{student.class?.name ?? "Not assigned"}</b>
+          <div className="idc-row">
+            <div className="idc-field">
+              <small>Class</small>
+              <b>{student.class?.name ?? "Not assigned"}</b>
+            </div>
+            <div className="idc-field">
+              <small>Admission no.</small>
+              <b>{student.admissionNo}</b>
+            </div>
           </div>
-          <div className="idc-field">
-            <small>Admission no.</small>
-            <b>{student.admissionNo}</b>
+          <div className="idc-field idc-email">
+            <small>Email</small>
+            <b>{student.user.email}</b>
           </div>
         </div>
       </div>
@@ -171,13 +213,21 @@ function IdCard({ student }: { student: StudentForCard }) {
 /*  Screen                                                                    */
 /* -------------------------------------------------------------------------- */
 
-export function IdCardsClient({ students }: { students: StudentForCard[] }) {
+export function IdCardsClient({
+  students,
+  school,
+}: {
+  students: StudentForCard[];
+  school: SchoolBranding;
+}) {
   const [query, setQuery] = useState("");
   const [classFilter, setClassFilter] = useState("all");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [perPage, setPerPage] = useState<PerPage>(8);
   const [printIds, setPrintIds] = useState<string[]>([]);
   const printRef = useRef<HTMLDivElement>(null);
+
+  const logo = school.logoUrl ?? undefined;
 
   const classNames = useMemo(
     () =>
@@ -369,7 +419,7 @@ export function IdCardsClient({ students }: { students: StudentForCard[] }) {
                   className="flex cursor-pointer justify-center overflow-x-auto"
                   onClick={() => toggle(s.id)}
                 >
-                  <IdCard student={s} />
+                  <IdCard student={s} school={school} logo={logo} />
                 </div>
               </div>
             );
@@ -421,7 +471,7 @@ export function IdCardsClient({ students }: { students: StudentForCard[] }) {
           {printPages.map((page, i) => (
             <div key={i} className="idc-sheet" data-per={perPage}>
               {page.map((s) => (
-                <IdCard key={s.id} student={s} />
+                <IdCard key={s.id} student={s} school={school} logo={logo} />
               ))}
             </div>
           ))}
