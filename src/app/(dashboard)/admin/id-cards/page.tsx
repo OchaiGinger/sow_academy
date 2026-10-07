@@ -2,13 +2,18 @@ import { db } from "@/lib/prisma";
 import { IdCardsClient } from "./_components/id-cards-client";
 
 export default async function AdminIdCardsPage() {
-  const students = await db.student.findMany({
-    include: {
-      user: { select: { name: true, email: true, phone: true } },
-      class: { select: { name: true, level: true, arm: true } },
-    },
-    orderBy: { admissionNo: "asc" },
-  });
+  const [students, school] = await Promise.all([
+    db.student.findMany({
+      include: {
+        user: { select: { name: true, email: true, phone: true } },
+        class: { select: { name: true, level: true, arm: true } },
+      },
+      orderBy: { admissionNo: "asc" },
+    }),
+    db.school.findFirst({
+      select: { name: true, email: true, logoUrl: true },
+    }),
+  ]);
 
   return (
     <div className="p-6 space-y-6">
@@ -26,7 +31,14 @@ export default async function AdminIdCardsPage() {
         </div>
       </div>
 
-      <IdCardsClient students={students} />
+      <IdCardsClient
+        students={students}
+        school={{
+          name: school?.name ?? "SOWA Academy",
+          email: school?.email ?? "",
+          logoUrl: school?.logoUrl ?? null,
+        }}
+      />
     </div>
   );
 }

@@ -6,7 +6,7 @@ import { db } from "@/lib/prisma";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 
 // FIX: Added STUDENT here
-const ALLOWED_ROLES = ["PRINCIPAL", "TEACHER", "ADMIN", "STUDENT"] as const;
+const ALLOWED_ROLES = ["PRINCIPAL", "TEACHER", "ADMIN", "STUDENT", "SUPER_ADMIN"] as const;
 type AllowedRole = (typeof ALLOWED_ROLES)[number];
 
 export default async function DashboardLayout({

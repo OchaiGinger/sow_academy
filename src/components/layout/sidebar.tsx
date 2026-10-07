@@ -26,6 +26,7 @@ import {
   ChevronRight,
   X,
   CreditCard,
+  School,
   type LucideIcon,
 } from "lucide-react";
 // ↑ removed unused Button import
@@ -103,6 +104,12 @@ const navItems: NavItem[] = [
     href: "/admin/id-cards",
     icon: CreditCard,
     roles: ["ADMIN"],
+  },
+  {
+    label: "Schools",
+    href: "/super-admin",
+    icon: School,
+    roles: ["SUPER_ADMIN"],
   },
   {
     label: "Results",

@@ -29,8 +29,8 @@ export const auth = betterAuth({
         type: "string",
         required: false,
         defaultValue: "STUDENT",
-        input: false, // NEVER true — blocks clients from self-assigning ADMIN
-        returned: true, // include in session so session.user.role works
+        input: false,
+        returned: true,
       },
     },
   },

@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 
 // 1. Move configuration outside the function for performance
 const ROLE_HOME: Record<string, string> = {
+  SUPER_ADMIN: "/super-admin",
   ADMIN: "/admin",
   PRINCIPAL: "/teacher",
   TEACHER: "/teacher",
@@ -11,6 +12,7 @@ const ROLE_HOME: Record<string, string> = {
 };
 
 const ROLE_PATHS: Record<string, string[]> = {
+  SUPER_ADMIN: ["/super-admin", "/admin", "/setup"],
   ADMIN: ["/admin", "/teacher", "/principal", "/student"],
   PRINCIPAL: ["/teacher", "/principal"],
   TEACHER: ["/teacher"],
@@ -23,7 +25,6 @@ export default async function middleware(request: NextRequest) {
   // 2. PUBLIC ROUTE CHECK
   const publicRoutes = [
     "/login",
-    "/setup",
     "/api/setup",
     "/api/auth",
     "/api/payments/webhook",
@@ -48,6 +49,14 @@ export default async function middleware(request: NextRequest) {
       loginUrl.searchParams.set("callbackUrl", pathname);
     }
     return NextResponse.redirect(loginUrl);
+  }
+
+  // 4b. SETUP PROTECTION — only SUPER_ADMIN can access /setup
+  if (pathname.startsWith("/setup")) {
+    const role = (session.user.role as string).toUpperCase();
+    if (role !== "SUPER_ADMIN") {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
   }
 
   // 5. STANDARDIZE ROLE (Crucial: Enums are often Uppercase)
