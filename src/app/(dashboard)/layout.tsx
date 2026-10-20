@@ -27,6 +27,15 @@ export default async function DashboardLayout({
   const hasTeacherRole = userRole === "TEACHER" || isPrincipal;
 
   let isFormMaster = false;
+  let schoolName: string | undefined;
+
+  if (userRole === "ADMIN") {
+    const school = await db.school.findFirst({
+      where: { adminUserId: session.user.id },
+      select: { name: true },
+    });
+    schoolName = school?.name;
+  }
 
   // Only attempt teacher lookup if they aren't a student
   if (hasTeacherRole && !isStudent) {
@@ -47,6 +56,7 @@ export default async function DashboardLayout({
       isFormMaster={isFormMaster}
       isPrincipal={isPrincipal}
       userId={session.user.id}
+      schoolName={schoolName}
     >
       {children}
     </DashboardShell>

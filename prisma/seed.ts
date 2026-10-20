@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { config } from "dotenv";
-import bcrypt from "bcryptjs";
+import { hashPassword } from "better-auth/crypto";
 
 config();
 
@@ -19,7 +19,7 @@ async function main() {
     return;
   }
 
-  const hashedPassword = await bcrypt.hash(password, 12);
+  const hashedPassword = await hashPassword(password);
 
   const user = await db.user.create({
     data: {

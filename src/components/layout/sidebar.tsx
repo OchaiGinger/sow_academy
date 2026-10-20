@@ -47,6 +47,7 @@ interface SidebarProps {
   onToggle: () => void;
   mobileOpen: boolean;
   onMobileClose: () => void;
+  schoolName?: string;
 }
 
 const navItems: NavItem[] = [
@@ -103,6 +104,12 @@ const navItems: NavItem[] = [
     label: "ID Cards",
     href: "/admin/id-cards",
     icon: CreditCard,
+    roles: ["ADMIN"],
+  },
+  {
+    label: "Validation Sheets",
+    href: "/admin/validation-sheets",
+    icon: FileSpreadsheet,
     roles: ["ADMIN"],
   },
   {
@@ -193,6 +200,7 @@ export function Sidebar({
   onToggle,
   mobileOpen,
   onMobileClose,
+  schoolName,
 }: SidebarProps) {
   const pathname = usePathname();
   const { data: session } = authClient.useSession();
@@ -238,7 +246,7 @@ export function Sidebar({
         >
           {(!collapsed || mobileOpen) && (
             <span className="text-primary font-black tracking-tighter text-lg uppercase italic">
-              Academia
+              {schoolName ?? "Academia"}
             </span>
           )}
 

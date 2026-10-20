@@ -11,6 +11,7 @@ interface DashboardShellProps {
   isFormMaster: boolean;
   isPrincipal: boolean;
   userId: string;
+  schoolName?: string;
   children: React.ReactNode;
 }
 
@@ -19,6 +20,7 @@ export function DashboardShell({
   isFormMaster,
   isPrincipal,
   userId,
+  schoolName,
   children,
 }: DashboardShellProps) {
   const [collapsed, setCollapsed] = useState(false);
@@ -53,6 +55,7 @@ export function DashboardShell({
         onToggle={toggleCollapsed}
         mobileOpen={mobileOpen}
         onMobileClose={() => setMobileOpen(false)}
+        schoolName={schoolName}
       />
 
       {/* Mobile Backdrop Overlay */}
