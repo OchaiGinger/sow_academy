@@ -32,6 +32,7 @@ export type AdminStudent = {
   guardianName: string | null;
   guardianPhone: string | null;
   address: string | null;
+  photo: string | null;
   user: {
     name: string;
     email: string;
@@ -286,8 +287,16 @@ export function StudentList({ students, classes }: Props) {
 
                           <TableCell className="px-4 py-4">
                             <div className="flex items-center gap-3 min-w-0">
-                              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                                <User size={14} />
+                              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0 overflow-hidden">
+                                {student.photo ? (
+                                  <img
+                                    src={student.photo}
+                                    alt={student.user.name}
+                                    className="h-full w-full object-cover"
+                                  />
+                                ) : (
+                                  <User size={14} />
+                                )}
                               </div>
                               <div className="min-w-0">
                                 <p className="font-semibold text-sm truncate">
@@ -352,7 +361,7 @@ export function StudentList({ students, classes }: Props) {
                                   guardianName: student.guardianName,
                                   guardianPhone: student.guardianPhone,
                                   address: student.address,
-                                  photo: student.user.image,
+                                  photo: student.photo,
                                 }}
                               />
                               <Button
