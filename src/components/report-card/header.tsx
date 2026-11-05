@@ -80,6 +80,23 @@ export const ReportHeader = ({
           </div>
         </div>
 
+        {/* Student Photo */}
+        <div className="shrink-0 flex-shrink-0">
+          <div className="w-16 h-16 md:w-20 md:h-20 print:w-14 print:h-14 rounded-full border-2 border-primary/20 overflow-hidden bg-muted/30 flex items-center justify-center">
+            {student?.photo ? (
+              <img
+                src={student.photo}
+                alt={`${student.name}'s passport`}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-2xl md:text-3xl print:text-xl font-bold text-primary/50">
+                {student?.name?.charAt(0).toUpperCase() || "?"}
+              </span>
+            )}
+          </div>
+        </div>
+
         {/* Average Badge */}
         <div className="print-badge shrink-0 flex flex-col items-center justify-center w-20 h-20 md:w-24 md:h-24 print:w-14 print:h-14 rounded-xl md:rounded-2xl print:rounded-lg border-2 border-slate-100 bg-slate-50 shadow-sm gap-0">
           <Award size={10} className="text-slate-400 mb-0.5 print:mb-0" />

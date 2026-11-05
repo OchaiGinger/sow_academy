@@ -6,7 +6,10 @@ import { GraduationCap, Users, BookOpen } from "lucide-react";
 export default async function StudentsAdminPage() {
   const [students, classes] = await Promise.all([
     db.student.findMany({
-      include: { user: true, class: true },
+      include: { 
+        user: { select: { name: true, email: true, phone: true, image: true } }, 
+        class: true 
+      },
       orderBy: { user: { name: "asc" } },
     }) as Promise<AdminStudent[]>,
     db.class.findMany({ orderBy: { name: "asc" } }),

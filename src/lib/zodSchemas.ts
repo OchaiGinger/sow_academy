@@ -71,6 +71,7 @@ export const studentSchema = z.object({
   guardianName: z.string().min(2, "Guardian name is required"),
   guardianPhone: z.string().min(10, "Valid phone number required"),
   address: z.string().optional(),
+  photo: z.string().url().optional().or(z.literal("")),
 });
 export const updateStudentSchema = studentSchema.omit({ password: true });
 

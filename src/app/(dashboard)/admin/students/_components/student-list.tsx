@@ -36,6 +36,7 @@ export type AdminStudent = {
     name: string;
     email: string;
     phone: string | null;
+    image: string | null;
   };
   class: { name: string; level: string; arm: string } | null;
 };
@@ -351,6 +352,7 @@ export function StudentList({ students, classes }: Props) {
                                   guardianName: student.guardianName,
                                   guardianPhone: student.guardianPhone,
                                   address: student.address,
+                                  photo: student.user.image,
                                 }}
                               />
                               <Button

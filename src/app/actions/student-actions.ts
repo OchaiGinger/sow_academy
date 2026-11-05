@@ -21,6 +21,7 @@ export async function createStudent(rawInput: unknown) {
     guardianName,
     guardianPhone,
     address,
+    photo,
   } = result.data;
 
   try {
@@ -57,6 +58,7 @@ export async function createStudent(rawInput: unknown) {
           guardianName,
           guardianPhone,
           address,
+          photo: photo || null,
         },
       }),
     ]);
@@ -116,6 +118,7 @@ export async function updateStudent(studentId: string, rawInput: unknown) {
     guardianName,
     guardianPhone,
     address,
+    photo,
   } = result.data;
 
   try {
@@ -141,6 +144,7 @@ export async function updateStudent(studentId: string, rawInput: unknown) {
           guardianName,
           guardianPhone,
           address,
+          photo: photo || null,
         },
       }),
     ]);

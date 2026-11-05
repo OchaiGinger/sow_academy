@@ -12,7 +12,7 @@ export async function getStudentReportData(studentId: string) {
   const student = await db.student.findUnique({
     where: { id: studentId },
     include: {
-      user: { select: { name: true } },
+      user: { select: { name: true, image: true } },
       scores: {
         where: { termId: currentTerm.id },
         include: { classSubject: { include: { subject: true } } },

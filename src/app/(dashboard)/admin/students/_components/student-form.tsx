@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { studentSchema, type StudentFormValues } from "@/lib/zodSchemas";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, Upload, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -24,6 +24,7 @@ import {
 import { createStudent, updateStudent } from "@/app/actions/student-actions";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { UploadButton } from "@/components/ui/upload-button";
 
 interface StudentFormProps {
   classes: {
@@ -45,6 +46,7 @@ interface StudentFormProps {
     guardianPhone?: string | null;
     address?: string | null;
     dateOfBirth?: Date | string | null;
+    photo?: string | null;
   };
 }
 
@@ -71,6 +73,7 @@ export function StudentForm({
           dateOfBirth: initialData.dateOfBirth
             ? new Date(initialData.dateOfBirth)
             : new Date(),
+          photo: initialData.photo ?? "",
         }
       : {
           name: "",
@@ -81,6 +84,7 @@ export function StudentForm({
           guardianName: "",
           guardianPhone: "",
           address: "",
+          photo: "",
         },
   });
 
@@ -119,7 +123,7 @@ export function StudentForm({
         )}
 
         {/* Section: Personal Info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <FormField
             control={form.control}
             name="name"
@@ -153,6 +157,26 @@ export function StudentForm({
                     placeholder="john@example.com"
                     {...field}
                     className="bg-muted/30"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="photo"
+            render={({ field }) => (
+              <FormItem className="md:col-span-3">
+                <FormLabel className="text-xs uppercase font-bold text-muted-foreground">
+                  Passport Photo
+                </FormLabel>
+                <FormControl>
+                  <UploadButton
+                    route="studentPassport"
+                    onUploadComplete={(url) => field.onChange(url)}
+                    currentUrl={field.value || initialData?.photo || undefined}
+                    disabled={form.formState.isSubmitting}
                   />
                 </FormControl>
                 <FormMessage />

@@ -71,7 +71,7 @@ export default async function StudentResultCardPage({
   // ── Fetch student ──────────────────────────────────────────────────────────
   const student = await db.student.findUnique({
     where: { userId: session.user.id },
-    include: { class: true, user: true },
+    include: { class: true, user: { select: { name: true, image: true } } },
   });
   if (!student) redirect("/student");
 
@@ -160,6 +160,7 @@ export default async function StudentResultCardPage({
     totalScore,
     rank: rank ?? 0,
     totalInClass: classSize,
+    photo: student.user.image,
 
     subjects: eligibleClassSubjects.map((classSubject) => {
       const score = scores.find((item) => item.classSubjectId === classSubject.id);

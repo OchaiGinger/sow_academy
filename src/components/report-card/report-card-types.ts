@@ -29,6 +29,7 @@ export type ReportStudent = {
   formMasterName?: string | null;
   formMasterId?: string | null;
   nextTermDate?: Date | string | null;
+  photo?: string | null;
 };
 
 export type StampingClass = {
