@@ -25,21 +25,17 @@ export const ourFileRouter = {
       return { userId: session.user.id, role: session.user.role };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      // This code RUNS ON YOUR SERVER after upload
       console.log("Upload complete for userId:", metadata.userId);
       console.log("file object:", JSON.stringify(file, null, 2));
-      console.log("file keys:", Object.keys(file));
-      
-      // Return data to the client - use file.url or file.ufsUrl depending on version
-      const fileUrl = file.url || file.ufsUrl;
+
+      const fileUrl = file.url ?? file.ufsUrl ?? file.appUrl;
       console.log("file url to return:", fileUrl);
-      
+
       if (!fileUrl) {
         console.error("No file URL found in file object:", file);
         throw new Error("No file URL returned from UploadThing");
       }
-      
-      // Return data to the client
+
       return { uploadedBy: metadata.userId, url: fileUrl };
     }),
 } satisfies FileRouter;
