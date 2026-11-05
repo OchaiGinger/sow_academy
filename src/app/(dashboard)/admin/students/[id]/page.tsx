@@ -173,30 +173,36 @@ export default async function AdminStudentDetailPage({ params }: { params: Promi
         <div className="p-6">
           {student.termResults.length > 0 ? (
             <div className="space-y-4">
-              {student.termResults.map((result) => (
-                <div key={result.id} className="border border-slate-200 rounded-xl p-4">
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-                    <div>
-                      <h3 className="font-bold text-slate-900">{result.term.name} Term</h3>
-                      <p className="text-sm text-slate-500">
-                        Average: {result.average?.toFixed(1)}% | Rank: {result.rank || "—"} / {result.totalInClass || "—"}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {result.isApproved && (
-                        <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">
-                          Approved
-                        </Badge>
-                      )}
-                      {result.isStamped && (
-                        <Badge className="bg-amber-100 text-amber-700 border-amber-200">
-                          Stamped
-                        </Badge>
-                      )}
+              {student.termResults.map((result) => {
+                // Calculate total students in class for this term
+                const totalInClass = student.class ? 
+                  student.class.students?.length || 0 : 0;
+                
+                return (
+                  <div key={result.id} className="border border-slate-200 rounded-xl p-4">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+                      <div>
+                        <h3 className="font-bold text-slate-900">{result.term.name} Term</h3>
+                        <p className="text-sm text-slate-500">
+                          Average: {result.average?.toFixed(1)}% | Rank: {result.rank || "—"} / {totalInClass || "—"}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {result.isApproved && (
+                          <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">
+                            Approved
+                          </Badge>
+                        )}
+                        {result.isStamped && (
+                          <Badge className="bg-amber-100 text-amber-700 border-amber-200">
+                            Stamped
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <p className="text-center text-slate-500 py-8">No academic records found.</p>
