@@ -36,11 +36,15 @@ export function UploadButton({ route, onUploadComplete, currentUrl, disabled }: 
   
   const { startUpload, isUploading: utIsUploading } = useUploadThing(route, {
     onClientUploadComplete: (data) => {
+      console.log("onClientUploadComplete data:", data);
       const url = data[0]?.url;
       if (url) {
         setPreviewUrl(url);
         onUploadComplete(url);
         toast.success("Photo uploaded successfully!");
+      } else {
+        console.error("No URL in upload response:", data);
+        toast.error("Upload completed but no URL returned");
       }
       setIsUploading(false);
     },
