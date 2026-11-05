@@ -23,7 +23,7 @@ type SchoolBranding = {
 type StudentForCard = {
   id: string;
   admissionNo: string;
-  photoUrl?: string | null; // optional: shows automatically if your model has it
+  photo: string | null;
   user: { name: string; email: string };
   class: { name: string; level: string; arm: string } | null;
 };
@@ -172,9 +172,9 @@ function IdCard({
 
       <div className="idc-body">
         <div className="idc-photo">
-          {student.photoUrl ? (
+          {student.photo ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={student.photoUrl} alt="" />
+            <img src={student.photo} alt={`${student.user.name} passport`} />
           ) : (
             initials(student.user.name)
           )}
