@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Upload, X, Crop, RotateCcw, Check, Loader2, Image } from "lucide-react";
 import { toast } from "sonner";
 import { useUploadThing } from "@/components/ui/uploadthing";
-import ReactCrop from "react-image-crop";
+import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import {
   Dialog,
@@ -28,7 +28,8 @@ export function UploadButton({ route, onUploadComplete, currentUrl, disabled }: 
   const [previewUrl, setPreviewUrl] = useState<string | null>(currentUrl || null);
   const [showCropModal, setShowCropModal] = useState(false);
   const [cropFile, setCropFile] = useState<File | null>(null);
-  const [crop, setCrop] = useState({ x: 0, y: 0, width: 200, height: 200, unit: "px" as const });
+  const [crop, setCrop] = useState<Crop>();
+  const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
   const [croppedImageUrl, setCroppedImageUrl] = useState<string | null>(null);
   const [isCropping, setIsCropping] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -75,14 +76,24 @@ export function UploadButton({ route, onUploadComplete, currentUrl, disabled }: 
       const objectUrl = URL.createObjectURL(file);
       setCroppedImageUrl(objectUrl);
       
-      // Reset crop to center square
-      setCrop({ x: 0, y: 0, width: 200, height: 200, unit: "px" });
+      setCrop(undefined);
+      setCompletedCrop(null);
     },
     []
   );
 
+  const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { width, height } = e.currentTarget;
+    const c = centerCrop(
+      makeAspectCrop({ unit: "%", width: 80 }, 1, width, height),
+      width,
+      height,
+    );
+    setCrop(c);
+  }, []);
+
   const handleCropComplete = useCallback(async () => {
-    if (!cropFile || !imgRef.current) return;
+    if (!cropFile || !imgRef.current || !completedCrop?.width || !completedCrop?.height) return;
     
     setIsCropping(true);
     
@@ -104,10 +115,10 @@ export function UploadButton({ route, onUploadComplete, currentUrl, disabled }: 
       // Draw cropped image
       ctx.drawImage(
         imgRef.current,
-        crop.x * scaleX,
-        crop.y * scaleY,
-        crop.width * scaleX,
-        crop.height * scaleY,
+        completedCrop.x * scaleX,
+        completedCrop.y * scaleY,
+        completedCrop.width * scaleX,
+        completedCrop.height * scaleY,
         0,
         0,
         size,
@@ -138,7 +149,7 @@ export function UploadButton({ route, onUploadComplete, currentUrl, disabled }: 
       setIsUploading(false);
       setIsCropping(false);
     }
-  }, [cropFile, crop, startUpload, croppedImageUrl]);
+  }, [cropFile, completedCrop, startUpload, croppedImageUrl]);
 
   const handleRemove = useCallback(() => {
     setPreviewUrl(null);
@@ -228,22 +239,22 @@ export function UploadButton({ route, onUploadComplete, currentUrl, disabled }: 
           </DialogHeader>
           
           <div className="p-4">
-            {cropFile && croppedImageUrl && imgRef.current && (
+            {cropFile && croppedImageUrl && (
               <div className="relative max-w-full mx-auto">
                 <ReactCrop
-                  src={croppedImageUrl}
                   crop={crop}
-                  onChange={(c) => setCrop({ ...c, unit: "px" })}
-                  onComplete={(c) => setCrop({ ...c, unit: "px" })}
+                  onChange={(c) => setCrop(c)}
+                  onComplete={(c) => setCompletedCrop(c)}
                   aspect={1}
                   minWidth={100}
                   minHeight={100}
                   ruleOfThirds
-                  imageRef={imgRef}
                 >
                   <img
+                    ref={imgRef}
                     src={croppedImageUrl}
                     alt="Crop preview"
+                    onLoad={onImageLoad}
                     style={{ maxWidth: "100%", height: "auto" }}
                   />
                 </ReactCrop>
