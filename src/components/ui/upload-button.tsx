@@ -2,7 +2,7 @@
 
 import { useCallback, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Upload, X, Crop, RotateCcw, Check, Loader2, Image } from "lucide-react";
+import { Upload, X, Crop, RotateCcw, Check, Loader2, Image, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { useUploadThing } from "@/components/ui/uploadthing";
 import ReactCrop, { type Crop as ReactCropType, type PixelCrop, centerCrop, makeAspectCrop } from "react-image-crop";
@@ -195,31 +195,65 @@ export function UploadButton({ route, onUploadComplete, currentUrl, disabled }: 
       </div>
 
       {/* Upload Button */}
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full md:w-auto"
-        onClick={() => document.getElementById("passport-upload")?.click()}
-        disabled={isLoading || disabled}
-      >
-        {isLoading ? (
-          <>
-            <Loader2 className="animate-spin mr-2 h-4 w-4" />
-            {isCropping ? "Processing..." : "Uploading..."}
-          </>
-        ) : (
-          <>
-            <Upload className="mr-2 h-4 w-4" />
-            {previewUrl ? "Change Photo" : "Upload Photo"}
-          </>
-        )}
-      </Button>
+      <div className="flex flex-col sm:flex-row gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full sm:w-auto"
+          onClick={() => document.getElementById("passport-upload")?.click()}
+          disabled={isLoading || disabled}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="animate-spin mr-2 h-4 w-4" />
+              {isCropping ? "Processing..." : "Uploading..."}
+            </>
+          ) : (
+            <>
+              <Upload className="mr-2 h-4 w-4" />
+              {previewUrl ? "Change Photo" : "Upload Photo"}
+            </>
+          )}
+        </Button>
 
-      {/* Hidden file input */}
+        {/* Camera Button */}
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full sm:w-auto"
+          onClick={() => document.getElementById("passport-camera")?.click()}
+          disabled={isLoading || disabled}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="animate-spin mr-2 h-4 w-4" />
+              {isCropping ? "Processing..." : "Uploading..."}
+            </>
+          ) : (
+            <>
+              <Camera className="mr-2 h-4 w-4" />
+              Take Photo
+            </>
+          )}
+        </Button>
+      </div>
+
+      {/* Hidden file input for file upload */}
       <input
         id="passport-upload"
         type="file"
         accept="image/*"
+        onChange={handleFileSelect}
+        className="hidden"
+        disabled={isLoading || disabled}
+      />
+
+      {/* Hidden file input for camera capture */}
+      <input
+        id="passport-camera"
+        type="file"
+        accept="image/*"
+        capture="environment"
         onChange={handleFileSelect}
         className="hidden"
         disabled={isLoading || disabled}
