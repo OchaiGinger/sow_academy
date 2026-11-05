@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Upload, X, Crop, RotateCcw, Check, Loader2, Image } from "lucide-react";
 import { toast } from "sonner";
 import { useUploadThing } from "@/components/ui/uploadthing";
-import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from "react-image-crop";
+import ReactCrop, { type Crop as ReactCropType, type PixelCrop, centerCrop, makeAspectCrop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import {
   Dialog,
@@ -28,7 +28,7 @@ export function UploadButton({ route, onUploadComplete, currentUrl, disabled }: 
   const [previewUrl, setPreviewUrl] = useState<string | null>(currentUrl || null);
   const [showCropModal, setShowCropModal] = useState(false);
   const [cropFile, setCropFile] = useState<File | null>(null);
-  const [crop, setCrop] = useState<Crop>();
+  const [crop, setCrop] = useState<ReactCropType>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
   const [croppedImageUrl, setCroppedImageUrl] = useState<string | null>(null);
   const [isCropping, setIsCropping] = useState(false);
