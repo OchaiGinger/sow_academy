@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { User, Mail, Phone, Calendar, MapPin, GraduationCap, Shield } from "lucide-react";
-import { format } from "date-fns";
 
 export default async function AdminStudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -111,7 +110,13 @@ export default async function AdminStudentDetailPage({ params }: { params: Promi
                 <div>
                   <dt className="text-xs text-slate-400">Date of Birth</dt>
                   <dd className="font-medium text-slate-900">
-                    {student.dateOfBirth ? format(new Date(student.dateOfBirth), "PPP") : "—"}
+                    {student.dateOfBirth
+                      ? new Date(student.dateOfBirth).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })
+                      : "—"}
                   </dd>
                 </div>
               </div>
@@ -156,7 +161,11 @@ export default async function AdminStudentDetailPage({ params }: { params: Promi
                 <div>
                   <dt className="text-xs text-slate-400">Admitted</dt>
                   <dd className="font-medium text-slate-900">
-                    {format(student.user.createdAt, "PPP")}
+                    {new Date(student.user.createdAt).toLocaleDateString("en-GB", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
                   </dd>
                 </div>
               </div>
