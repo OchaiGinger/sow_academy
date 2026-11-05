@@ -19,7 +19,7 @@ export default async function AdminStudentDetailPage({ params }: { params: Promi
     where: { id },
     include: {
       user: { select: { name: true, email: true, phone: true, image: true, createdAt: true } },
-      class: true,
+      class: { include: { _count: { select: { students: true } } } },
       scores: {
         include: {
           classSubject: { include: { subject: true } },
@@ -174,9 +174,7 @@ export default async function AdminStudentDetailPage({ params }: { params: Promi
           {student.termResults.length > 0 ? (
             <div className="space-y-4">
               {student.termResults.map((result) => {
-                // Calculate total students in class for this term
-                const totalInClass = student.class ? 
-                  student.class.students?.length || 0 : 0;
+                const totalInClass = student.class?._count?.students ?? 0;
                 
                 return (
                   <div key={result.id} className="border border-slate-200 rounded-xl p-4">
