@@ -8,12 +8,18 @@ const f = createUploadthing();
 export const ourFileRouter = {
   // Define a route for student passport photos
   studentPassport: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
-    .middleware(async () => {
+    .middleware(async ({ req }) => {
       // This code runs on your server before upload
+      console.log("Middleware called, req:", req?.url);
       const session = await auth.api.getSession({ headers: await headers() });
       
       // If you throw, the user will not be able to upload
-      if (!session) throw new Error("Unauthorized");
+      if (!session) {
+        console.error("No session found");
+        throw new Error("Unauthorized");
+      }
+      
+      console.log("Session found:", session.user.id, session.user.role);
       
       // Whatever is returned here is accessible in onUploadComplete as `metadata`
       return { userId: session.user.id, role: session.user.role };
