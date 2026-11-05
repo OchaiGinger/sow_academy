@@ -31,6 +31,7 @@ type StudentFormData = {
   guardianPhone?: string | null;
   address?: string | null;
   dateOfBirth?: Date | string | null;
+  photo?: string | null;
 };
 
 export function AddStudentButton({
