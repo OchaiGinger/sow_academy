@@ -137,6 +137,8 @@ export function UploadButton({ route, onUploadComplete, currentUrl, disabled }: 
       // Create file from blob
       const croppedFile = new File([blob], "passport.jpg", { type: "image/jpeg" });
       
+      console.log("Cropped file:", croppedFile.name, croppedFile.size, croppedFile.type);
+      
       // Upload the cropped file
       setIsUploading(true);
       await startUpload([croppedFile]);

@@ -22,12 +22,14 @@ export const ourFileRouter = {
       // This code RUNS ON YOUR SERVER after upload
       console.log("Upload complete for userId:", metadata.userId);
       console.log("file object:", JSON.stringify(file, null, 2));
+      console.log("file keys:", Object.keys(file));
       
       // Return data to the client - use file.url or file.ufsUrl depending on version
       const fileUrl = file.url || file.ufsUrl;
       console.log("file url to return:", fileUrl);
       
       if (!fileUrl) {
+        console.error("No file URL found in file object:", file);
         throw new Error("No file URL returned from UploadThing");
       }
       
