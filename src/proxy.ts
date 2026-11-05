@@ -28,6 +28,7 @@ export default async function middleware(request: NextRequest) {
     "/api/setup",
     "/api/auth",
     "/api/payments/webhook",
+    "/api/uploadthing",
     "/logo.svg",
   ];
 
@@ -85,8 +86,7 @@ export default async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Matches all routes except static files, auth internals, and specific public assets
   matcher: [
-    "/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\..*|api/payments/webhook).*)",
+    "/((?!api/auth|api/uploadthing|_next/static|_next/image|favicon.ico|.*\\..*|api/payments/webhook).*)",
   ],
 };
