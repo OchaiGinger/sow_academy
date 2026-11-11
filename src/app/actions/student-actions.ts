@@ -25,9 +25,48 @@ export async function createStudent(rawInput: unknown) {
   } = result.data;
 
   try {
-    const existing = await db.user.findUnique({ where: { email } });
-    if (existing) return { success: false, error: "Email already exists." };
+    const existing = await db.user.findUnique({ 
+      where: { email },
+      include: { studentProfile: true }
+    });
 
+    // If user exists but has no student profile (orphan), create the student profile
+    if (existing && !existing.studentProfile) {
+      const count = await db.student.count();
+      const year = new Date().getFullYear().toString().slice(-2);
+      const admissionNo = `SOWA/ST/${year}/${(count + 1).toString().padStart(3, "0")}`;
+
+      // Update user role and phone if needed
+      await db.user.update({
+        where: { id: existing.id },
+        data: { role: "STUDENT", phone: phone || existing.phone },
+      });
+
+      // Create student profile for existing user
+      const student = await db.student.create({
+        data: {
+          userId: existing.id,
+          admissionNo,
+          classId,
+          dateOfBirth,
+          gender,
+          guardianName,
+          guardianPhone,
+          address,
+          photo: photo || null,
+        },
+      });
+
+      revalidatePath("/admin/students");
+      return { success: true, admissionNo, message: "Student profile created for existing user." };
+    }
+
+    // If user exists AND has student profile, it's a true duplicate
+    if (existing) {
+      return { success: false, error: "Email already exists." };
+    }
+
+    // Normal flow: create new user and student profile
     const count = await db.student.count();
     const year = new Date().getFullYear().toString().slice(-2);
     const admissionNo = `SOWA/ST/${year}/${(count + 1).toString().padStart(3, "0")}`;
