@@ -19,6 +19,19 @@ const ROLE_PATHS: Record<string, string[]> = {
   STUDENT: ["/student"],
 };
 
+// Simple retry function for database operations
+async function withRetry<T>(fn: () => Promise<T>, retries = 2, delay = 100): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    if (retries > 0) {
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return withRetry(fn, retries - 1, delay * 2);
+    }
+    throw error;
+  }
+}
+
 export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -29,27 +42,28 @@ export default async function middleware(request: NextRequest) {
     "/api/auth",
     "/api/payments/webhook",
     "/api/uploadthing",
+    "/api/health",
     "/logo.svg",
   ];
 
   const isPublic = publicRoutes.some((p) => pathname.startsWith(p));
   if (isPublic) return NextResponse.next();
 
-  // 3. SESSION CHECK - with error handling for DB connection issues
+  // 3. SESSION CHECK - with retry for DB connection issues
   let session = null;
   try {
-    session = await auth.api.getSession({
+    session = await withRetry(() => auth.api.getSession({
       headers: new Headers(request.headers),
-    });
+    }));
   } catch (error) {
-    console.error("Middleware session error:", error);
-    // If DB connection fails, allow request to continue (will fail later if auth needed)
-    // Or redirect to login if it's a protected route
+    console.error("Middleware session error after retries:", error);
+    // If DB connection fails after retries, redirect to login for protected routes
     if (!pathname.startsWith("/api/")) {
       const loginUrl = new URL("/login", request.url);
       loginUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(loginUrl);
     }
+    // For API routes, let them handle the error themselves
     return NextResponse.next();
   }
 
@@ -100,6 +114,6 @@ export default async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api/auth|api/uploadthing|_next/static|_next/image|favicon.ico|.*\\..*|api/payments/webhook).*)",
+    "/((?!api/auth|api/uploadthing|_next/static|_next/image|favicon.ico|.*\\..*|api/payments/webhook|api/health).*)",
   ],
 };
