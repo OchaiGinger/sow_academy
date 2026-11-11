@@ -35,10 +35,23 @@ export default async function middleware(request: NextRequest) {
   const isPublic = publicRoutes.some((p) => pathname.startsWith(p));
   if (isPublic) return NextResponse.next();
 
-  // 3. SESSION CHECK
-  const session = await auth.api.getSession({
-    headers: new Headers(request.headers),
-  });
+  // 3. SESSION CHECK - with error handling for DB connection issues
+  let session = null;
+  try {
+    session = await auth.api.getSession({
+      headers: new Headers(request.headers),
+    });
+  } catch (error) {
+    console.error("Middleware session error:", error);
+    // If DB connection fails, allow request to continue (will fail later if auth needed)
+    // Or redirect to login if it's a protected route
+    if (!pathname.startsWith("/api/")) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    return NextResponse.next();
+  }
 
   console.log("Middleware Path:", pathname, "Session Found:", !!session);
   // 4. AUTH REDIRECTS
