@@ -67,9 +67,17 @@ export async function createStudent(rawInput: unknown) {
     }
 
     // Normal flow: create new user and student profile
-    const count = await db.student.count();
     const year = new Date().getFullYear().toString().slice(-2);
-    const admissionNo = `SOWA/ST/${year}/${(count + 1).toString().padStart(3, "0")}`;
+    const last = await db.student.findFirst({
+      orderBy: { admissionNo: "desc" },
+      select: { admissionNo: true },
+    });
+    let seq = Number(last?.admissionNo?.split("/").pop() ?? "0") + 1;
+    let admissionNo = `SOWA/ST/${year}/${seq.toString().padStart(3, "0")}`;
+    while (await db.student.findUnique({ where: { admissionNo } })) {
+      seq++;
+      admissionNo = `SOWA/ST/${year}/${seq.toString().padStart(3, "0")}`;
+    }
 
     const user = await auth.api.signUpEmail({
       headers: await headers(),

@@ -65,6 +65,12 @@ const navItems: NavItem[] = [
     roles: ["ADMIN"],
   },
   {
+    label: "Users",
+    href: "/admin/users",
+    icon: Users,
+    roles: ["ADMIN"],
+  },
+  {
     label: "Classes",
     href: "/admin/classes",
     icon: GraduationCap,
