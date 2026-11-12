@@ -36,8 +36,8 @@ export default async function AdminTeachersPage() {
     }),
   ]);
 
-  // The "Add" form should only offer unallocated subjects; the edit form
-  // separately re-includes the ones already held by that teacher.
+  // The "Add" form should only offer unallocated subjects. The edit form
+  // needs all offerings so it can show the teacher's current assignments too.
   const unallocatedSubjects = availableSubjects.filter(
     (cs) => cs.teacherId === null,
   );
@@ -59,7 +59,7 @@ export default async function AdminTeachersPage() {
       <div className="border border-border-subtle rounded-sm bg-bg-surface overflow-hidden shadow-sm">
         <TeacherList
           initialData={teachers}
-          availableSubjects={unallocatedSubjects}
+          availableSubjects={availableSubjects}
         />
       </div>
     </div>

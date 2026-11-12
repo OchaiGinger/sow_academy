@@ -261,7 +261,12 @@ export function TeacherList({
         {editingTeacher && (
           <div className="mt-6">
             <TeacherForm
-              availableSubjects={availableSubjects}
+              key={editingTeacher.id}
+              availableSubjects={availableSubjects.filter(
+                (subject) =>
+                  subject.teacherId === null ||
+                  subject.teacherId === editingTeacher.id,
+              )}
               initialData={{
                 id: editingTeacher.id,
                 name: editingTeacher.user.name,
