@@ -2,9 +2,8 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { Switch } from "@/components/ui/switch";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   getOrCreateScoreWindows,
   toggleScoreWindow,
@@ -15,6 +14,7 @@ enum ScoreComponent {
   ASSIGNMENT2 = "ASSIGNMENT2",
   TEST1 = "TEST1",
   TEST2 = "TEST2",
+  TEST3 = "TEST3",
   EXAM = "EXAM",
 }
 
@@ -22,15 +22,14 @@ interface Window {
   id: string;
   component: ScoreComponent;
   isOpen: boolean;
-  opensAt: Date | null;
-  closesAt: Date | null;
 }
 
 const LABELS: Record<ScoreComponent, string> = {
   ASSIGNMENT1: "Assignment 1 (max 5)",
   ASSIGNMENT2: "Assignment 2 (max 5)",
-  TEST1: "Test 1 (max 15)",
-  TEST2: "Test 2 (max 15)",
+  TEST1: "Test 1 (max 10)",
+  TEST2: "Test 2 (max 10)",
+  TEST3: "Test 3 (max 10)",
   EXAM: "Exam (max 60)",
 };
 
@@ -46,8 +45,6 @@ export function ScoreWindowManager({ termId }: { termId: string }) {
   }, [termId]);
 
   function handleToggle(component: ScoreComponent, checked: boolean) {
-    const win = windows.find((w) => w.component === component);
-
     // Optimistic UI Update
     setWindows((prev) =>
       prev.map((w) =>
@@ -56,43 +53,15 @@ export function ScoreWindowManager({ termId }: { termId: string }) {
     );
 
     startTransition(async () => {
-      await toggleScoreWindow(
-        termId,
-        component,
-        checked,
-        win?.opensAt?.toISOString().slice(0, 10) ?? null,
-        win?.closesAt?.toISOString().slice(0, 10) ?? null,
-      );
+      await toggleScoreWindow(termId, component, checked);
     });
   }
 
-  function handleDate(
-    component: ScoreComponent,
-    field: "opensAt" | "closesAt",
-    value: string,
-  ) {
-    const dateValue = value ? new Date(value) : null;
-
-    // Update local state immediately
-    setWindows((prev) =>
-      prev.map((w) =>
-        w.component === component ? { ...w, [field]: dateValue } : w,
-      ),
-    );
-
-    const win = windows.find((w) => w.component === component)!;
-    const opensAt =
-      field === "opensAt"
-        ? value || null
-        : (win.opensAt?.toISOString().slice(0, 10) ?? null);
-    const closesAt =
-      field === "closesAt"
-        ? value || null
-        : (win.closesAt?.toISOString().slice(0, 10) ?? null);
-
-    startTransition(() =>
-      toggleScoreWindow(termId, component, win.isOpen, opensAt, closesAt),
-    );
+  function handleToggleAll(checked: boolean) {
+    setWindows((previous) => previous.map((window) => ({ ...window, isOpen: checked })));
+    startTransition(async () => {
+      await Promise.all(windows.map((window) => toggleScoreWindow(termId, window.component, checked)));
+    });
   }
 
   // --- LOADING STATE (Skeleton) ---
@@ -101,7 +70,7 @@ export function ScoreWindowManager({ termId }: { termId: string }) {
       <div className="space-y-4 w-full">
         <div className="h-4 w-32 bg-muted animate-pulse rounded" />
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-          {[1, 2, 3, 4, 5].map((i) => (
+          {[1, 2, 3, 4, 5, 6].map((i) => (
             <div
               key={i}
               className="h-32 rounded-lg border bg-muted/20 animate-pulse"
@@ -115,14 +84,15 @@ export function ScoreWindowManager({ termId }: { termId: string }) {
   return (
     <div className="w-full space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-          Score Entry Windows
-        </p>
-        {isPending && (
-          <span className="text-[10px] text-primary animate-pulse font-medium">
-            Saving changes...
-          </span>
-        )}
+        <div>
+          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Score Entry Windows</p>
+          <p className="mt-1 text-xs text-muted-foreground">Open or close each score component directly. No date scheduling required.</p>
+        </div>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          {isPending && <span className="text-[10px] font-medium text-primary">Saving…</span>}
+          <Button type="button" variant="outline" size="sm" disabled={isPending} onClick={() => handleToggleAll(true)}>Open all</Button>
+          <Button type="button" variant="outline" size="sm" disabled={isPending} onClick={() => handleToggleAll(false)}>Close all</Button>
+        </div>
       </div>
 
       {/* Main Grid Container */}
@@ -130,7 +100,7 @@ export function ScoreWindowManager({ termId }: { termId: string }) {
         {windows.map((w) => (
           <div
             key={w.component}
-            className={`rounded-lg border p-4 space-y-3 transition-all duration-200 ${
+            className={`rounded-xl border p-4 space-y-3 transition-all duration-200 ${
               w.isOpen
                 ? "bg-card border-emerald-500/30 shadow-sm"
                 : "bg-muted/10 border-border opacity-80"
@@ -158,42 +128,9 @@ export function ScoreWindowManager({ termId }: { termId: string }) {
               </div>
             </div>
 
-            {/* Date Controls */}
-            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-border/50">
-              <div className="space-y-1.5">
-                <Label className="text-[11px] font-semibold text-muted-foreground">
-                  Opens On
-                </Label>
-                <Input
-                  type="date"
-                  className="h-9 text-xs focus-visible:ring-emerald-500/50"
-                  value={
-                    w.opensAt
-                      ? new Date(w.opensAt).toISOString().slice(0, 10)
-                      : ""
-                  }
-                  onChange={(e) =>
-                    handleDate(w.component, "opensAt", e.target.value)
-                  }
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-[11px] font-semibold text-muted-foreground">
-                  Closes On
-                </Label>
-                <Input
-                  type="date"
-                  className="h-9 text-xs focus-visible:ring-emerald-500/50"
-                  value={
-                    w.closesAt
-                      ? new Date(w.closesAt).toISOString().slice(0, 10)
-                      : ""
-                  }
-                  onChange={(e) =>
-                    handleDate(w.component, "closesAt", e.target.value)
-                  }
-                />
-              </div>
+            <div className="flex items-center justify-between border-t border-border/50 pt-3">
+              <p className="text-xs text-muted-foreground">Maximum score</p>
+              <p className="text-sm font-black text-foreground">{LABELS[w.component].match(/max (\d+)/)?.[1] ?? "—"} marks</p>
             </div>
           </div>
         ))}

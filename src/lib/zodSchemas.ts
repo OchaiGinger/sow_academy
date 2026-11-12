@@ -83,8 +83,9 @@ export const ScoreInputSchema = z.object({
   termId: z.string(),
   assignment1: z.coerce.number().min(0).max(5),
   assignment2: z.coerce.number().min(0).max(5),
-  test1: z.coerce.number().min(0).max(15),
-  test2: z.coerce.number().min(0).max(15),
+  test1: z.coerce.number().min(0).max(10),
+  test2: z.coerce.number().min(0).max(10),
+  test3: z.coerce.number().min(0).max(10),
   exam: z.coerce.number().min(0).max(60),
 });
 
@@ -92,7 +93,7 @@ export const ScoreInputSchema = z.object({
 
 export const ScoreWindowSchema = z.object({
   termId: z.string(),
-  component: z.enum(["ASSIGNMENT1", "ASSIGNMENT2", "TEST1", "TEST2", "EXAM"]),
+  component: z.enum(["ASSIGNMENT1", "ASSIGNMENT2", "TEST1", "TEST2", "TEST3", "EXAM"]),
   isOpen: z.boolean(),
   opensAt: z.string().optional().nullable(),
   closesAt: z.string().optional().nullable(),

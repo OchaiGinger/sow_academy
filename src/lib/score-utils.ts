@@ -15,6 +15,7 @@ export function calculateTotal(scores: {
   assignment2: number;
   test1: number;
   test2: number;
+  test3: number;
   exam: number;
 }): number {
   return (
@@ -22,6 +23,7 @@ export function calculateTotal(scores: {
     scores.assignment2 +
     scores.test1 +
     scores.test2 +
+    scores.test3 +
     scores.exam
   );
 }

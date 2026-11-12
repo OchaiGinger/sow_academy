@@ -9,6 +9,7 @@ const ALL_COMPONENTS: ScoreComponent[] = [
   "ASSIGNMENT2",
   "TEST1",
   "TEST2",
+  "TEST3",
   "EXAM",
 ];
 

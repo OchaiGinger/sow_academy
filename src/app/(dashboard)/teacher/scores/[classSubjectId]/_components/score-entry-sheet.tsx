@@ -25,8 +25,9 @@ interface Props {
 const FIELDS = [
   { key: "assignment1", label: "Assignment 1", max: 5, window: "ASSIGNMENT1" },
   { key: "assignment2", label: "Assignment 2", max: 5, window: "ASSIGNMENT2" },
-  { key: "test1", label: "Test 1", max: 15, window: "TEST1" },
-  { key: "test2", label: "Test 2", max: 15, window: "TEST2" },
+  { key: "test1", label: "Test 1", max: 10, window: "TEST1" },
+  { key: "test2", label: "Test 2", max: 10, window: "TEST2" },
+  { key: "test3", label: "Test 3", max: 10, window: "TEST3" },
   { key: "exam", label: "Exam", max: 60, window: "EXAM" },
 ] as const;
 
@@ -52,6 +53,7 @@ export function ScoreEntrySheet({
     assignment2: sc?.assignment2 ?? 0,
     test1: sc?.test1 ?? 0,
     test2: sc?.test2 ?? 0,
+    test3: sc?.test3 ?? 0,
     exam: sc?.exam ?? 0,
   });
 

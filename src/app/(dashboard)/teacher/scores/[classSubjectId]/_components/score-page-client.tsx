@@ -58,6 +58,7 @@ export function ScorePageClient({
         assignment2: sc?.assignment2 ?? 0,
         test1: sc?.test1 ?? 0,
         test2: sc?.test2 ?? 0,
+        test3: sc?.test3 ?? 0,
         exam: sc?.exam ?? 0,
         dirty: false,
       };

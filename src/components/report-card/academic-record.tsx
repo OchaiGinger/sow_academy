@@ -16,6 +16,7 @@ export interface ScoredSubject {
   a2: number;
   t1: number;
   t2: number;
+  t3: number;
   caTotal: number;
   exam: number;
   total: number;
@@ -75,14 +76,14 @@ export const AcademicRecord = ({ subjects, allSubjects }: Props) => {
       )}
 
       <div className="bg-white overflow-x-auto print:overflow-visible">
-        <Table className="min-w-[680px] print:min-w-0 print:w-full print:table-fixed">
+        <Table className="min-w-[760px] print:min-w-0 print:w-full print:table-fixed">
           <TableHeader className="bg-slate-50 print:bg-slate-100">
             <TableRow className="border-b border-slate-200">
               {/* Subject column: wider */}
               <TableHead className="font-black uppercase text-[10px] print:text-[6pt] text-slate-900 w-[30%] print:w-[32%] px-2 py-2 print:px-1 print:py-1">
                 Subject
               </TableHead>
-              {["Asgn 1", "Asgn 2", "Test 1", "Test 2"].map((h) => (
+              {["Asgn 1", "Asgn 2", "Test 1", "Test 2", "Test 3"].map((h) => (
                 <TableHead
                   key={h}
                   className="text-center font-bold text-[9px] print:text-[6pt] text-slate-500 px-1 py-2 print:px-0.5 print:py-1"
@@ -128,7 +129,7 @@ export const AcademicRecord = ({ subjects, allSubjects }: Props) => {
                   </TableCell>
 
                   {/* CA components */}
-                  {[scored?.a1, scored?.a2, scored?.t1, scored?.t2].map(
+                  {[scored?.a1, scored?.a2, scored?.t1, scored?.t2, scored?.t3].map(
                     (val, idx) => (
                       <TableCell
                         key={idx}

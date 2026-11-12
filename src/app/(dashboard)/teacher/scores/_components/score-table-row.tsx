@@ -18,7 +18,7 @@ import {
   type ScoreRowWithTotals,
 } from "@/utils/score-utils";
 
-type ScoreField = "assignment1" | "assignment2" | "test1" | "test2" | "exam";
+type ScoreField = "assignment1" | "assignment2" | "test1" | "test2" | "test3" | "exam";
 
 interface ScoreTableRowProps {
   row: ScoreRowWithTotals;
@@ -31,9 +31,10 @@ interface ScoreTableRowProps {
 const MOBILE_COLS: { label: string; field: ScoreField; opts: string[] }[] = [
   { label: "Assignment 1 · /5", field: "assignment1", opts: ASSIGNMENT_OPTS },
   { label: "Assignment 2 · /5", field: "assignment2", opts: ASSIGNMENT_OPTS },
-  { label: "Test 1 · /15", field: "test1", opts: TEST_OPTS },
-  { label: "Test 2 · /15", field: "test2", opts: TEST_OPTS },
-  { label: "Exam", field: "exam", opts: EXAM_OPTS },
+  { label: "Test 1 · /10", field: "test1", opts: TEST_OPTS },
+  { label: "Test 2 · /10", field: "test2", opts: TEST_OPTS },
+  { label: "Test 3 · /10", field: "test3", opts: TEST_OPTS },
+  { label: "Exam · /60", field: "exam", opts: EXAM_OPTS },
 ];
 
 export function ScoreTableRow({
@@ -52,7 +53,7 @@ export function ScoreTableRow({
   return (
     <div className={cn("bg-white px-3 py-4 text-black transition-colors sm:px-4", rowState)}>
       {/* Desktop */}
-      <div className="hidden md:grid grid-cols-[2rem_1fr_5rem_5rem_5rem_5rem_5rem_5rem_5rem_4.5rem_3rem] gap-x-1 items-center">
+      <div className="hidden items-center gap-x-1 md:grid md:grid-cols-[2rem_minmax(0,1fr)_repeat(6,5rem)_5rem_5rem_4.5rem_3rem]">
         <span className="text-sm font-bold text-black">{index + 1}</span>
 
         <div className="flex items-center gap-2 min-w-0">
@@ -92,6 +93,11 @@ export function ScoreTableRow({
           value={row.test2}
           options={TEST_OPTS}
           onChange={(v) => onUpdate(row.studentId, "test2", v)}
+        />
+        <ScoreSelect
+          value={row.test3}
+          options={TEST_OPTS}
+          onChange={(v) => onUpdate(row.studentId, "test3", v)}
         />
         <ScoreSelect
           value={row.exam}

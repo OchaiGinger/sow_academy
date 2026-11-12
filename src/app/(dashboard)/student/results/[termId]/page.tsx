@@ -134,8 +134,8 @@ export default async function StudentResultCardPage({
 
   // ── Derived values ─────────────────────────────────────────────────────────
   const computedTotal = scores.reduce(
-    (sum: number, s: { total?: number | null; assignment1: number; assignment2: number; test1: number; test2: number; exam: number }) =>
-      sum + (s.total ?? s.assignment1 + s.assignment2 + s.test1 + s.test2 + s.exam),
+    (sum: number, s: { total?: number | null; assignment1: number; assignment2: number; test1: number; test2: number; test3: number; exam: number }) =>
+      sum + (s.total ?? s.assignment1 + s.assignment2 + s.test1 + s.test2 + s.test3 + s.exam),
     0,
   );
   const computedAvg = eligibleClassSubjects.length > 0
@@ -165,7 +165,7 @@ export default async function StudentResultCardPage({
     subjects: eligibleClassSubjects.map((classSubject) => {
       const score = scores.find((item) => item.classSubjectId === classSubject.id);
       const raw = score
-        ? score.total ?? score.assignment1 + score.assignment2 + score.test1 + score.test2 + score.exam
+        ? score.total ?? score.assignment1 + score.assignment2 + score.test1 + score.test2 + score.test3 + score.exam
         : 0;
       return {
         name: classSubject.subject.name,
@@ -174,7 +174,8 @@ export default async function StudentResultCardPage({
         a2: score?.assignment2 ?? 0,
         t1: score?.test1 ?? 0,
         t2: score?.test2 ?? 0,
-        caTotal: (score?.assignment1 ?? 0) + (score?.assignment2 ?? 0) + (score?.test1 ?? 0) + (score?.test2 ?? 0),
+        t3: score?.test3 ?? 0,
+        caTotal: (score?.assignment1 ?? 0) + (score?.assignment2 ?? 0) + (score?.test1 ?? 0) + (score?.test2 ?? 0) + (score?.test3 ?? 0),
         exam: score?.exam ?? 0,
         total: raw,
         grade: score?.grade ?? resolveGrade(raw).grade,

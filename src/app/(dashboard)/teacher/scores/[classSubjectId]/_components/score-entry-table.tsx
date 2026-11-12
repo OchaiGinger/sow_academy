@@ -19,6 +19,7 @@ type Student = {
     assignment2: number;
     test1: number;
     test2: number;
+    test3: number;
     exam: number;
     total: number | null;
     grade: string | null;
@@ -35,8 +36,9 @@ interface Props {
 const FIELDS = [
   { key: "assignment1", label: "Asmt 1", max: 5, window: "ASSIGNMENT1" },
   { key: "assignment2", label: "Asmt 2", max: 5, window: "ASSIGNMENT2" },
-  { key: "test1", label: "Test 1", max: 15, window: "TEST1" },
-  { key: "test2", label: "Test 2", max: 15, window: "TEST2" },
+  { key: "test1", label: "Test 1", max: 10, window: "TEST1" },
+  { key: "test2", label: "Test 2", max: 10, window: "TEST2" },
+  { key: "test3", label: "Test 3", max: 10, window: "TEST3" },
   { key: "exam", label: "Exam", max: 60, window: "EXAM" },
 ] as const;
 
@@ -59,6 +61,7 @@ export function ScoreEntryTable({
               assignment2: sc?.assignment2 ?? 0,
               test1: sc?.test1 ?? 0,
               test2: sc?.test2 ?? 0,
+              test3: sc?.test3 ?? 0,
               exam: sc?.exam ?? 0,
             },
           ];
@@ -91,6 +94,7 @@ export function ScoreEntryTable({
           assignment2: d.assignment2,
           test1: d.test1,
           test2: d.test2,
+          test3: d.test3,
           exam: d.exam,
         });
         toast.success("Score saved");
@@ -157,7 +161,7 @@ export function ScoreEntryTable({
             {/* Expandable score form */}
             {isOpen && (
               <div className="px-4 py-4 bg-[#071510] border-t border-emerald-900/40 space-y-4">
-                <div className="grid grid-cols-5 gap-3">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
                   {FIELDS.map((f) => {
                     const fieldOpen = openWindows.has(f.window);
                     return (

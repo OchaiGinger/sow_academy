@@ -6,6 +6,7 @@ export interface ScoreRow {
   assignment2: number;
   test1: number;
   test2: number;
+  test3: number;
   exam: number;
   dirty: boolean;
 }
@@ -43,14 +44,14 @@ function makeOptions(max: number, step = 0.5): string[] {
 }
 
 export const ASSIGNMENT_OPTS = makeOptions(5, 0.5); // 0 – 5
-export const TEST_OPTS = makeOptions(15, 0.5); // 0 – 15
+export const TEST_OPTS = makeOptions(10, 0.5); // 0 – 10
 export const EXAM_OPTS = makeOptions(60, 0.5); // 0 – 60
 
 // ─── Derived totals ───────────────────────────────────────────────────────────
 
 export function withTotals(rows: ScoreRow[]): ScoreRowWithTotals[] {
   return rows.map((r) => {
-    const total = r.assignment1 + r.assignment2 + r.test1 + r.test2 + r.exam;
+    const total = r.assignment1 + r.assignment2 + r.test1 + r.test2 + r.test3 + r.exam;
     const { grade, remark } = computeGrade(total);
     return { ...r, total, grade, remark };
   });

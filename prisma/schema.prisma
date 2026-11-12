@@ -102,6 +102,7 @@ enum ScoreComponent {
   ASSIGNMENT2
   TEST1
   TEST2
+  TEST3
   EXAM
 }
 
@@ -264,6 +265,7 @@ model Score {
   assignment2 Float @default(0)
   test1       Float @default(0)
   test2       Float @default(0)
+  test3       Float @default(0)
   exam        Float @default(0)
 
   total    Float?

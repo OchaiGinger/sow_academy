@@ -73,6 +73,7 @@ export async function getStudentsWithScores(classSubjectId: string) {
             assignment2: true,
             test1: true,
             test2: true,
+            test3: true,
             exam: true,
             total: true,
             grade: true,
@@ -98,6 +99,7 @@ export async function upsertScore(input: {
   assignment2: number;
   test1: number;
   test2: number;
+  test3: number;
   exam: number;
 }) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -149,6 +151,7 @@ export async function upsertScore(input: {
     input.assignment2 +
     input.test1 +
     input.test2 +
+    input.test3 +
     input.exam;
 
   const { grade, remark } = computeGrade(total);
@@ -158,6 +161,7 @@ export async function upsertScore(input: {
     assignment2: input.assignment2,
     test1: input.test1,
     test2: input.test2,
+    test3: input.test3,
     exam: input.exam,
     total,
     grade,

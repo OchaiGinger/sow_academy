@@ -179,11 +179,13 @@ export async function getFormMasterClassData(userId: string, requestedClassId?: 
           a2: s.assignment2 ?? 0,
           t1: s.test1 ?? 0,
           t2: s.test2 ?? 0,
+          t3: s.test3 ?? 0,
           caTotal:
             (s.assignment1 ?? 0) +
             (s.assignment2 ?? 0) +
             (s.test1 ?? 0) +
-            (s.test2 ?? 0),
+            (s.test2 ?? 0) +
+            (s.test3 ?? 0),
           exam: s.exam ?? 0,
           total: s.total ?? 0,
           grade: s.grade ?? "-",
@@ -327,6 +329,7 @@ export async function saveStudentReport(
           assignment2: true,
           test1: true,
           test2: true,
+          test3: true,
           exam: true,
         },
       })
@@ -343,7 +346,7 @@ export async function saveStudentReport(
   const compiled = classStudents.map((classStudent) => {
     const eligibleIds = eligibleSubjectIdsByStudent.get(classStudent.id) ?? new Set<string>();
     const studentScores = scores.filter((score) => score.studentId === classStudent.id && eligibleIds.has(score.classSubjectId));
-    const totalScore = studentScores.reduce((sum, score) => sum + (score.total ?? score.assignment1 + score.assignment2 + score.test1 + score.test2 + score.exam), 0);
+    const totalScore = studentScores.reduce((sum, score) => sum + (score.total ?? score.assignment1 + score.assignment2 + score.test1 + score.test2 + score.test3 + score.exam), 0);
     return {
       studentId: classStudent.id,
       totalScore,
