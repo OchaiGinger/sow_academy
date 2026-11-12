@@ -3,7 +3,7 @@ import { db } from "@/lib/prisma";
 
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const school = await db.school.findFirst({ select: { logoUrl: true } });
-  const schoolBadge = school?.logoUrl ? "/app-icon" : "/icons/sowa-app-icon.svg";
+  const schoolBadge = school?.logoUrl ? "/app-icon" : "/logo.svg";
 
   return {
     id: "/",

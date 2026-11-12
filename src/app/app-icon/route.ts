@@ -16,7 +16,7 @@ export async function GET(request: Request) {
   const school = await db.school.findFirst({ select: { logoUrl: true } });
   const logo = school?.logoUrl?.trim();
   if (!logo) {
-    return NextResponse.redirect(new URL("/icons/sowa-app-icon.svg", request.url));
+    return NextResponse.redirect(new URL("/logo.svg", request.url));
   }
 
   // Setup currently saves uploaded logos as data URLs. Serve those same bytes
@@ -25,12 +25,12 @@ export async function GET(request: Request) {
   if (dataUrlMatch) {
     const mimeType = dataUrlMatch[1].toLowerCase();
     if (!ALLOWED_IMAGE_TYPES.has(mimeType)) {
-      return NextResponse.redirect(new URL("/icons/sowa-app-icon.svg", request.url));
+      return NextResponse.redirect(new URL("/logo.svg", request.url));
     }
 
     const bytes = Buffer.from(dataUrlMatch[2], "base64");
     if (bytes.byteLength === 0 || bytes.byteLength > MAX_LOGO_BYTES) {
-      return NextResponse.redirect(new URL("/icons/sowa-app-icon.svg", request.url));
+      return NextResponse.redirect(new URL("/logo.svg", request.url));
     }
 
     return new NextResponse(new Uint8Array(bytes), {
