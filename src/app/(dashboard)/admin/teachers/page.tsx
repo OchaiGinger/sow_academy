@@ -43,9 +43,9 @@ export default async function AdminTeachersPage() {
   );
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
+    <div className="space-y-4 p-3 sm:space-y-6 sm:p-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
           <h1 className="text-3xl font-bold tracking-tight text-text-primary">
             Teachers
           </h1>
@@ -53,7 +53,9 @@ export default async function AdminTeachersPage() {
             Manage school staff accounts and subject allocations.
           </p>
         </div>
-        <AddTeacherButton availableSubjects={unallocatedSubjects} />
+        <div className="w-full shrink-0 sm:w-auto">
+          <AddTeacherButton availableSubjects={unallocatedSubjects} />
+        </div>
       </div>
 
       <div className="border border-border-subtle rounded-sm bg-bg-surface overflow-hidden shadow-sm">

@@ -140,8 +140,8 @@ export function TeacherList({
 
             return (
               <AccordionItem key={teacher.id} value={teacher.id} className="border-0">
-                <div className="flex items-center gap-2 px-3 transition-colors hover:bg-bg-elevated/50 sm:px-4">
-                  <AccordionTrigger className="min-w-0 flex-1 gap-3 py-4 text-left hover:no-underline">
+                <div className="flex flex-col gap-1 px-3 transition-colors hover:bg-bg-elevated/50 sm:flex-row sm:items-center sm:gap-2 sm:px-4">
+                  <AccordionTrigger className="w-full min-w-0 gap-3 py-3 text-left hover:no-underline sm:flex-1 sm:py-4">
                     <div className="flex min-w-0 flex-1 items-center gap-3">
                       <Avatar className="h-12 w-12 shrink-0 rounded-lg border border-border-subtle sm:h-14 sm:w-14">
                         <AvatarImage src={teacher.user.image || ""} alt={`${teacher.user.name} profile photo`} />
@@ -177,33 +177,36 @@ export function TeacherList({
                     </div>
                   </AccordionTrigger>
 
-                  <div className="flex w-28 shrink-0 items-center justify-between">
+                  <div className="flex w-full shrink-0 items-center justify-end gap-1 border-t border-border-subtle/70 py-1 sm:w-28 sm:justify-between sm:border-0 sm:py-0">
                     <Button
                       variant="ghost"
-                      size="icon"
-                      className={`h-8 w-8 ${teacher.user.role === "PRINCIPAL" ? "bg-primary/10 text-primary hover:bg-primary/20" : "text-text-tertiary hover:text-primary"}`}
+                      size="sm"
+                      className={`h-10 min-w-10 gap-2 px-3 sm:h-8 sm:w-8 sm:min-w-0 sm:px-0 ${teacher.user.role === "PRINCIPAL" ? "bg-primary/10 text-primary hover:bg-primary/20" : "text-text-tertiary hover:text-primary"}`}
                       onClick={() => handleTogglePrincipal(teacher.user.id, teacher.user.role)}
                       title={teacher.user.role === "PRINCIPAL" ? "Revoke Principal Role" : "Make Principal"}
                     >
                       {teacher.user.role === "PRINCIPAL" ? <ShieldCheck className="h-4 w-4" /> : <ShieldAlert className="h-4 w-4" />}
+                      <span className="text-xs sm:hidden">{teacher.user.role === "PRINCIPAL" ? "Principal" : "Make principal"}</span>
                     </Button>
                     <Button
                       variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+                      size="sm"
+                      className="h-10 min-w-10 gap-2 px-3 text-primary hover:bg-primary/10 sm:h-8 sm:w-8 sm:min-w-0 sm:px-0"
                       onClick={() => setEditingTeacher(teacher)}
                       title="Edit Teacher"
                     >
                       <Edit className="h-3.5 w-3.5" />
+                      <span className="text-xs sm:hidden">Edit</span>
                     </Button>
                     <Button
                       variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                      size="sm"
+                      className="h-10 min-w-10 gap-2 px-3 text-destructive hover:bg-destructive/10 sm:h-8 sm:w-8 sm:min-w-0 sm:px-0"
                       onClick={() => handleDelete(teacher.id)}
                       title="Delete Teacher"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
+                      <span className="text-xs sm:hidden">Delete</span>
                     </Button>
                   </div>
                 </div>
