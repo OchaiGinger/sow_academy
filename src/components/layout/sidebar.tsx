@@ -233,9 +233,8 @@ export function Sidebar({
       {/* SIDEBAR (Drawer on mobile, Fixed on desktop) */}
       <aside
           className={cn(
-            "fixed inset-0 z-50 box-border flex h-dvh max-h-dvh w-screen max-w-[100vw] flex-col overflow-x-hidden overflow-y-hidden bg-bg-surface border-r border-border-subtle shadow-2xl transition-transform duration-300 ease-in-out md:inset-y-0 md:right-auto md:shadow-none",
-            // Mobile navigation occupies the viewport; desktop remains a fixed rail.
-            "md:w-auto md:max-w-none",
+            "fixed inset-0 z-50 box-border flex h-dvh max-h-dvh w-[min(18rem,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] flex-col overflow-x-hidden overflow-y-hidden bg-bg-surface border-r border-border-subtle shadow-2xl transition-transform duration-300 ease-in-out md:inset-y-0 md:right-auto md:w-auto md:max-w-none md:shadow-none",
+            // Keep the mobile drawer within the viewport; desktop remains a fixed rail.
           mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
           // Desktop collapse state
           collapsed ? "md:w-[60px]" : "md:w-[220px]",

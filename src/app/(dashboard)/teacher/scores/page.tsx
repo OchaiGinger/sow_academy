@@ -25,7 +25,7 @@ export default async function TeacherScoresPage() {
 
   if (!teacher || teacher.classSubjects.length === 0) {
     return (
-      <div className="p-3 sm:p-6">
+      <div className="rounded-xl border-2 border-black bg-white p-3 text-black sm:p-6">
         <div className="rounded-lg border-2 border-black bg-gray-100 px-4 py-3 text-sm font-bold text-black">
           No subjects assigned to you yet. Contact your admin.
         </div>
@@ -34,7 +34,7 @@ export default async function TeacherScoresPage() {
   }
 
   return (
-    <div className="space-y-6 p-3 sm:p-6">
+    <div className="space-y-6 rounded-xl border-2 border-black bg-white p-3 text-black sm:p-6">
       <div>
         <h1 className="text-2xl font-black text-black sm:text-3xl">Enter Scores</h1>
         <p className="mt-1 text-sm font-bold text-black sm:text-base">

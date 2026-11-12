@@ -74,7 +74,7 @@ export function ScorePageClient({
 
   return (
     <>
-      <div className="space-y-4 p-3 sm:p-6">
+      <div className="min-h-full space-y-4 rounded-xl border-2 border-black bg-white p-3 text-black sm:p-6">
         <div>
           <h2 className="text-2xl font-black text-black sm:text-3xl">
             {classSubject.subject.name}
