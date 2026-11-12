@@ -146,6 +146,44 @@ export async function upsertScore(input: {
     throw new Error("Unauthorized");
   }
 
+  const openWindows = await db.scoreWindow.findMany({
+    where: { termId: input.termId, isOpen: true },
+    select: { component: true },
+  });
+  if (session.user.role !== "ADMIN") {
+    const openComponents = new Set(openWindows.map((window) => window.component));
+    const previousScore = await db.score.findUnique({
+      where: {
+        studentId_classSubjectId_termId: {
+          studentId: input.studentId,
+          classSubjectId: input.classSubjectId,
+          termId: input.termId,
+        },
+      },
+      select: {
+        assignment1: true,
+        assignment2: true,
+        test1: true,
+        test2: true,
+        test3: true,
+        exam: true,
+      },
+    });
+    const components = [
+      ["ASSIGNMENT1", "assignment1"],
+      ["ASSIGNMENT2", "assignment2"],
+      ["TEST1", "test1"],
+      ["TEST2", "test2"],
+      ["TEST3", "test3"],
+      ["EXAM", "exam"],
+    ] as const;
+    for (const [component, field] of components) {
+      if (!openComponents.has(component) && input[field] !== (previousScore?.[field] ?? 0)) {
+        throw new Error(`${component.replace(/\d/, " $&")} score entry is closed.`);
+      }
+    }
+  }
+
   const total =
     input.assignment1 +
     input.assignment2 +

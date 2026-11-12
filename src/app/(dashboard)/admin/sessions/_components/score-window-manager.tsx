@@ -4,19 +4,11 @@ import { useEffect, useState, useTransition } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import type { ScoreComponent } from "@prisma/client";
 import {
   getOrCreateScoreWindows,
   toggleScoreWindow,
 } from "@/app/actions/score-window-actions";
-
-enum ScoreComponent {
-  ASSIGNMENT1 = "ASSIGNMENT1",
-  ASSIGNMENT2 = "ASSIGNMENT2",
-  TEST1 = "TEST1",
-  TEST2 = "TEST2",
-  TEST3 = "TEST3",
-  EXAM = "EXAM",
-}
 
 interface Window {
   id: string;
