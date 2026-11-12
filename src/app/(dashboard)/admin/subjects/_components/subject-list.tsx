@@ -82,7 +82,7 @@ export function SubjectList({ initialSubjects, classes, teachers }: SubjectListP
           <p className="text-base font-medium">No subjects found.</p>
         </div>
       ) : (
-        <div className="grid gap-4 xl:grid-cols-2">
+        <div className="grid items-start gap-4 xl:grid-cols-2">
           {initialSubjects.map((subject) => {
             const offerings = subject.classSubjects ?? [];
             const isExpanded = expandedSubjects.has(subject.id);

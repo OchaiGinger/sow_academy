@@ -160,6 +160,8 @@ export async function getFormMasterClassData(userId: string, requestedClassId?: 
       return {
         studentId: student.id,
         name: student.user.name,
+        admissionNo: student.admissionNo,
+        photo: student.photo,
         totalInClass,
 
         isApproved: termResult?.isApproved ?? false,
@@ -240,50 +242,192 @@ export async function saveStudentReport(
     fmRemark: string;
   },
   stats: {
-    average: number;
-    rank: number;
-    totalScore: number;
     termId: string;
+    approve?: boolean;
   },
 ) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return { success: false, error: "Unauthorized" };
 
+  const teacher = await db.teacher.findUnique({
+    where: { userId: session.user.id },
+    select: { id: true },
+  });
+  if (!teacher) return { success: false, error: "Only an assigned form master can edit this report." };
+
+  const student = await db.student.findUnique({
+    where: { id: studentId },
+    select: { id: true, classId: true },
+  });
+  if (!student) return { success: false, error: "Student not found." };
+
+  const assignment = await db.formMaster.findUnique({
+    where: { classId: student.classId },
+    select: { teacherId: true },
+  });
+  if (assignment?.teacherId !== teacher.id) {
+    return { success: false, error: "You are not the form master for this student's class." };
+  }
+
+  const term = await db.term.findUnique({
+    where: { id: stats.termId },
+    select: { id: true },
+  });
+  if (!term) return { success: false, error: "Term not found." };
+
   if (!stats.termId) {
     return { success: false, error: "Missing termId — cannot save report." };
   }
 
-  await db.termResult.upsert({
+  const ratings = [formData.punctuality, formData.neatness, formData.conduct];
+  if (ratings.some((rating) => !/^([1-9]|10)$/.test(rating))) {
+    return { success: false, error: "Behaviour ratings must be between 1 and 10." };
+  }
+  const attendance = formData.attendance.trim();
+  const attendanceMatch = attendance ? attendance.match(/^(\d{1,3})\s*\/\s*(\d{1,3})$/) : null;
+  if (attendance && !attendanceMatch) {
+    return { success: false, error: "Attendance must use days-present/total-days format, e.g. 84/90." };
+  }
+  if (attendanceMatch && Number(attendanceMatch[1]) > Number(attendanceMatch[2])) {
+    return { success: false, error: "Days present cannot exceed total days." };
+  }
+  if (formData.fmRemark.length > 1500) {
+    return { success: false, error: "The form master's remark must be 1,500 characters or fewer." };
+  }
+
+  const existingResult = await db.termResult.findUnique({
     where: { studentId_termId: { studentId, termId: stats.termId } },
-    update: {
-      attendance: formData.attendance,
-      punctuality: formData.punctuality,
-      neatness: formData.neatness,
-      conduct: formData.conduct,
-      fmRemark: formData.fmRemark,
-      isApproved: true,
-      approvedBy: session.user.id,
-      average: stats.average,
-      totalScore: stats.totalScore,
-      rank: stats.rank,
-    },
-    create: {
-      studentId,
-      termId: stats.termId,
-      attendance: formData.attendance,
-      punctuality: formData.punctuality,
-      neatness: formData.neatness,
-      conduct: formData.conduct,
-      fmRemark: formData.fmRemark,
-      isApproved: true,
-      approvedBy: session.user.id,
-      average: stats.average,
-      totalScore: stats.totalScore,
-      rank: stats.rank,
-    },
+    select: { isStamped: true },
   });
+  if (existingResult?.isStamped) {
+    return { success: false, error: "This report is locked because it has already been stamped." };
+  }
+
+  const approve = stats.approve === true;
+  const [classSubjects, classStudents] = await Promise.all([
+    db.classSubject.findMany({
+      where: { classId: student.classId },
+      select: {
+        id: true,
+        isElective: true,
+        studentEnrollments: { select: { studentId: true } },
+      },
+    }),
+    db.student.findMany({ where: { classId: student.classId }, select: { id: true } }),
+  ]);
+  const classSubjectIds = classSubjects.map((subject) => subject.id);
+  const scores = classSubjectIds.length
+    ? await db.score.findMany({
+        where: { termId: stats.termId, classSubjectId: { in: classSubjectIds } },
+        select: {
+          studentId: true,
+          classSubjectId: true,
+          total: true,
+          assignment1: true,
+          assignment2: true,
+          test1: true,
+          test2: true,
+          exam: true,
+        },
+      })
+    : [];
+
+  const eligibleSubjectIdsByStudent = new Map(
+    classStudents.map((classStudent) => [
+      classStudent.id,
+      new Set(classSubjects
+        .filter((subject) => !subject.isElective || subject.studentEnrollments.some((enrollment) => enrollment.studentId === classStudent.id))
+        .map((subject) => subject.id)),
+    ]),
+  );
+  const compiled = classStudents.map((classStudent) => {
+    const eligibleIds = eligibleSubjectIdsByStudent.get(classStudent.id) ?? new Set<string>();
+    const studentScores = scores.filter((score) => score.studentId === classStudent.id && eligibleIds.has(score.classSubjectId));
+    const totalScore = studentScores.reduce((sum, score) => sum + (score.total ?? score.assignment1 + score.assignment2 + score.test1 + score.test2 + score.exam), 0);
+    return {
+      studentId: classStudent.id,
+      totalScore,
+      average: studentScores.length ? totalScore / studentScores.length : 0,
+      scoredCount: studentScores.length,
+      eligibleCount: eligibleIds.size,
+    };
+  });
+  if (approve) {
+    const currentStudent = compiled.find((result) => result.studentId === studentId);
+    if (currentStudent && currentStudent.scoredCount < currentStudent.eligibleCount) {
+      return { success: false, error: "Complete this student's eligible subject scores before approving the report." };
+    }
+  }
+  const orderedResults = [...compiled].sort((a, b) => b.average - a.average);
+  const studentStats = compiled.find((result) => result.studentId === studentId);
+  if (!studentStats) return { success: false, error: "Student is not in your assigned class." };
+  const reportStats = {
+    average: studentStats.average,
+    totalScore: studentStats.totalScore,
+    rank: orderedResults.findIndex((result) => result.studentId === studentId) + 1,
+  };
+
+  const daysPresent = attendanceMatch ? Number(attendanceMatch[1]) : null;
+  const totalDays = attendanceMatch ? Number(attendanceMatch[2]) : null;
+
+  await db.$transaction([
+    db.termResult.upsert({
+      where: { studentId_termId: { studentId, termId: stats.termId } },
+      update: {
+        attendance,
+        punctuality: formData.punctuality,
+        neatness: formData.neatness,
+        conduct: formData.conduct,
+        fmRemark: formData.fmRemark.trim(),
+        isApproved: approve,
+        approvedBy: approve ? session.user.id : null,
+        signatureData: approve ? undefined : null,
+        average: reportStats.average,
+        totalScore: reportStats.totalScore,
+        rank: reportStats.rank,
+      },
+      create: {
+        studentId,
+        termId: stats.termId,
+        attendance,
+        punctuality: formData.punctuality,
+        neatness: formData.neatness,
+        conduct: formData.conduct,
+        fmRemark: formData.fmRemark.trim(),
+        isApproved: approve,
+        approvedBy: approve ? session.user.id : null,
+        average: reportStats.average,
+        totalScore: reportStats.totalScore,
+        rank: reportStats.rank,
+      },
+    }),
+    db.assessment.upsert({
+      where: { studentId_termId: { studentId, termId: stats.termId } },
+      update: {
+        punctuality: formData.punctuality,
+        neatness: formData.neatness,
+        conduct: formData.conduct,
+        formMasterRemark: formData.fmRemark.trim(),
+        daysPresent,
+        daysAbsent: daysPresent !== null && totalDays !== null ? Math.max(0, totalDays - daysPresent) : null,
+        totalDays,
+      },
+      create: {
+        studentId,
+        termId: stats.termId,
+        punctuality: formData.punctuality,
+        neatness: formData.neatness,
+        conduct: formData.conduct,
+        formMasterRemark: formData.fmRemark.trim(),
+        daysPresent,
+        daysAbsent: daysPresent !== null && totalDays !== null ? Math.max(0, totalDays - daysPresent) : null,
+        totalDays,
+      },
+    }),
+  ]);
 
   revalidatePath("/form-master/results");
+  revalidatePath(`/student/results/${stats.termId}`);
   revalidatePath("/principal/stamping");
   return { success: true };
 }

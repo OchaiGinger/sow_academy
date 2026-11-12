@@ -1,7 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
+import { ArrowLeft } from "lucide-react";
 import { WorkspaceModal } from "@/components/ui/workspace-modal";
 import ResultSheetPreview from "./result-sheet-preview";
 import { ScoreEntrySheet } from "./score-entry-sheet";
@@ -72,19 +74,30 @@ export function ScorePageClient({
     setSheetOpen(true);
   }
 
+  const termLabel = currentTerm.name
+    .replace(/_/g, " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+
   return (
     <>
       <div className="min-h-full space-y-4 rounded-xl border-2 border-black bg-white p-3 text-black sm:p-6">
-        <div>
-          <h2 className="text-2xl font-black text-black sm:text-3xl">
-            {classSubject.subject.name}
-          </h2>
-          <p className="mt-1 text-sm font-bold text-black sm:text-base">
-            {classSubject.class.name} · {" "}
-            {currentTerm.name.charAt(0) +
-              currentTerm.name.slice(1).toLowerCase()}
-            Term · {currentTerm.session.name}
-          </p>
+        <div className="flex flex-col gap-4 rounded-xl border-2 border-black bg-black p-4 text-white sm:flex-row sm:items-center sm:p-5">
+          <Link
+            href="/teacher/scores"
+            className="inline-flex min-h-11 w-fit shrink-0 items-center gap-2 rounded-lg border-2 border-white px-4 py-2 text-sm font-black text-white transition-colors hover:bg-white hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            Back to subjects
+          </Link>
+          <div className="min-w-0 sm:border-l-2 sm:border-white/40 sm:pl-5">
+            <h2 className="break-words text-2xl font-black leading-tight text-white sm:text-3xl">
+              {classSubject.subject.name}
+            </h2>
+            <p className="mt-1 text-sm font-bold text-white sm:text-base">
+              {classSubject.class.name} <span aria-hidden="true">·</span> {termLabel} Term <span aria-hidden="true">·</span> {currentTerm.session.name}
+            </p>
+          </div>
         </div>
 
         {openWindows.size === 0 && (

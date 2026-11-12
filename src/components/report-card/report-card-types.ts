@@ -14,6 +14,7 @@ export type ReportSchool = {
 export type ReportStudent = {
   studentId: string;
   name: string;
+  admissionNo?: string;
   totalInClass: number;
   isApproved: boolean;
   isStamped: boolean;

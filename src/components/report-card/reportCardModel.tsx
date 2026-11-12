@@ -7,6 +7,8 @@ import {
   DialogContent,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Printer } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -58,15 +60,20 @@ export function ReportCardModal({
     fmRemark: "",
   });
 
+  const normalizeRating = (value: string | null | undefined) => {
+    const score = Number(value);
+    return Number.isInteger(score) && score >= 1 && score <= 10 ? String(score) : "5";
+  };
+
   useEffect(() => {
     if (student && isOpen) {
       setIsApproved(!!student.isApproved);
       setIsStamped(!!student.isStamped);
       setFormData({
-        punctuality: student.punctuality || "5",
-        neatness: student.neatness || "5",
-        conduct: student.conduct || "5",
-        attendance: student.attendance || "",
+        punctuality: normalizeRating(student.punctuality),
+        neatness: normalizeRating(student.neatness),
+        conduct: normalizeRating(student.conduct),
+        attendance: /^\d{1,3}\s*\/\s*\d{1,3}$/.test(student.attendance || "") ? student.attendance || "" : "",
         fmRemark: student.fmRemark || "",
       });
     }
@@ -80,9 +87,9 @@ export function ReportCardModal({
   );
   const hasMissingSubjects = missingSubjects.length > 0;
 
-  const handleAction = async () => {
+  const handleAction = async (approve = false) => {
     if (!student) return;
-    if (hasMissingSubjects) {
+    if (approve && hasMissingSubjects) {
       toast.error("Complete scores before signing.");
       return;
     }
@@ -96,19 +103,19 @@ export function ReportCardModal({
           router.refresh();
         }
       } else {
-        const stats = {
-          average: student.average,
-          totalScore: student.totalScore,
-          rank: student.rank,
-          termId,
-        };
+        const stats = { termId, approve };
         const res = await saveStudentReport(student.studentId, formData, stats);
         if (res.success) {
-          setIsApproved(true);
-          onApproved?.(student.studentId, "approved");
+          setIsApproved(approve);
+          if (approve) onApproved?.(student.studentId, "approved");
+          toast.success(approve ? "Report approved and signed." : "Behaviour and remark saved.");
           router.refresh();
+        } else {
+          toast.error(res.error || "Unable to save the report.");
         }
       }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to save this report.");
     } finally {
       setLoading(false);
     }
@@ -193,7 +200,66 @@ export function ReportCardModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl w-[95vw] h-[90vh] p-0 border-none bg-white overflow-y-auto">
+      <DialogContent className="flex h-[92dvh] w-[calc(100vw-1rem)] max-w-5xl flex-col gap-0 overflow-y-auto border-2 border-black bg-white p-0 sm:w-[95vw]">
+        {!isPrincipal && (
+          <section className="no-print mx-4 mt-4 rounded-xl border-2 border-black bg-white p-4 text-black sm:mx-8 sm:p-5">
+            <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h3 className="text-base font-black text-black">Form master assessment</h3>
+                <p className="text-sm font-medium text-gray-700">Edit behaviour ratings and your comment before approving the report.</p>
+              </div>
+              {isStamped && <span className="w-fit rounded-full border-2 border-black px-3 py-1 text-xs font-black">Locked after principal stamp</span>}
+              {isApproved && !isStamped && <span className="w-fit rounded-full border-2 border-black px-3 py-1 text-xs font-black">Editing will require re-approval</span>}
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              {([
+                ["punctuality", "Punctuality"],
+                ["neatness", "Neatness"],
+                ["conduct", "Conduct"],
+              ] as const).map(([field, label]) => (
+                <label key={field} className="space-y-1.5 text-sm font-bold text-black">
+                  <span>{label} (1–10)</span>
+                  <select
+                    value={formData[field]}
+                    onChange={(event) => setFormData((previous) => ({ ...previous, [field]: event.target.value }))}
+                    disabled={loading || isStamped}
+                    className="h-11 w-full rounded-md border-2 border-black bg-white px-3 font-bold text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black disabled:bg-gray-100"
+                  >
+                    {Array.from({ length: 10 }, (_, index) => String(index + 1)).map((score) => (
+                      <option key={score} value={score}>{score} / 10</option>
+                    ))}
+                  </select>
+                </label>
+              ))}
+              <label className="space-y-1.5 text-sm font-bold text-black">
+                <span>Attendance (days present / total days)</span>
+                <Input
+                  value={formData.attendance}
+                  onChange={(event) => setFormData((previous) => ({ ...previous, attendance: event.target.value }))}
+                  placeholder="e.g. 84/90"
+                  maxLength={20}
+                  disabled={loading || isStamped}
+                  className="h-11 border-2 border-black bg-white font-semibold text-black placeholder:text-gray-600 focus-visible:ring-black"
+                />
+              </label>
+              <label className="space-y-1.5 text-sm font-bold text-black sm:col-span-2">
+                <span>Form master&apos;s remark</span>
+                <Textarea
+                  value={formData.fmRemark}
+                  onChange={(event) => setFormData((previous) => ({ ...previous, fmRemark: event.target.value }))}
+                  placeholder="Add a helpful comment about the student's progress…"
+                  maxLength={1500}
+                  rows={4}
+                  disabled={loading || isStamped}
+                  className="min-h-28 resize-y border-2 border-black bg-white font-medium text-black placeholder:text-gray-600 focus-visible:ring-black"
+                />
+                <span className="block text-right text-xs font-semibold text-gray-700">{formData.fmRemark.length}/1500</span>
+              </label>
+            </div>
+          </section>
+        )}
+
         {/* ── Printable area ── */}
         <div
           ref={printRef}
@@ -277,17 +343,24 @@ export function ReportCardModal({
         </div>
 
         {/* ── Screen-only controls ── */}
-        <div className="no-print p-4 bg-slate-50 border-t flex gap-3">
+        <div className="no-print sticky bottom-0 flex flex-wrap gap-3 border-t-2 border-black bg-white p-4">
           <Button variant="outline" onClick={handlePrint}>
             <Printer className="w-4 h-4 mr-2" /> Print 1-Page Report
           </Button>
-          <Button onClick={handleAction} disabled={loading}>
-            {loading
-              ? "Saving…"
-              : isPrincipal
-                ? "Stamp Report"
-                : "Approve & Sign"}
-          </Button>
+          {isPrincipal ? (
+            <Button onClick={() => handleAction()} disabled={loading || !isApproved || isStamped} className="font-bold">
+              {loading ? "Applying stamp…" : isStamped ? "Already stamped" : "Stamp Report"}
+            </Button>
+          ) : (
+            <>
+              <Button variant="outline" onClick={() => handleAction(false)} disabled={loading || isStamped} className="border-2 border-black font-bold text-black">
+                {loading ? "Saving…" : "Save assessment"}
+              </Button>
+              <Button onClick={() => handleAction(true)} disabled={loading || isStamped} className="font-bold">
+                {loading ? "Saving…" : isApproved ? "Update & approve" : "Approve & sign"}
+              </Button>
+            </>
+          )}
           <Button variant="ghost" onClick={onClose}>
             Close
           </Button>

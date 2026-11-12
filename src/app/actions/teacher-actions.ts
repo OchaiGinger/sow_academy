@@ -41,6 +41,24 @@ async function assertSubjectsClaimable(
   return { ok: true as const };
 }
 
+async function nextStaffId(tx: Pick<typeof db, "teacher">) {
+  const year = new Date().getFullYear().toString().slice(-2);
+  const prefix = `SOWA/STF/${year}/`;
+  const existing = await tx.teacher.findMany({
+    where: { staffId: { startsWith: prefix } },
+    select: { staffId: true },
+  });
+  const used = new Set(existing.map(({ staffId }) => staffId));
+
+  let sequence = 1;
+  let staffId = `${prefix}${sequence.toString().padStart(3, "0")}`;
+  while (used.has(staffId)) {
+    sequence++;
+    staffId = `${prefix}${sequence.toString().padStart(3, "0")}`;
+  }
+  return staffId;
+}
+
 export async function createTeacher(rawInput: unknown) {
   const result = teacherSchema.safeParse(rawInput);
   if (!result.success)
@@ -49,28 +67,66 @@ export async function createTeacher(rawInput: unknown) {
   const { name, email, phone, image, password, classSubjectIds } = result.data;
 
   try {
-    // Run existence check + hash in parallel
-    const [existingUser, hashedPassword] = await Promise.all([
-      db.user.findUnique({ where: { email }, select: { id: true } }),
-      hashPassword(password),
-    ]);
+    const existingUser = await db.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        role: true,
+        studentProfile: { select: { id: true } },
+        teacherProfile: { select: { id: true } },
+      },
+    });
 
-    if (existingUser)
+    if (existingUser?.teacherProfile)
       return {
         success: false,
         error: "A user with this email already exists.",
       };
 
+    if (
+      existingUser &&
+      (existingUser.studentProfile ||
+        !["TEACHER", "PRINCIPAL"].includes(existingUser.role))
+    )
+      return {
+        success: false,
+        error: "This email belongs to another account type and cannot be registered as a teacher.",
+      };
+
     const claimable = await assertSubjectsClaimable(classSubjectIds);
     if (!claimable.ok) return { success: false, error: claimable.error };
 
+    const hashedPassword = await hashPassword(password);
     const { firstName, lastName } = splitName(name);
 
     const created = await db.$transaction(
       async (tx) => {
-        const [count, user] = await Promise.all([
-          tx.teacher.count(),
-          tx.user.create({
+        let userId: string;
+
+        if (existingUser) {
+          userId = existingUser.id;
+          await tx.user.update({
+            where: { id: userId },
+            data: { name, phone: phone || null, image: image || null },
+          });
+
+          const credential = await tx.account.updateMany({
+            where: { userId, providerId: "credential" },
+            data: { password: hashedPassword, accountId: email },
+          });
+
+          if (credential.count === 0) {
+            await tx.account.create({
+              data: {
+                userId,
+                providerId: "credential",
+                accountId: email,
+                password: hashedPassword,
+              },
+            });
+          }
+        } else {
+          const user = await tx.user.create({
             data: {
               name,
               email,
@@ -86,21 +142,22 @@ export async function createTeacher(rawInput: unknown) {
               },
             },
             select: { id: true },
-          }),
-        ]);
+          });
+          userId = user.id;
+        }
 
-        const staffId = `SOWA/STF/${new Date().getFullYear().toString().slice(-2)}/${(count + 1).toString().padStart(3, "0")}`;
+        const staffId = await nextStaffId(tx);
 
         await tx.teacher.create({
           data: {
-            userId: user.id,
+            userId,
             staffId,
             classSubjects: { connect: classSubjectIds.map((id) => ({ id })) },
           },
           select: { id: true },
         });
 
-        return { userId: user.id, staffId };
+        return { userId, staffId };
       },
       { timeout: 10000 },
     );
