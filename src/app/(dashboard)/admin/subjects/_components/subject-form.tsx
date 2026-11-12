@@ -27,9 +27,14 @@ interface Props {
     name: string;
     students: { id: string; name: string }[];
   }[];
+  teachers: {
+    id: string;
+    staffId: string | null;
+    user: { name: string };
+  }[];
 }
 
-export function SubjectForm({ initialData, onSuccess, classes }: Props) {
+export function SubjectForm({ initialData, onSuccess, classes, teachers }: Props) {
   const form = useForm<SubjectFormValues>({
     resolver: zodResolver(subjectSchema),
     defaultValues: initialData ?? {
@@ -40,6 +45,7 @@ export function SubjectForm({ initialData, onSuccess, classes }: Props) {
         enabled: false,
         isElective: false,
         studentIds: [],
+        teacherId: null,
       })),
     },
   });
@@ -148,16 +154,39 @@ export function SubjectForm({ initialData, onSuccess, classes }: Props) {
 
                     {isEnabled && (
                       <div className="border-t px-4 py-3">
-                        <label className="flex cursor-pointer items-center gap-2 text-sm">
-                          <Checkbox
-                            checked={isElective}
-                            onCheckedChange={(checked) => {
-                              form.setValue(`offerings.${index}.isElective`, checked === true, { shouldDirty: true, shouldValidate: true });
-                              if (checked !== true) form.setValue(`offerings.${index}.studentIds`, [], { shouldDirty: true });
-                            }}
-                          />
-                          <span className="font-medium">Only selected students take this subject</span>
-                        </label>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <div className="space-y-2">
+                            <label htmlFor={`subject-teacher-${cls.id}`} className="text-xs font-semibold">Assigned teacher</label>
+                            <select
+                              id={`subject-teacher-${cls.id}`}
+                              value={offering?.teacherId ?? ""}
+                              onChange={(event) => form.setValue(`offerings.${index}.teacherId`, event.target.value || null, { shouldDirty: true, shouldValidate: true })}
+                              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                              <option value="">No teacher assigned</option>
+                              {teachers.map((teacher) => (
+                                <option key={teacher.id} value={teacher.id}>
+                                  {teacher.user.name}{teacher.staffId ? ` · ${teacher.staffId}` : ""}
+                                </option>
+                              ))}
+                            </select>
+                            <p className="text-[11px] text-muted-foreground">
+                              {offering?.teacherId
+                                ? `Assigned to ${teachers.find((teacher) => teacher.id === offering.teacherId)?.user.name ?? "selected teacher"}`
+                                : "Select a teacher for this class offering."}
+                            </p>
+                          </div>
+                          <label className="flex cursor-pointer items-center gap-2 self-start pt-6 text-sm">
+                            <Checkbox
+                              checked={isElective}
+                              onCheckedChange={(checked) => {
+                                form.setValue(`offerings.${index}.isElective`, checked === true, { shouldDirty: true, shouldValidate: true });
+                                if (checked !== true) form.setValue(`offerings.${index}.studentIds`, [], { shouldDirty: true });
+                              }}
+                            />
+                            <span className="font-medium">Only selected students take this subject</span>
+                          </label>
+                        </div>
 
                         {isElective && (
                           <div className="mt-3 space-y-2">

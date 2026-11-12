@@ -18,7 +18,13 @@ interface ClassOption {
   students: { id: string; name: string }[];
 }
 
-export function AddSubjectButton({ classes }: { classes: ClassOption[] }) {
+interface TeacherOption {
+  id: string;
+  staffId: string | null;
+  user: { name: string };
+}
+
+export function AddSubjectButton({ classes, teachers }: { classes: ClassOption[]; teachers: TeacherOption[] }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -34,7 +40,7 @@ export function AddSubjectButton({ classes }: { classes: ClassOption[] }) {
           <p className="text-sm text-muted-foreground">Set the subject details, then choose where it is taught.</p>
         </SheetHeader>
         <div className="flex min-h-0 flex-1 flex-col">
-          <SubjectForm classes={classes} onSuccess={() => setOpen(false)} />
+          <SubjectForm classes={classes} teachers={teachers} onSuccess={() => setOpen(false)} />
         </div>
       </SheetContent>
     </Sheet>

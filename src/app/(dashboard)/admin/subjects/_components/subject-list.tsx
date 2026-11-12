@@ -27,7 +27,13 @@ interface SubjectItem {
   code: string | null;
   classSubjects?: {
     classId: string;
+    class: { name: string };
     isElective: boolean;
+    teacher: {
+      id: string;
+      staffId: string | null;
+      user: { name: string };
+    } | null;
     studentEnrollments: { studentId: string }[];
   }[];
 }
@@ -38,12 +44,19 @@ interface ClassOption {
   students: { id: string; name: string }[];
 }
 
+interface TeacherOption {
+  id: string;
+  staffId: string | null;
+  user: { name: string };
+}
+
 interface SubjectListProps {
   initialSubjects: SubjectItem[];
   classes: ClassOption[];
+  teachers: TeacherOption[];
 }
 
-export function SubjectList({ initialSubjects, classes }: SubjectListProps) {
+export function SubjectList({ initialSubjects, classes, teachers }: SubjectListProps) {
   const [editingSubject, setEditingSubject] = useState<SubjectItem | null>(
     null,
   );
@@ -101,6 +114,21 @@ export function SubjectList({ initialSubjects, classes }: SubjectListProps) {
                           Elective
                         </span>
                       )}
+                      {(subject.classSubjects?.length ?? 0) > 0 && (
+                        <div className="mt-2 flex max-h-20 flex-wrap gap-1 overflow-y-auto">
+                          {subject.classSubjects?.map((offering) => (
+                            <span
+                              key={offering.classId}
+                              className="inline-flex max-w-full items-center gap-1 rounded-md border bg-muted/40 px-1.5 py-1 text-[10px]"
+                              title={`${offering.class.name}: ${offering.teacher?.user.name ?? "No teacher assigned"}`}
+                            >
+                              <span className="font-semibold">{offering.class.name}</span>
+                              <span className="text-muted-foreground">·</span>
+                              <span className="truncate text-muted-foreground">{offering.teacher?.user.name ?? "Unassigned"}</span>
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="px-2">
@@ -149,6 +177,7 @@ export function SubjectList({ initialSubjects, classes }: SubjectListProps) {
               <SubjectForm
                 key={editingSubject.id}
                 classes={classes}
+                teachers={teachers}
                 initialData={{
                   id: editingSubject.id,
                   name: editingSubject.name,
@@ -161,6 +190,7 @@ export function SubjectList({ initialSubjects, classes }: SubjectListProps) {
                       classId: cls.id,
                       enabled: Boolean(offering),
                       isElective: offering?.isElective ?? false,
+                      teacherId: offering?.teacher?.id ?? null,
                       studentIds: offering?.studentEnrollments.map(
                         (enrollment) => enrollment.studentId,
                       ) ?? [],

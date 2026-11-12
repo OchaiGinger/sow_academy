@@ -17,6 +17,7 @@ export const subjectSchema = z.object({
     enabled: z.boolean(),
     isElective: z.boolean(),
     studentIds: z.array(z.string()),
+    teacherId: z.string().nullable().optional(),
   })),
 }).superRefine((values, ctx) => {
   const enabledOfferings = values.offerings.filter((offering) => offering.enabled);

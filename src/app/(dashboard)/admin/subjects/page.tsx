@@ -29,11 +29,27 @@ export default async function AdminSubjectsPage() {
       classSubjects: {
         select: {
           classId: true,
+            class: { select: { name: true } },
           isElective: true,
+            teacher: {
+              select: {
+                id: true,
+                staffId: true,
+                user: { select: { name: true } },
+              },
+            },
           studentEnrollments: { select: { studentId: true } },
         },
       },
     },
+  });
+  const teachers = await db.teacher.findMany({
+    select: {
+      id: true,
+      staffId: true,
+      user: { select: { name: true } },
+    },
+    orderBy: { user: { name: "asc" } },
   });
 
   return (
@@ -49,12 +65,12 @@ export default async function AdminSubjectsPage() {
           </p>
         </div>
         <div className="w-full sm:w-auto shrink-0">
-          <AddSubjectButton classes={classes} />
+          <AddSubjectButton classes={classes} teachers={teachers} />
         </div>
       </div>
 
       <div className="w-full animate-in fade-in slide-in-from-bottom-3 duration-500">
-        <SubjectList initialSubjects={subjects} classes={classes} />
+        <SubjectList initialSubjects={subjects} classes={classes} teachers={teachers} />
       </div>
     </div>
   );

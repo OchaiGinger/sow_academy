@@ -18,6 +18,9 @@ export async function upsertSubject(rawInput: unknown) {
   const { id, name, code, offerings } = result.data;
   const selectedOfferings = offerings.filter((offering) => offering.enabled);
   const offeringClassIds = selectedOfferings.map((offering) => offering.classId);
+  const assignedTeacherIds = Array.from(
+    new Set(selectedOfferings.map((offering) => offering.teacherId).filter((teacherId): teacherId is string => Boolean(teacherId))),
+  );
 
   try {
     const saved = await db.$transaction(async (tx) => {
@@ -31,6 +34,16 @@ export async function upsertSubject(rawInput: unknown) {
       });
       if (classes.length !== offeringClassIds.length) {
         throw new Error("One or more selected classes no longer exist.");
+      }
+
+      if (assignedTeacherIds.length > 0) {
+        const teachers = await tx.teacher.findMany({
+          where: { id: { in: assignedTeacherIds } },
+          select: { id: true },
+        });
+        if (teachers.length !== assignedTeacherIds.length) {
+          throw new Error("One or more selected teachers no longer exist.");
+        }
       }
 
       for (const offering of selectedOfferings) {
@@ -69,7 +82,7 @@ export async function upsertSubject(rawInput: unknown) {
       }
 
       for (const classOffering of selectedOfferings) {
-        const { classId, isElective, studentIds } = classOffering;
+        const { classId, isElective, studentIds, teacherId } = classOffering;
         const existingOffering = existingOfferings.find(
           (offering) => offering.classId === classId,
         );
@@ -90,8 +103,8 @@ export async function upsertSubject(rawInput: unknown) {
 
         const offering = await tx.classSubject.upsert({
           where: { classId_subjectId: { classId, subjectId: subject.id } },
-          update: { isElective },
-          create: { classId, subjectId: subject.id, isElective },
+          update: { isElective, teacherId: teacherId || null },
+          create: { classId, subjectId: subject.id, isElective, teacherId: teacherId || null },
           select: { id: true },
         });
 
@@ -139,6 +152,7 @@ export async function upsertSubject(rawInput: unknown) {
 
     revalidatePath("/admin/subjects");
     revalidatePath("/admin/teachers");
+    revalidatePath("/admin/teacher-id-cards");
     revalidatePath("/teacher/scores");
     revalidatePath("/student");
     revalidatePath("/form-master/results");

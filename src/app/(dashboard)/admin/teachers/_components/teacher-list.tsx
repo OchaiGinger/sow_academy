@@ -252,14 +252,17 @@ export function TeacherList({
       open={!!editingTeacher}
       onOpenChange={(open) => !open && setEditingTeacher(null)}
     >
-      <SheetContent className="sm:max-w-md overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle className="uppercase tracking-widest font-bold">
-            Edit Teacher Profile
+      <SheetContent className="flex h-dvh w-full max-w-none flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl">
+        <SheetHeader className="shrink-0 border-b px-5 py-5 pr-14 text-left sm:px-7">
+          <SheetTitle className="text-xl font-bold tracking-tight">
+            Edit teacher profile
           </SheetTitle>
+          <p className="text-sm text-muted-foreground">
+            Update staff information, profile photo, and teaching assignments.
+          </p>
         </SheetHeader>
         {editingTeacher && (
-          <div className="mt-6">
+          <div className="flex min-h-0 flex-1 flex-col">
             <TeacherForm
               key={editingTeacher.id}
               availableSubjects={availableSubjects.filter(
