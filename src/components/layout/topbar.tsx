@@ -8,6 +8,7 @@ import { LogOut, Menu } from "lucide-react";
 import NotificationInbox from "./notification-inbox";
 import { AnnouncementButton } from "./announcement-button";
 import { signOutAction } from "@/lib/actions/auth.actions";
+import { InstallAppButton } from "@/components/pwa/install-app-button";
 
 interface TopbarProps {
   onMobileMenuOpen: () => void;
@@ -66,6 +67,7 @@ export function Topbar({ onMobileMenuOpen, userId, role }: TopbarProps) {
       </div>
 
       <div className="flex shrink-0 items-center gap-2 sm:gap-4">
+        <InstallAppButton />
         <NotificationInbox subscriberId={userId} />
         {role === "ADMIN" && <AnnouncementButton />}
         <div className="hidden items-center gap-2 sm:flex">

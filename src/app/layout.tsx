@@ -1,13 +1,36 @@
-import type {Metadata} from 'next';
+import type {Metadata, Viewport} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "@/lib/uploadthing";
+import { PwaRegister } from "@/components/pwa/pwa-register";
 
 export const metadata: Metadata = {
-  title: 'AcademiaFlow | School Result Management System',
-  description: 'Manage student academic records digitally with efficiency and precision.',
+  title: 'SOWA Academy | School Management',
+  description: 'Manage SOWA Academy student records, academic results, and school operations.',
+  applicationName: "SOWA Academy",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "SOWA Academy",
+    statusBarStyle: "black-translucent",
+  },
+  icons: {
+    icon: [
+      { url: "/icons/sowa-app-icon.svg", type: "image/svg+xml" },
+    ],
+    apple: [
+      { url: "/icons/sowa-app-icon.svg", type: "image/svg+xml" },
+    ],
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#050c0a",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -24,6 +47,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased bg-background text-foreground">
         <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
+        <PwaRegister />
         {children}
         <Toaster />
       </body>

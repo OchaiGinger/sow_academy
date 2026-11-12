@@ -25,12 +25,13 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  LoaderCircle,
   CreditCard,
   School,
   type LucideIcon,
 } from "lucide-react";
 // ↑ removed unused Button import
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface NavItem {
   label: string;
@@ -215,9 +216,11 @@ export function Sidebar({
   schoolName,
 }: SidebarProps) {
   const pathname = usePathname();
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
 
-  // Auto-close on mobile when route changes
+  // Close the mobile drawer and clear the navigation indicator after routing.
   useEffect(() => {
+    setPendingHref(null);
     onMobileClose();
   }, [pathname, onMobileClose]);
 
@@ -276,26 +279,40 @@ export function Sidebar({
           {filteredItems.map((item) => {
             const isActive =
               pathname === item.href || pathname.startsWith(item.href + "/");
+            const isPending = pendingHref === item.href;
             const isExpanded = !collapsed || mobileOpen;
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                aria-current={isActive ? "page" : undefined}
+                aria-busy={isPending}
+                onClick={() => {
+                  if (isActive) return;
+                  setPendingHref(item.href);
+                }}
                 className={cn(
-                  "flex items-center rounded-sm text-sm transition-all group relative",
+                  "flex min-h-11 items-center rounded-md border-l-4 text-sm transition-all group relative",
                   isExpanded ? "gap-3 px-3 py-2.5" : "justify-center p-2.5",
                   isActive
-                    ? "bg-accent-muted text-primary font-bold"
-                    : "text-text-secondary hover:bg-bg-elevated",
+                    ? "border-primary bg-accent-muted text-primary font-bold shadow-sm"
+                    : isPending
+                      ? "border-primary/60 bg-bg-elevated text-primary font-bold"
+                      : "border-transparent text-text-secondary hover:border-border-strong hover:bg-bg-elevated hover:text-text-primary",
                 )}
               >
-                <item.icon
-                  className={cn(
-                    "w-4 h-4",
-                    isActive ? "text-primary" : "text-text-tertiary",
-                  )}
-                />
+                {isPending ? (
+                  <LoaderCircle className="h-4 w-4 shrink-0 animate-spin text-primary" aria-hidden="true" />
+                ) : (
+                  <item.icon
+                    className={cn(
+                      "h-4 w-4 shrink-0",
+                      isActive ? "text-primary" : "text-text-tertiary",
+                    )}
+                  />
+                )}
                 {isExpanded && <span className="truncate">{item.label}</span>}
+                {isExpanded && isPending && <span className="sr-only">Loading</span>}
               </Link>
             );
           })}
