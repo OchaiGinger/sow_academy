@@ -1,6 +1,10 @@
 import type { MetadataRoute } from "next";
+import { db } from "@/lib/prisma";
 
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const school = await db.school.findFirst({ select: { logoUrl: true } });
+  const schoolBadge = school?.logoUrl || "/icons/sowa-app-icon.svg";
+
   return {
     id: "/",
     name: "SOWA Academy",
@@ -15,12 +19,11 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#050c0a",
     categories: ["education", "productivity"],
     icons: [
-      { src: "/icons/sowa-app-icon.svg", sizes: "any 192x192 512x512", type: "image/svg+xml", purpose: "any" },
-      { src: "/icons/sowa-app-maskable.svg", sizes: "any", type: "image/svg+xml", purpose: "maskable" },
+      { src: schoolBadge, purpose: "any" },
     ],
     shortcuts: [
-      { name: "Enter Scores", short_name: "Scores", url: "/teacher/scores", icons: [{ src: "/icons/sowa-app-icon.svg", sizes: "any", type: "image/svg+xml" }] },
-      { name: "Form Master Results", short_name: "Class Results", url: "/form-master/results", icons: [{ src: "/icons/sowa-app-icon.svg", sizes: "any", type: "image/svg+xml" }] },
+      { name: "Enter Scores", short_name: "Scores", url: "/teacher/scores", icons: [{ src: schoolBadge }] },
+      { name: "Form Master Results", short_name: "Class Results", url: "/form-master/results", icons: [{ src: schoolBadge }] },
     ],
   };
 }

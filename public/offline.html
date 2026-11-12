@@ -9,7 +9,7 @@
       * { box-sizing: border-box; }
       body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; background: #050c0a; color: #fff; font: 16px/1.5 system-ui, sans-serif; }
       main { width: min(100%, 480px); padding: 32px; border: 1px solid #174b37; border-radius: 20px; background: #0b1711; text-align: center; }
-      .mark { width: 64px; height: 64px; margin: 0 auto 20px; }
+      .mark { width: 64px; height: 64px; margin: 0 auto 20px; display: grid; place-items: center; border: 2px solid #00d98b; border-radius: 18px; color: #00d98b; font-size: 1.15rem; font-weight: 900; letter-spacing: .04em; }
       h1 { margin: 0 0 8px; font-size: 1.6rem; }
       p { margin: 0; color: #c1d0c8; }
       button { margin-top: 24px; padding: 12px 18px; border: 0; border-radius: 10px; background: #00d98b; color: #03120b; font: inherit; font-weight: 800; cursor: pointer; }
@@ -17,7 +17,7 @@
   </head>
   <body>
     <main>
-      <img class="mark" src="/icons/sowa-app-icon.svg" alt="SOWA Academy" />
+      <div class="mark" aria-label="SOWA Academy">SOWA</div>
       <h1>You’re offline</h1>
       <p>Reconnect to the internet to access student records and school results. Your account data is never stored for offline use.</p>
       <button onclick="location.reload()">Try again</button>
