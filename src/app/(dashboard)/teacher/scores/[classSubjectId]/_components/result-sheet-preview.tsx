@@ -15,16 +15,12 @@ type FullPageData = NonNullable<
 >;
 
 interface ResultSheetPreviewProps {
-  classSubject: FullPageData["classSubject"];
-  currentTerm: FullPageData["currentTerm"];
   rows: ScoreRowWithTotals[];
   students: FullPageData["students"];
   onStudentClick?: (student: FullPageData["students"][number]) => void;
 }
 
 export default function ResultSheetPreview({
-  classSubject,
-  currentTerm,
   rows = [],
   students,
   onStudentClick,
@@ -40,11 +36,6 @@ export default function ResultSheetPreview({
   const avg = safeRows.length
     ? safeRows.reduce((s, r) => s + (r.total || 0), 0) / safeRows.length
     : 0;
-
-  const termName = currentTerm?.name ?? "";
-  const termLabel = termName
-    ? termName.charAt(0) + termName.slice(1).toLowerCase()
-    : "N/A";
 
   return (
     <div className="space-y-4">

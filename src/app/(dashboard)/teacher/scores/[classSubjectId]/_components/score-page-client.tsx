@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { WorkspaceModal } from "@/components/ui/workspace-modal";
 import ResultSheetPreview from "./result-sheet-preview";
 import { ScoreEntrySheet } from "./score-entry-sheet";
 import { withTotals } from "@/utils/score-utils";
@@ -94,30 +94,32 @@ export function ScorePageClient({
         )}
 
         <ResultSheetPreview
-          classSubject={classSubject}
-          currentTerm={currentTerm}
           rows={rows}
           onStudentClick={openSheet}
           students={students}
         />
       </div>
 
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent
-          side="right"
-          className="h-dvh w-screen max-w-none overflow-hidden border-l-2 border-black bg-white p-0 text-black sm:max-w-lg"
-        >
-          {selectedStudent && (
-            <ScoreEntrySheet
-              student={selectedStudent}
-              classSubjectId={classSubjectId}
-              termId={termId}
-              openWindows={openWindows}
-              onSaved={handleSaved}
-            />
-          )}
-        </SheetContent>
-      </Sheet>
+      <WorkspaceModal
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        title="Enter student scores"
+        description={selectedStudent
+          ? `${selectedStudent.user.name} · ${classSubject.class.name} · ${classSubject.subject.name}`
+          : "Enter assessment scores for this student."}
+        size="medium"
+        tone="light"
+      >
+        {selectedStudent && (
+          <ScoreEntrySheet
+            student={selectedStudent}
+            classSubjectId={classSubjectId}
+            termId={termId}
+            openWindows={openWindows}
+            onSaved={handleSaved}
+          />
+        )}
+      </WorkspaceModal>
     </>
   );
 }

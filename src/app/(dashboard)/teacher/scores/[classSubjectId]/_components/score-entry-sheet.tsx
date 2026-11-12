@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Lock, Save, AlertCircle, CheckCircle2 } from "lucide-react";
 import { upsertScore } from "@/app/actions/score-actions";
 import { cn } from "@/lib/utils";
@@ -128,13 +127,7 @@ export function ScoreEntrySheet({
   return (
     <div className="flex h-full flex-col bg-white text-black">
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div className="border-b-2 border-black bg-white px-4 pb-4 pt-5 sm:px-6">
-        <SheetHeader>
-          <SheetTitle className="text-lg font-black tracking-tight text-black sm:text-xl">
-            Score Entry
-          </SheetTitle>
-        </SheetHeader>
-
+      <div className="border-b-2 border-black bg-white px-4 py-4 sm:px-6">
         {/* Student card */}
         <div className="mt-4 flex items-center gap-3 rounded-xl border-2 border-black bg-white px-4 py-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-black bg-gray-100">

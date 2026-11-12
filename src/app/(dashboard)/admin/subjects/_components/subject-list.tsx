@@ -5,12 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Edit, Trash2, BookOpen, GraduationCap, UserRound } from "lucide-react";
 import { deleteSubject } from "@/app/actions/subject-actions";
 import { toast } from "sonner";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { WorkspaceModal } from "@/components/ui/workspace-modal";
 import { SubjectForm } from "./subject-form";
 
 interface SubjectItem {
@@ -147,46 +142,41 @@ export function SubjectList({ initialSubjects, classes, teachers }: SubjectListP
         </div>
       )}
 
-      <Sheet
+      <WorkspaceModal
         open={!!editingSubject}
         onOpenChange={(open) => !open && setEditingSubject(null)}
+        title="Edit subject"
+        description="Update subject details and class or elective assignments."
+        size="wide"
       >
-        <SheetContent className="flex h-dvh w-full max-w-none flex-col gap-0 overflow-hidden p-0 sm:max-w-3xl">
-          <SheetHeader className="shrink-0 border-b px-5 py-5 pr-14 text-left sm:px-7">
-            <SheetTitle className="text-xl font-bold tracking-tight">Edit subject</SheetTitle>
-            <p className="text-sm text-muted-foreground">Update subject details and class or elective assignments.</p>
-          </SheetHeader>
-          <div className="flex min-h-0 flex-1 flex-col">
-            {editingSubject && (
-              <SubjectForm
-                key={editingSubject.id}
-                classes={classes}
-                teachers={teachers}
-                initialData={{
-                  id: editingSubject.id,
-                  name: editingSubject.name,
-                  code: editingSubject.code || "",
-                  offerings: classes.map((cls) => {
-                    const offering = editingSubject.classSubjects?.find(
-                      (classSubject) => classSubject.classId === cls.id,
-                    );
-                    return {
-                      classId: cls.id,
-                      enabled: Boolean(offering),
-                      isElective: offering?.isElective ?? false,
-                      teacherId: offering?.teacher?.id ?? null,
-                      studentIds: offering?.studentEnrollments.map(
-                        (enrollment) => enrollment.studentId,
-                      ) ?? [],
-                    };
-                  }),
-                }}
-                onSuccess={() => setEditingSubject(null)}
-              />
-            )}
-          </div>
-        </SheetContent>
-      </Sheet>
+        {editingSubject && (
+          <SubjectForm
+            key={editingSubject.id}
+            classes={classes}
+            teachers={teachers}
+            initialData={{
+              id: editingSubject.id,
+              name: editingSubject.name,
+              code: editingSubject.code || "",
+              offerings: classes.map((cls) => {
+                const offering = editingSubject.classSubjects?.find(
+                  (classSubject) => classSubject.classId === cls.id,
+                );
+                return {
+                  classId: cls.id,
+                  enabled: Boolean(offering),
+                  isElective: offering?.isElective ?? false,
+                  teacherId: offering?.teacher?.id ?? null,
+                  studentIds: offering?.studentEnrollments.map(
+                    (enrollment) => enrollment.studentId,
+                  ) ?? [],
+                };
+              }),
+            }}
+            onSuccess={() => setEditingSubject(null)}
+          />
+        )}
+      </WorkspaceModal>
     </>
   );
 }

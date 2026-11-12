@@ -17,12 +17,7 @@ import {
   togglePrincipalRole,
 } from "@/app/actions/teacher-actions";
 import { useState } from "react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { WorkspaceModal } from "@/components/ui/workspace-modal";
 import { TeacherForm } from "./teacher-form";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
@@ -248,43 +243,34 @@ export function TeacherList({
       </Accordion>
 
     {/* EDIT SHEET */}
-    <Sheet
+    <WorkspaceModal
       open={!!editingTeacher}
       onOpenChange={(open) => !open && setEditingTeacher(null)}
+      title="Edit teacher profile"
+      description="Update staff information, profile photo, and teaching assignments."
+      size="wide"
     >
-      <SheetContent className="flex h-dvh w-full max-w-none flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl">
-        <SheetHeader className="shrink-0 border-b px-5 py-5 pr-14 text-left sm:px-7">
-          <SheetTitle className="text-xl font-bold tracking-tight">
-            Edit teacher profile
-          </SheetTitle>
-          <p className="text-sm text-muted-foreground">
-            Update staff information, profile photo, and teaching assignments.
-          </p>
-        </SheetHeader>
-        {editingTeacher && (
-          <div className="flex min-h-0 flex-1 flex-col">
-            <TeacherForm
-              key={editingTeacher.id}
-              availableSubjects={availableSubjects.filter(
-                (subject) =>
-                  subject.teacherId === null ||
-                  subject.teacherId === editingTeacher.id,
-              )}
-              initialData={{
-                id: editingTeacher.id,
-                name: editingTeacher.user.name,
-                email: editingTeacher.user.email,
-                phone: editingTeacher.user.phone,
-                image: editingTeacher.user.image,
-                staffId: editingTeacher.staffId,
-                classSubjectIds: editingTeacher.classSubjects.map((cs) => cs.id),
-              }}
-              onSuccess={() => setEditingTeacher(null)}
-            />
-          </div>
-        )}
-      </SheetContent>
-    </Sheet>
+      {editingTeacher && (
+        <TeacherForm
+          key={editingTeacher.id}
+          availableSubjects={availableSubjects.filter(
+            (subject) =>
+              subject.teacherId === null ||
+              subject.teacherId === editingTeacher.id,
+          )}
+          initialData={{
+            id: editingTeacher.id,
+            name: editingTeacher.user.name,
+            email: editingTeacher.user.email,
+            phone: editingTeacher.user.phone,
+            image: editingTeacher.user.image,
+            staffId: editingTeacher.staffId,
+            classSubjectIds: editingTeacher.classSubjects.map((cs) => cs.id),
+          }}
+          onSuccess={() => setEditingTeacher(null)}
+        />
+      )}
+    </WorkspaceModal>
     </>
   );
 }
