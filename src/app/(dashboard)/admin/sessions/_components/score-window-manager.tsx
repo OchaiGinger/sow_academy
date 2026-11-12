@@ -4,7 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { ScoreComponent } from "@prisma/client";
+import type { ScoreComponent as PrismaScoreComponent } from "@prisma/client";
 import {
   getOrCreateScoreWindows,
   toggleScoreWindow,
@@ -15,6 +15,8 @@ interface Window {
   component: ScoreComponent;
   isOpen: boolean;
 }
+
+type ScoreComponent = "ASSIGNMENT1" | "ASSIGNMENT2" | "TEST1" | "TEST2" | "TEST3" | "EXAM";
 
 const LABELS: Record<ScoreComponent, string> = {
   ASSIGNMENT1: "Assignment 1 (max 5)",
@@ -45,14 +47,14 @@ export function ScoreWindowManager({ termId }: { termId: string }) {
     );
 
     startTransition(async () => {
-      await toggleScoreWindow(termId, component, checked);
+      await toggleScoreWindow(termId, component as PrismaScoreComponent, checked);
     });
   }
 
   function handleToggleAll(checked: boolean) {
     setWindows((previous) => previous.map((window) => ({ ...window, isOpen: checked })));
     startTransition(async () => {
-      await Promise.all(windows.map((window) => toggleScoreWindow(termId, window.component, checked)));
+      await Promise.all(windows.map((window) => toggleScoreWindow(termId, window.component as PrismaScoreComponent, checked)));
     });
   }
 

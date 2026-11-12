@@ -220,7 +220,6 @@ export function Sidebar({
 
   // Close the mobile drawer and clear the navigation indicator after routing.
   useEffect(() => {
-    setPendingHref(null);
     onMobileClose();
   }, [pathname, onMobileClose]);
 
@@ -279,7 +278,7 @@ export function Sidebar({
           {filteredItems.map((item) => {
             const isActive =
               pathname === item.href || pathname.startsWith(item.href + "/");
-            const isPending = pendingHref === item.href;
+            const isPending = pendingHref === item.href && !isActive;
             const isExpanded = !collapsed || mobileOpen;
             return (
               <Link
