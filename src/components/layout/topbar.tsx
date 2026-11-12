@@ -4,9 +4,10 @@ import { usePathname, useParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
 import { getCurrentTermInfo } from "@/app/actions/term-action";
-import { Menu } from "lucide-react";
+import { LogOut, Menu } from "lucide-react";
 import NotificationInbox from "./notification-inbox";
 import { AnnouncementButton } from "./announcement-button";
+import { signOutAction } from "@/lib/actions/auth.actions";
 
 interface TopbarProps {
   onMobileMenuOpen: () => void;
@@ -49,24 +50,25 @@ export function Topbar({ onMobileMenuOpen, userId, role }: TopbarProps) {
   };
 
   return (
-    <header className="h-16 border-b border-emerald-900/20 flex items-center justify-between px-8 bg-[#050c0a] sticky top-0 z-40">
+    <header className="sticky top-0 z-40 flex h-16 items-center justify-between gap-2 border-b border-emerald-900/20 bg-[#050c0a] px-3 sm:px-8">
       <div className="flex items-center gap-3">
         {/* Mobile menu button */}
         <button
           onClick={onMobileMenuOpen}
+          aria-label="Open navigation menu"
           className="md:hidden p-1.5 rounded-md text-text-secondary hover:bg-bg-elevated"
         >
           <Menu size={20} />
         </button>
-        <h1 className="text-xl font-bold tracking-tight text-white">
+        <h1 className="truncate text-base font-bold tracking-tight text-white sm:text-xl">
           {getPageTitle()}
         </h1>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex shrink-0 items-center gap-2 sm:gap-4">
         <NotificationInbox subscriberId={userId} />
         {role === "ADMIN" && <AnnouncementButton />}
-        <div className="flex items-center gap-2">
+        <div className="hidden items-center gap-2 sm:flex">
           <Badge
             variant="outline"
             className="border-emerald-900/40 text-emerald-500 text-[10px] py-0 px-2 uppercase tracking-wider bg-emerald-950/20"
@@ -78,6 +80,16 @@ export function Topbar({ onMobileMenuOpen, userId, role }: TopbarProps) {
             title="Current Session Active"
           />
         </div>
+        <button
+          type="button"
+          onClick={() => signOutAction()}
+          className="inline-flex h-9 items-center gap-2 rounded-md px-2 text-sm font-medium text-text-secondary transition-colors hover:bg-bg-elevated hover:text-danger sm:px-3"
+          aria-label="Sign out"
+          title="Sign out"
+        >
+          <LogOut className="h-4 w-4" />
+          <span className="hidden sm:inline">Sign out</span>
+        </button>
       </div>
     </header>
   );

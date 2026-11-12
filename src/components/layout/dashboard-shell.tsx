@@ -1,7 +1,7 @@
 "use client";
 
 import { Toaster } from "sonner";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
 import { cn } from "@/lib/utils";
@@ -26,6 +26,7 @@ export function DashboardShell({
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const closeMobileMenu = useCallback(() => setMobileOpen(false), []);
 
   // Sync with localStorage on mount
   useEffect(() => {
@@ -36,6 +37,22 @@ export function DashboardShell({
     });
   }, []);
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [mobileOpen]);
+
   const toggleCollapsed = () => {
     setCollapsed((c) => {
       const newState = !c;
@@ -45,7 +62,7 @@ export function DashboardShell({
   };
 
   return (
-    <div className="flex min-h-screen bg-bg-base">
+    <div className="flex min-h-screen overflow-x-clip bg-bg-base">
       {/* Sidebar Component */}
       <Sidebar
         role={role}
@@ -54,14 +71,15 @@ export function DashboardShell({
         collapsed={collapsed}
         onToggle={toggleCollapsed}
         mobileOpen={mobileOpen}
-        onMobileClose={() => setMobileOpen(false)}
+        onMobileClose={closeMobileMenu}
         schoolName={schoolName}
       />
 
       {/* Mobile Backdrop Overlay */}
       {mobileOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black/60 z-40 backdrop-blur-sm animate-in fade-in duration-300"
+          className="md:hidden fixed inset-0 z-40 bg-black/65 backdrop-blur-[2px] animate-in fade-in duration-200"
+          aria-hidden="true"
           onClick={() => setMobileOpen(false)}
         />
       )}
@@ -69,7 +87,7 @@ export function DashboardShell({
       {/* Main Content Area */}
       <main
         className={cn(
-          "flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out",
+          "flex-1 flex min-h-screen min-w-0 flex-col overflow-x-clip transition-all duration-300 ease-in-out",
           "md:ml-[var(--sidebar-width)]"
         )}
         style={

@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { authClient } from "@/lib/auth-client";
+import { signOutAction } from "@/lib/actions/auth.actions";
 import {
   LayoutDashboard,
   Users,
@@ -209,35 +209,27 @@ export function Sidebar({
   schoolName,
 }: SidebarProps) {
   const pathname = usePathname();
-  const { data: session } = authClient.useSession();
 
   // Auto-close on mobile when route changes
   useEffect(() => {
     onMobileClose();
-  }, [pathname]);
+  }, [pathname, onMobileClose]);
 
   const filteredItems = navItems.filter((item) => {
     if (item.roles.includes(role)) return true;
+    if (isPrincipal && item.roles.includes("PRINCIPAL")) return true;
     if (isFormMaster && item.roles.includes("FORM_MASTER")) return true;
     return false;
   });
-
-  const initials =
-    session?.user.name
-      ?.split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2) || "U";
 
   return (
     <>
       {/* SIDEBAR (Drawer on mobile, Fixed on desktop) */}
       <aside
         className={cn(
-          "fixed top-0 left-0 h-screen z-50 flex flex-col bg-bg-surface border-r border-border-subtle transition-all duration-300 ease-in-out",
+          "fixed inset-y-0 left-0 z-50 flex h-dvh max-h-dvh flex-col overflow-hidden bg-bg-surface border-r border-border-subtle shadow-2xl transition-transform duration-300 ease-in-out md:shadow-none",
           // Mobile state
-          "w-[280px] md:w-auto",
+          "w-[min(18rem,92vw)] md:w-auto",
           mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
           // Desktop collapse state
           collapsed ? "md:w-[60px]" : "md:w-[220px]",
@@ -274,7 +266,7 @@ export function Sidebar({
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto p-2 space-y-1">
+        <nav className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-2 space-y-1">
           {filteredItems.map((item) => {
             const isActive =
               pathname === item.href || pathname.startsWith(item.href + "/");
@@ -304,17 +296,9 @@ export function Sidebar({
         </nav>
 
         {/* User Footer */}
-        <div className="p-3 border-t border-border-subtle">
+        <div className="shrink-0 p-3 border-t border-border-subtle">
           <button
-            onClick={() =>
-              authClient.signOut({
-                fetchOptions: {
-                  onSuccess: () => {
-                    window.location.href = "/student";
-                  },
-                },
-              })
-            }
+            onClick={() => signOutAction()}
             className={cn(
               "w-full flex items-center p-2 text-sm text-text-secondary hover:text-danger rounded-sm",
               !collapsed || mobileOpen ? "gap-2" : "justify-center",
