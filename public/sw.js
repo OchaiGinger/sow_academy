@@ -1,5 +1,5 @@
 const CACHE_NAME = "sowa-academy-shell-v1";
-const SHELL_ASSETS = ["/offline.html", "/app-icon"];
+const SHELL_ASSETS = ["/offline.html", "/app-icon", "/logo.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -34,7 +34,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (url.pathname === "/app-icon" || url.pathname.startsWith("/_next/static/")) {
+  if (url.pathname === "/app-icon" || url.pathname === "/logo.svg" || url.pathname.startsWith("/_next/static/")) {
     event.respondWith(
       caches.match(request).then((cached) => cached || fetch(request).then((response) => {
         if (response.ok) {

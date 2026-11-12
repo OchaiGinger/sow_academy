@@ -19,11 +19,14 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     theme_color: "#050c0a",
     categories: ["education", "productivity"],
     icons: [
-      { src: schoolBadge, purpose: "any" },
+      { src: "/logo.svg", sizes: "any", type: "image/svg+xml", purpose: "any maskable" },
+      { src: schoolBadge, sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: schoolBadge, sizes: "512x512", type: "image/png", purpose: "any" },
     ],
     shortcuts: [
       { name: "Enter Scores", short_name: "Scores", url: "/teacher/scores", icons: [{ src: schoolBadge }] },
       { name: "Form Master Results", short_name: "Class Results", url: "/form-master/results", icons: [{ src: schoolBadge }] },
     ],
+    screenshots: [],
   };
 }
