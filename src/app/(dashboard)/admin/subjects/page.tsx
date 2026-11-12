@@ -7,6 +7,7 @@ export default async function AdminSubjectsPage() {
     select: {
       id: true,
       name: true,
+      level: true,
       students: {
         select: { id: true, user: { select: { name: true } } },
         orderBy: { user: { name: "asc" } },
@@ -17,6 +18,7 @@ export default async function AdminSubjectsPage() {
   const classes = classesRaw.map((cls) => ({
     id: cls.id,
     name: cls.name,
+    level: cls.level,
     students: cls.students.map((student) => ({
       id: student.id,
       name: student.user.name,
@@ -29,15 +31,15 @@ export default async function AdminSubjectsPage() {
       classSubjects: {
         select: {
           classId: true,
-            class: { select: { name: true } },
+          class: { select: { name: true, level: true } },
           isElective: true,
-            teacher: {
-              select: {
-                id: true,
-                staffId: true,
-                user: { select: { name: true } },
-              },
+          teacher: {
+            select: {
+              id: true,
+              staffId: true,
+              user: { select: { name: true } },
             },
+          },
           studentEnrollments: { select: { studentId: true } },
         },
       },

@@ -2,9 +2,9 @@ import { StatsCard } from "@/components/shared/stats-card";
 import { db } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { PageHeader } from "@/components/shared/page-header";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default async function TeacherDashboard() {
   const session = await auth.api.getSession({
@@ -14,6 +14,7 @@ export default async function TeacherDashboard() {
   const teacher = await db.teacher.findUnique({
     where: { userId: session?.user.id },
     include: {
+      user: { select: { name: true, image: true } },
       classSubjects: {
         include: {
           class: {
@@ -54,10 +55,22 @@ export default async function TeacherDashboard() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      <PageHeader
-        title={`Welcome back, ${session?.user.name}`}
-        description="Manage your classroom scores and student academic tracking."
-      />
+      <div className="flex items-center gap-4 rounded-xl border border-border-subtle bg-bg-surface p-4 sm:p-5">
+        <Avatar className="h-16 w-16 shrink-0 border-2 border-primary/20 sm:h-20 sm:w-20">
+          <AvatarImage src={teacher?.user.image ?? ""} alt={`${teacher?.user.name ?? session?.user.name ?? "Teacher"} profile photo`} />
+          <AvatarFallback className="bg-primary/10 text-lg font-bold text-primary">
+            {(teacher?.user.name ?? session?.user.name ?? "T").split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+        <div className="min-w-0">
+          <h1 className="truncate text-xl font-bold tracking-tight text-text-primary sm:text-2xl">
+            Welcome back, {teacher?.user.name ?? session?.user.name}
+          </h1>
+          <p className="mt-1 text-sm text-text-secondary">
+            Manage your classroom scores and student academic tracking.
+          </p>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatsCard

@@ -15,6 +15,7 @@ import { SubjectForm } from "./subject-form";
 interface ClassOption {
   id: string;
   name: string;
+  level: string;
   students: { id: string; name: string }[];
 }
 

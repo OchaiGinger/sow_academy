@@ -3,7 +3,6 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { User, Mail, Phone, Calendar, MapPin, GraduationCap, Shield } from "lucide-react";
 
 export default async function AdminStudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -17,7 +16,7 @@ export default async function AdminStudentDetailPage({ params }: { params: Promi
   const student = await db.student.findUnique({
     where: { id },
     include: {
-      user: { select: { name: true, email: true, phone: true, image: true, createdAt: true } },
+      user: { select: { name: true, email: true, phone: true, createdAt: true } },
       class: { include: { _count: { select: { students: true } } } },
       scores: {
         include: {
@@ -45,9 +44,10 @@ export default async function AdminStudentDetailPage({ params }: { params: Promi
           {/* Student Photo */}
           <div className="flex-shrink-0">
             <div className="w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-white/20 overflow-hidden bg-muted/30 flex items-center justify-center">
-              {student.user.image ? (
+              {student.photo ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={student.user.image}
+                  src={student.photo}
                   alt={`${student.user.name}'s passport`}
                   className="w-full h-full object-cover"
                 />

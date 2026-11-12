@@ -148,9 +148,9 @@ export function TeacherList({
                 <div className="flex items-center gap-2 px-3 transition-colors hover:bg-bg-elevated/50 sm:px-4">
                   <AccordionTrigger className="min-w-0 flex-1 gap-3 py-4 text-left hover:no-underline">
                     <div className="flex min-w-0 flex-1 items-center gap-3">
-                      <Avatar className="h-9 w-9 shrink-0 rounded-sm border border-border-subtle">
-                        <AvatarImage src={teacher.user.image || ""} />
-                        <AvatarFallback className="rounded-sm bg-primary/10 text-xs font-bold text-primary">
+                      <Avatar className="h-12 w-12 shrink-0 rounded-lg border border-border-subtle sm:h-14 sm:w-14">
+                        <AvatarImage src={teacher.user.image || ""} alt={`${teacher.user.name} profile photo`} />
+                        <AvatarFallback className="rounded-lg bg-primary/10 text-sm font-bold text-primary">
                           {teacher.user.name.substring(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>

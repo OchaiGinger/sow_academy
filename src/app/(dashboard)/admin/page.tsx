@@ -1,10 +1,12 @@
 import { StatsCard } from "@/components/shared/stats-card";
 import { db } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
+import { UserRound } from "lucide-react";
 
 type RecentStudent = {
   id: string;
   admissionNo: string;
+  photo: string | null;
   user: { name: string; createdAt: Date };
   class: { name: string } | null;
 };
@@ -50,7 +52,7 @@ export default async function AdminDashboard() {
                 <thead className="bg-bg-elevated text-text-secondary text-[10px] uppercase tracking-widest font-bold">
                   <tr>
                     <th className="px-6 py-3">Admission No</th>
-                    <th className="px-6 py-3">Student Name</th>
+                    <th className="px-6 py-3">Student</th>
                     <th className="px-6 py-3">Class</th>
                     <th className="px-6 py-3">Date</th>
                   </tr>
@@ -65,7 +67,17 @@ export default async function AdminDashboard() {
                         {student.admissionNo}
                       </td>
                       <td className="px-6 py-4 font-medium">
-                        {student.user.name}
+                        <div className="flex min-w-0 items-center gap-3">
+                          <div className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full border border-border-subtle bg-primary/10 text-primary">
+                            {student.photo ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={student.photo} alt={`${student.user.name} profile photo`} className="h-full w-full object-cover" />
+                            ) : (
+                              <UserRound className="h-4 w-4" aria-hidden="true" />
+                            )}
+                          </div>
+                          <span className="truncate">{student.user.name}</span>
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-text-secondary">
                         {student.class?.name ?? "—"} {/* ← safe access */}

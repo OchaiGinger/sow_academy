@@ -17,7 +17,7 @@ export default async function StudentDashboard() {
 
   const student = await db.student.findUnique({
     where: { userId: session.user.id },
-    include: { class: true, user: { select: { name: true, email: true, image: true } } },
+    include: { class: true, user: { select: { name: true, email: true } } },
   });
 
   if (!student)
@@ -65,9 +65,10 @@ export default async function StudentDashboard() {
         {/* Student Photo */}
         <div className="flex-shrink-0">
           <div className="w-20 h-20 md:w-24 md:h-24 rounded-full border-2 border-primary/20 overflow-hidden bg-muted/30 flex items-center justify-center">
-            {student.user.image ? (
+            {student.photo ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={student.user.image}
+                src={student.photo}
                 alt={`${session.user.name}'s passport`}
                 className="w-full h-full object-cover"
               />

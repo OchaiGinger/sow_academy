@@ -25,6 +25,7 @@ interface Props {
   classes: {
     id: string;
     name: string;
+    level: string;
     students: { id: string; name: string }[];
   }[];
   teachers: {
@@ -35,9 +36,19 @@ interface Props {
 }
 
 export function SubjectForm({ initialData, onSuccess, classes, teachers }: Props) {
+  const isJuniorSecondary = (className: string, level: string) =>
+    /^(?:JSS|JUNIOR(?:\s+SECONDARY)?)\s*[-_]?\s*[1-3](?:\s*[A-Z])?$/i.test(level.trim()) ||
+    /^(?:JSS|JUNIOR(?:\s+SECONDARY)?)\s*[-_]?\s*[1-3](?:\s*[A-Z])?$/i.test(className.trim());
   const form = useForm<SubjectFormValues>({
     resolver: zodResolver(subjectSchema),
-    defaultValues: initialData ?? {
+    defaultValues: initialData ? {
+      ...initialData,
+      offerings: initialData.offerings.map((offering, index) =>
+        isJuniorSecondary(classes[index]?.name ?? "", classes[index]?.level ?? "")
+          ? { ...offering, isElective: false, studentIds: [] }
+          : offering,
+      ),
+    } : {
       name: "",
       code: "",
       offerings: classes.map((cls) => ({
@@ -52,11 +63,21 @@ export function SubjectForm({ initialData, onSuccess, classes, teachers }: Props
   const offerings = useWatch({ control: form.control, name: "offerings" });
   const [classQuery, setClassQuery] = useState("");
   const enabledCount = offerings?.filter((offering) => offering.enabled).length ?? 0;
-  const electiveCount = offerings?.filter((offering) => offering.enabled && offering.isElective).length ?? 0;
+  const electiveCount = offerings?.filter((offering, index) =>
+    offering.enabled && offering.isElective && !isJuniorSecondary(classes[index]?.name ?? "", classes[index]?.level ?? ""),
+  ).length ?? 0;
 
   async function onSubmit(values: SubjectFormValues) {
     try {
-      const result = await upsertSubject(values);
+      const normalizedValues = {
+        ...values,
+        offerings: values.offerings.map((offering, index) =>
+          isJuniorSecondary(classes[index]?.name ?? "", classes[index]?.level ?? "")
+            ? { ...offering, isElective: false, studentIds: [] }
+            : offering,
+        ),
+      };
+      const result = await upsertSubject(normalizedValues);
       if (result.success) {
         toast.success("Saved successfully");
         onSuccess();
@@ -134,8 +155,9 @@ export function SubjectForm({ initialData, onSuccess, classes, teachers }: Props
               {classes.map((cls, index) => ({ cls, index })).filter(({ cls }) => cls.name.toLowerCase().includes(classQuery.trim().toLowerCase())).map(({ cls, index }) => {
                 const offering = offerings?.[index];
                 const isEnabled = offering?.enabled ?? false;
-                const isElective = offering?.isElective ?? false;
-                const studentIds = offering?.studentIds ?? [];
+                const juniorSecondary = isJuniorSecondary(cls.name, cls.level);
+                const isElective = !juniorSecondary && (offering?.isElective ?? false);
+                const studentIds = juniorSecondary ? [] : offering?.studentIds ?? [];
 
                 return (
                   <article key={cls.id} className={`min-w-0 overflow-hidden rounded-xl border transition-colors ${isEnabled ? "border-primary/40 bg-primary/[0.03]" : "bg-card"}`}>
@@ -176,16 +198,22 @@ export function SubjectForm({ initialData, onSuccess, classes, teachers }: Props
                                 : "Select a teacher for this class offering."}
                             </p>
                           </div>
-                          <label className="flex cursor-pointer items-center gap-2 self-start pt-6 text-sm">
-                            <Checkbox
-                              checked={isElective}
-                              onCheckedChange={(checked) => {
-                                form.setValue(`offerings.${index}.isElective`, checked === true, { shouldDirty: true, shouldValidate: true });
-                                if (checked !== true) form.setValue(`offerings.${index}.studentIds`, [], { shouldDirty: true });
-                              }}
-                            />
-                            <span className="font-medium">Only selected students take this subject</span>
-                          </label>
+                          {juniorSecondary ? (
+                            <p className="self-center rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
+                              Elective subjects are not available for JSS1–JSS3.
+                            </p>
+                          ) : (
+                            <label className="flex cursor-pointer items-center gap-2 self-start pt-6 text-sm">
+                              <Checkbox
+                                checked={isElective}
+                                onCheckedChange={(checked) => {
+                                  form.setValue(`offerings.${index}.isElective`, checked === true, { shouldDirty: true, shouldValidate: true });
+                                  if (checked !== true) form.setValue(`offerings.${index}.studentIds`, [], { shouldDirty: true });
+                                }}
+                              />
+                              <span className="font-medium">Only selected students take this subject</span>
+                            </label>
+                          )}
                         </div>
 
                         {isElective && (

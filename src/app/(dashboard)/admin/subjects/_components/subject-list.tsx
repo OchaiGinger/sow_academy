@@ -1,16 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, BookOpen } from "lucide-react";
+import { Edit, Trash2, BookOpen, GraduationCap, UserRound } from "lucide-react";
 import { deleteSubject } from "@/app/actions/subject-actions";
 import { toast } from "sonner";
 import {
@@ -27,7 +19,7 @@ interface SubjectItem {
   code: string | null;
   classSubjects?: {
     classId: string;
-    class: { name: string };
+    class: { name: string; level: string };
     isElective: boolean;
     teacher: {
       id: string;
@@ -41,6 +33,7 @@ interface SubjectItem {
 interface ClassOption {
   id: string;
   name: string;
+  level: string;
   students: { id: string; name: string }[];
 }
 
@@ -72,96 +65,87 @@ export function SubjectList({ initialSubjects, classes, teachers }: SubjectListP
     }
   };
 
+  const isJuniorSecondary = (className: string, level: string) =>
+    /^(?:JSS|JUNIOR(?:\s+SECONDARY)?)\s*[-_]?\s*[1-3](?:\s*[A-Z])?$/i.test(level.trim()) ||
+    /^(?:JSS|JUNIOR(?:\s+SECONDARY)?)\s*[-_]?\s*[1-3](?:\s*[A-Z])?$/i.test(className.trim());
+
   return (
     <>
-      <div className="rounded-xl border bg-card overflow-hidden w-full">
-        {/* table-fixed + w-full + overflow-hidden is the "Nuclear Option" for horizontal scrolls */}
-        <Table className="w-full table-fixed border-collapse">
-          <TableHeader className="bg-muted/50">
-            <TableRow>
-              {/* Assigning explicit % widths ensures the table never exceeds 100% */}
-              <TableHead className="w-[50%] sm:w-[60%] px-4">Subject</TableHead>
-              <TableHead className="w-[25%] sm:w-[20%] px-2">Code</TableHead>
-              <TableHead className="w-[25%] sm:w-[20%] text-right px-4">
-                Actions
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {initialSubjects.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={3} className="text-center py-12">
-                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                    <BookOpen className="h-8 w-8 opacity-20" />
-                    <p className="text-sm">No subjects found.</p>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : (
-              initialSubjects.map((subject) => (
-                <TableRow key={subject.id} className="group transition-colors">
-                  <TableCell className="px-4 py-3">
-                    {/* min-w-0 + truncate prevents long text from breaking the row */}
-                    <div className="flex flex-col min-w-0">
-                      <span
-                        className="font-medium text-sm sm:text-base truncate"
-                        title={subject.name}
-                      >
-                        {subject.name}
-                      </span>
-                      {subject.classSubjects?.some((offering) => offering.isElective) && (
-                        <span className="mt-1 w-fit rounded bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-amber-800">
-                          Elective
+      {initialSubjects.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed bg-card px-6 py-16 text-center text-muted-foreground">
+          <BookOpen className="h-10 w-10 opacity-30" />
+          <p className="text-base font-medium">No subjects found.</p>
+        </div>
+      ) : (
+        <div className="grid gap-4 xl:grid-cols-2">
+          {initialSubjects.map((subject) => {
+            const offerings = subject.classSubjects ?? [];
+            const hasElectiveOffering = offerings.some(
+              (offering) => offering.isElective && !isJuniorSecondary(offering.class.name, offering.class.level),
+            );
+
+            return (
+              <article key={subject.id} className="min-w-0 rounded-2xl border bg-card p-5 shadow-sm sm:p-6">
+                <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                      <BookOpen className="h-6 w-6" />
+                    </div>
+                    <div className="min-w-0">
+                      <h2 className="break-words text-xl font-bold leading-tight text-foreground sm:text-2xl">{subject.name}</h2>
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <span className="rounded-md border bg-muted px-2.5 py-1 font-mono text-sm font-semibold text-foreground">
+                          {subject.code || "No code"}
                         </span>
-                      )}
-                      {(subject.classSubjects?.length ?? 0) > 0 && (
-                        <div className="mt-2 flex max-h-20 flex-wrap gap-1 overflow-y-auto">
-                          {subject.classSubjects?.map((offering) => (
-                            <span
-                              key={offering.classId}
-                              className="inline-flex max-w-full items-center gap-1 rounded-md border bg-muted/40 px-1.5 py-1 text-[10px]"
-                              title={`${offering.class.name}: ${offering.teacher?.user.name ?? "No teacher assigned"}`}
-                            >
-                              <span className="font-semibold">{offering.class.name}</span>
-                              <span className="text-muted-foreground">·</span>
-                              <span className="truncate text-muted-foreground">{offering.teacher?.user.name ?? "Unassigned"}</span>
-                            </span>
-                          ))}
+                        <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
+                          {offerings.length} class{offerings.length === 1 ? "" : "es"}
+                        </span>
+                        {hasElectiveOffering && <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-900">Elective</span>}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 gap-2">
+                    <Button variant="outline" size="sm" className="min-h-10 gap-2 px-3" onClick={() => setEditingSubject(subject)} aria-label={`Edit ${subject.name}`}>
+                      <Edit className="h-4 w-4" /> Edit
+                    </Button>
+                    <Button variant="outline" size="sm" className="min-h-10 gap-2 px-3 text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => handleDelete(subject.id)} aria-label={`Delete ${subject.name}`}>
+                      <Trash2 className="h-4 w-4" /> Delete
+                    </Button>
+                  </div>
+                </header>
+
+                <section className="mt-5 border-t pt-4">
+                  <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <GraduationCap className="h-4 w-4 text-primary" />
+                    Class assignments
+                  </div>
+                  {offerings.length ? (
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {offerings.map((offering) => (
+                        <div key={offering.classId} className="min-w-0 rounded-xl border bg-muted/20 p-3.5">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="truncate text-base font-bold">{offering.class.name}</span>
+                            {offering.isElective && !isJuniorSecondary(offering.class.name, offering.class.level) && (
+                              <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-900">Elective</span>
+                            )}
+                          </div>
+                          <div className="mt-2 flex min-w-0 items-center gap-2 text-sm">
+                            <UserRound className="h-4 w-4 shrink-0 text-primary" />
+                            <span className="truncate font-medium">{offering.teacher?.user.name ?? "No teacher assigned"}</span>
+                          </div>
+                          {offering.teacher?.staffId && <p className="ml-6 mt-0.5 text-xs text-muted-foreground">Staff ID: {offering.teacher.staffId}</p>}
                         </div>
-                      )}
+                      ))}
                     </div>
-                  </TableCell>
-                  <TableCell className="px-2">
-                    <code className="bg-muted px-1.5 py-0.5 rounded text-[10px] font-mono whitespace-nowrap">
-                      {subject.code || "---"}
-                    </code>
-                  </TableCell>
-                  <TableCell className="px-4 text-right">
-                    <div className="flex justify-end items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 shrink-0"
-                        onClick={() => setEditingSubject(subject)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 shrink-0 text-destructive hover:bg-destructive/10"
-                        onClick={() => handleDelete(subject.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+                  ) : (
+                    <p className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">This subject is not assigned to any classes yet.</p>
+                  )}
+                </section>
+              </article>
+            );
+          })}
+        </div>
+      )}
 
       <Sheet
         open={!!editingSubject}

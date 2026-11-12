@@ -6,6 +6,11 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
+function isJuniorSecondary(name: string, level: string) {
+  return /^(?:JSS|JUNIOR(?:\s+SECONDARY)?)\s*[-_]?\s*[1-3](?:\s*[A-Z])?$/i.test(level.trim()) ||
+    /^(?:JSS|JUNIOR(?:\s+SECONDARY)?)\s*[-_]?\s*[1-3](?:\s*[A-Z])?$/i.test(name.trim());
+}
+
 export async function upsertSubject(rawInput: unknown) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (session?.user.role !== "ADMIN") {
@@ -30,11 +35,12 @@ export async function upsertSubject(rawInput: unknown) {
 
       const classes = await tx.class.findMany({
         where: { id: { in: offeringClassIds } },
-        select: { id: true },
+        select: { id: true, name: true, level: true },
       });
       if (classes.length !== offeringClassIds.length) {
         throw new Error("One or more selected classes no longer exist.");
       }
+      const classesById = new Map(classes.map((classRecord) => [classRecord.id, classRecord]));
 
       if (assignedTeacherIds.length > 0) {
         const teachers = await tx.teacher.findMany({
@@ -47,7 +53,8 @@ export async function upsertSubject(rawInput: unknown) {
       }
 
       for (const offering of selectedOfferings) {
-        if (!offering.isElective) continue;
+        const classRecord = classesById.get(offering.classId);
+        if (!offering.isElective || (classRecord && isJuniorSecondary(classRecord.name, classRecord.level))) continue;
         const uniqueStudentIds = new Set(offering.studentIds);
         if (uniqueStudentIds.size !== offering.studentIds.length) {
           throw new Error("A student can only be selected once for a class elective.");
@@ -82,7 +89,12 @@ export async function upsertSubject(rawInput: unknown) {
       }
 
       for (const classOffering of selectedOfferings) {
-        const { classId, isElective, studentIds, teacherId } = classOffering;
+        const { classId, studentIds, teacherId } = classOffering;
+        const classRecord = classesById.get(classId);
+        const juniorSecondary = classRecord
+          ? isJuniorSecondary(classRecord.name, classRecord.level)
+          : false;
+        const isElective = !juniorSecondary && classOffering.isElective;
         const existingOffering = existingOfferings.find(
           (offering) => offering.classId === classId,
         );
@@ -91,7 +103,7 @@ export async function upsertSubject(rawInput: unknown) {
             where: { id: existingOffering.id },
             select: { isElective: true },
           });
-          if (currentOffering && currentOffering.isElective !== isElective) {
+          if (currentOffering && currentOffering.isElective !== isElective && !juniorSecondary) {
             const scoreCount = await tx.score.count({
               where: { classSubjectId: existingOffering.id },
             });
