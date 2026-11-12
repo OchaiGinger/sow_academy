@@ -110,7 +110,7 @@ export default async function FormMasterResultsPage({
         termId={data.termId}
         allSubjects={data.classSubjects}
         subjectsByStudent={data.subjectsByStudent}
-        userRole={session.user.role}
+        userRole={session.user.role ?? undefined}
         results={data.results}
       />
     </div>
