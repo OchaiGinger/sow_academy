@@ -19,7 +19,8 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     theme_color: "#050c0a",
     categories: ["education", "productivity"],
     icons: [
-      { src: "/logo.svg", sizes: "any", type: "image/svg+xml", purpose: "any maskable" },
+      { src: "/logo.svg", sizes: "any", type: "image/svg+xml", purpose: "maskable" },
+      { src: "/logo.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },
       { src: schoolBadge, sizes: "192x192", type: "image/png", purpose: "any" },
       { src: schoolBadge, sizes: "512x512", type: "image/png", purpose: "any" },
     ],
