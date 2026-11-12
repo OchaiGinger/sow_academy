@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, BookOpen, GraduationCap, UserRound } from "lucide-react";
+import { ChevronDown, Edit, Trash2, BookOpen, GraduationCap, UserRound } from "lucide-react";
 import { deleteSubject } from "@/app/actions/subject-actions";
 import { toast } from "sonner";
 import { WorkspaceModal } from "@/components/ui/workspace-modal";
@@ -48,6 +48,16 @@ export function SubjectList({ initialSubjects, classes, teachers }: SubjectListP
   const [editingSubject, setEditingSubject] = useState<SubjectItem | null>(
     null,
   );
+  const [expandedSubjects, setExpandedSubjects] = useState<Set<string>>(() => new Set());
+
+  const toggleSubject = (subjectId: string) => {
+    setExpandedSubjects((previous) => {
+      const next = new Set(previous);
+      if (next.has(subjectId)) next.delete(subjectId);
+      else next.add(subjectId);
+      return next;
+    });
+  };
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this subject?")) {
@@ -75,6 +85,7 @@ export function SubjectList({ initialSubjects, classes, teachers }: SubjectListP
         <div className="grid gap-4 xl:grid-cols-2">
           {initialSubjects.map((subject) => {
             const offerings = subject.classSubjects ?? [];
+            const isExpanded = expandedSubjects.has(subject.id);
             const hasElectiveOffering = offerings.some(
               (offering) => offering.isElective && !isJuniorSecondary(offering.class.name, offering.class.level),
             );
@@ -99,7 +110,19 @@ export function SubjectList({ initialSubjects, classes, teachers }: SubjectListP
                       </div>
                     </div>
                   </div>
-                  <div className="flex shrink-0 gap-2">
+                  <div className="flex shrink-0 flex-wrap gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="min-h-10 gap-1.5 px-3"
+                      onClick={() => toggleSubject(subject.id)}
+                      aria-label={`${isExpanded ? "Hide" : "Show"} class assignments for ${subject.name}`}
+                      aria-expanded={isExpanded}
+                      aria-controls={`subject-assignments-${subject.id}`}
+                    >
+                      <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                      <span className="text-xs">{isExpanded ? "Hide" : "Classes"}</span>
+                    </Button>
                     <Button variant="outline" size="sm" className="min-h-10 gap-2 px-3" onClick={() => setEditingSubject(subject)} aria-label={`Edit ${subject.name}`}>
                       <Edit className="h-4 w-4" /> Edit
                     </Button>
@@ -109,7 +132,11 @@ export function SubjectList({ initialSubjects, classes, teachers }: SubjectListP
                   </div>
                 </header>
 
-                <section className="mt-5 border-t pt-4">
+                <section
+                  id={`subject-assignments-${subject.id}`}
+                  hidden={!isExpanded}
+                  className="mt-5 border-t pt-4"
+                >
                   <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
                     <GraduationCap className="h-4 w-4 text-primary" />
                     Class assignments
