@@ -220,7 +220,9 @@ export function Sidebar({
 
   // Close the mobile drawer and clear the navigation indicator after routing.
   useEffect(() => {
+    const clearPending = window.setTimeout(() => setPendingHref(null), 0);
     onMobileClose();
+    return () => window.clearTimeout(clearPending);
   }, [pathname, onMobileClose]);
 
   const filteredItems = navItems.filter((item) => {
