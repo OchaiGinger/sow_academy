@@ -15,7 +15,6 @@ import type {
 interface Props {
   initialData: ReportStudent[];
   school: ReportSchool | null;
-  termName: string;
   termId: string;
   allSubjects: ClassSubject[];
   subjectsByStudent?: Record<string, ClassSubject[]>;
@@ -26,7 +25,6 @@ interface Props {
 export function ClassResultTable({
   initialData,
   school,
-  termName,
   termId,
   allSubjects,
   subjectsByStudent,
@@ -162,7 +160,6 @@ export function ClassResultTable({
       <ReportCardModal
         student={modalStudent}
         school={school}
-        termName={termName}
         termId={termId}
         isOpen={isModalOpen}
         userRole={userRole}

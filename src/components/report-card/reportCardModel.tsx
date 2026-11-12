@@ -25,7 +25,6 @@ import {
 interface ReportCardModalProps {
   student: ReportStudent | null;
   school: ReportSchool | null;
-  termName: string;
   isOpen: boolean;
   onClose: () => void;
   userRole?: string;
@@ -37,7 +36,6 @@ interface ReportCardModalProps {
 export function ReportCardModal({
   student,
   school,
-  termName,
   isOpen,
   onClose,
   userRole,

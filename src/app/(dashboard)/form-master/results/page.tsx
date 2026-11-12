@@ -107,7 +107,6 @@ export default async function FormMasterResultsPage({
       <ClassResultTable
         initialData={data.results}
         school={data.school}
-        termName={data.termName}
         termId={data.termId}
         allSubjects={data.classSubjects}
         subjectsByStudent={data.subjectsByStudent}
