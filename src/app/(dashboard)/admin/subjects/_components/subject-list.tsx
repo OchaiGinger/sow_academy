@@ -139,14 +139,15 @@ export function SubjectList({ initialSubjects, classes }: SubjectListProps) {
         open={!!editingSubject}
         onOpenChange={(open) => !open && setEditingSubject(null)}
       >
-        {/* Using w-full with sm:max-w-md for mobile-first sheets */}
-        <SheetContent className="w-full sm:max-w-md overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>Edit Subject</SheetTitle>
+        <SheetContent className="flex h-dvh w-full max-w-none flex-col gap-0 overflow-hidden p-0 sm:max-w-3xl">
+          <SheetHeader className="shrink-0 border-b px-5 py-5 pr-14 text-left sm:px-7">
+            <SheetTitle className="text-xl font-bold tracking-tight">Edit subject</SheetTitle>
+            <p className="text-sm text-muted-foreground">Update subject details and class or elective assignments.</p>
           </SheetHeader>
-          <div className="mt-8 pb-10">
+          <div className="flex min-h-0 flex-1 flex-col">
             {editingSubject && (
               <SubjectForm
+                key={editingSubject.id}
                 classes={classes}
                 initialData={{
                   id: editingSubject.id,
