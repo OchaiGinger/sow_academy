@@ -17,12 +17,8 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
   },
   icons: {
-    icon: [
-      { url: "/icons/sowa-app-icon.svg", type: "image/svg+xml" },
-    ],
-    apple: [
-      { url: "/icons/sowa-app-icon.svg", type: "image/svg+xml" },
-    ],
+    icon: [{ url: "/app-icon" }],
+    apple: [{ url: "/app-icon" }],
   },
 };
 
