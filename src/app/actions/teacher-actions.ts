@@ -46,7 +46,7 @@ export async function createTeacher(rawInput: unknown) {
   if (!result.success)
     return { success: false, error: result.error.issues[0].message };
 
-  const { name, email, phone, password, classSubjectIds } = result.data;
+  const { name, email, phone, image, password, classSubjectIds } = result.data;
 
   try {
     // Run existence check + hash in parallel
@@ -75,6 +75,7 @@ export async function createTeacher(rawInput: unknown) {
               name,
               email,
               phone: phone || null,
+              image: image || null,
               role: "TEACHER",
               accounts: {
                 create: {
@@ -124,6 +125,7 @@ export async function createTeacher(rawInput: unknown) {
     );
 
     revalidatePath("/admin/teachers");
+    revalidatePath("/admin/teacher-id-cards");
     return { success: true, emailSent: mail.success };
   } catch (error: unknown) {
     console.error("CREATE_TEACHER_ERROR:", error);
@@ -146,7 +148,7 @@ export async function updateTeacher(teacherId: string, rawInput: unknown) {
   if (!result.success)
     return { success: false, error: result.error.issues[0].message };
 
-  const { name, email, phone, password, classSubjectIds } = result.data;
+  const { name, email, phone, image, password, classSubjectIds } = result.data;
 
   try {
     const existingTeacher = await db.teacher.findUnique({
@@ -176,7 +178,7 @@ export async function updateTeacher(teacherId: string, rawInput: unknown) {
     await db.$transaction(async (tx) => {
       await tx.user.update({
         where: { id: existingTeacher.userId },
-        data: { name, email, phone: phone || null },
+        data: { name, email, phone: phone || null, image: image || null },
       });
 
       if (hashedPassword) {
@@ -199,6 +201,7 @@ export async function updateTeacher(teacherId: string, rawInput: unknown) {
     });
 
     revalidatePath("/admin/teachers");
+    revalidatePath("/admin/teacher-id-cards");
     return { success: true };
   } catch (error: unknown) {
     console.error("UPDATE_TEACHER_ERROR:", error);

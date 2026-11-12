@@ -113,6 +113,12 @@ const navItems: NavItem[] = [
     roles: ["ADMIN"],
   },
   {
+    label: "Teacher ID Cards",
+    href: "/admin/teacher-id-cards",
+    icon: CreditCard,
+    roles: ["ADMIN"],
+  },
+  {
     label: "Validation Sheets",
     href: "/admin/validation-sheets",
     icon: FileSpreadsheet,

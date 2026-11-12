@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { UploadButton } from "@/components/ui/upload-button";
 import { createTeacher, updateTeacher } from "@/app/actions/teacher-actions";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -32,6 +33,7 @@ interface Props {
     name: string;
     email: string;
     phone: string | null;
+    image: string | null;
     staffId: string | null;
     classSubjectIds: string[];
   };
@@ -60,6 +62,7 @@ export function TeacherForm({
           name: initialData.name,
           email: initialData.email,
           phone: initialData.phone ?? "",
+          image: initialData.image ?? "",
           password: "",
           classSubjectIds: initialData.classSubjectIds,
         }
@@ -67,6 +70,7 @@ export function TeacherForm({
           name: "",
           email: "",
           phone: "",
+          image: "",
           password: "",
           classSubjectIds: [],
         },
@@ -185,6 +189,25 @@ export function TeacherForm({
                     disabled={isSubmitting}
                   />
                 </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="image"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-xs uppercase font-bold">Profile Photo</FormLabel>
+              <FormControl>
+                <UploadButton
+                  route="teacherProfile"
+                  currentUrl={field.value || undefined}
+                  onUploadComplete={field.onChange}
+                  disabled={isSubmitting}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useState, useRef } from "react";
+import { useCallback, useState, useRef, useId } from "react";
 import { Button } from "@/components/ui/button";
-import { Upload, X, Crop, RotateCcw, Check, Loader2, Image, Camera } from "lucide-react";
+import { Upload, X, Crop, Check, Loader2, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { useUploadThing } from "@/components/ui/uploadthing";
 import ReactCrop, { type Crop as ReactCropType, type PixelCrop, centerCrop, makeAspectCrop } from "react-image-crop";
@@ -17,13 +17,16 @@ import {
 } from "@/components/ui/dialog";
 
 interface UploadButtonProps {
-  route: "studentPassport";
+  route: "studentPassport" | "teacherProfile";
   onUploadComplete: (url: string) => void;
   currentUrl?: string;
   disabled?: boolean;
 }
 
 export function UploadButton({ route, onUploadComplete, currentUrl, disabled }: UploadButtonProps) {
+  const routePrefix = route === "teacherProfile" ? "teacher-profile" : "student-passport";
+  const inputPrefix = `${routePrefix}-${useId().replace(/:/g, "")}`;
+  const photoLabel = route === "teacherProfile" ? "Teacher profile photo" : "Student passport photo";
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(currentUrl || null);
   const [showCropModal, setShowCropModal] = useState(false);
@@ -177,9 +180,10 @@ export function UploadButton({ route, onUploadComplete, currentUrl, disabled }: 
       <div className="relative w-32 h-32 mx-auto md:mx-0 rounded-lg border-2 border-dashed border-muted-foreground/20 overflow-hidden bg-muted/30">
         {previewUrl ? (
           <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={previewUrl}
-              alt="Student passport"
+              alt={photoLabel}
               className="w-full h-full object-cover"
             />
             <button
@@ -195,7 +199,7 @@ export function UploadButton({ route, onUploadComplete, currentUrl, disabled }: 
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground/60">
             <Upload className="h-8 w-8 mb-2" />
-            <span className="text-xs text-center px-2">Passport Photo</span>
+            <span className="text-xs text-center px-2">{route === "teacherProfile" ? "Profile Photo" : "Passport Photo"}</span>
           </div>
         )}
       </div>
@@ -206,7 +210,7 @@ export function UploadButton({ route, onUploadComplete, currentUrl, disabled }: 
           type="button"
           variant="outline"
           className="w-full sm:w-auto"
-          onClick={() => document.getElementById("passport-upload")?.click()}
+          onClick={() => document.getElementById(`${inputPrefix}-upload`)?.click()}
           disabled={isLoading || disabled}
         >
           {isLoading ? (
@@ -227,7 +231,7 @@ export function UploadButton({ route, onUploadComplete, currentUrl, disabled }: 
           type="button"
           variant="outline"
           className="w-full sm:w-auto"
-          onClick={() => document.getElementById("passport-camera")?.click()}
+          onClick={() => document.getElementById(`${inputPrefix}-camera`)?.click()}
           disabled={isLoading || disabled}
         >
           {isLoading ? (
@@ -246,7 +250,7 @@ export function UploadButton({ route, onUploadComplete, currentUrl, disabled }: 
 
       {/* Hidden file input for file upload */}
       <input
-        id="passport-upload"
+        id={`${inputPrefix}-upload`}
         type="file"
         accept="image/*"
         onChange={handleFileSelect}
@@ -256,7 +260,7 @@ export function UploadButton({ route, onUploadComplete, currentUrl, disabled }: 
 
       {/* Hidden file input for camera capture */}
       <input
-        id="passport-camera"
+        id={`${inputPrefix}-camera`}
         type="file"
         accept="image/*"
         capture="environment"
@@ -271,7 +275,7 @@ export function UploadButton({ route, onUploadComplete, currentUrl, disabled }: 
           <DialogHeader className="p-4 border-b">
             <DialogTitle className="flex items-center gap-2">
               <Crop className="h-4 w-4" />
-              Crop Passport Photo
+              Crop {route === "teacherProfile" ? "Profile Photo" : "Passport Photo"}
             </DialogTitle>
             <DialogDescription>
               Adjust the crop area to a square. The photo will be resized to 400x400px.
@@ -290,6 +294,7 @@ export function UploadButton({ route, onUploadComplete, currentUrl, disabled }: 
                   minHeight={100}
                   ruleOfThirds
                 >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     ref={imgRef}
                     src={croppedImageUrl}

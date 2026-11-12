@@ -272,6 +272,7 @@ export function TeacherList({
                 name: editingTeacher.user.name,
                 email: editingTeacher.user.email,
                 phone: editingTeacher.user.phone,
+                image: editingTeacher.user.image,
                 staffId: editingTeacher.staffId,
                 classSubjectIds: editingTeacher.classSubjects.map((cs) => cs.id),
               }}
