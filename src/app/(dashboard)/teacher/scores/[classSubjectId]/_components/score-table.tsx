@@ -21,9 +21,9 @@ export function ScoreTable({
 }: ScoreTableProps) {
   return (
     <TooltipProvider>
-      <div className="rounded-xl border border-emerald-900/40 overflow-hidden bg-[#071510]/60">
+      <div className="overflow-hidden rounded-xl border-2 border-black bg-white shadow-sm">
         {/* Header (desktop only) */}
-        <div className="hidden md:grid grid-cols-[2rem_1fr_5rem_5rem_5rem_5rem_5rem_5rem_5rem_4.5rem_3rem] gap-x-1 px-3 py-2.5 bg-[#0a1f14] border-b border-emerald-900/40 text-[11px] font-semibold uppercase tracking-widest text-emerald-600">
+        <div className="hidden border-b-2 border-black bg-gray-100 px-3 py-3 text-xs font-black uppercase tracking-wide text-black md:grid md:grid-cols-[2rem_1fr_5rem_5rem_5rem_5rem_5rem_5rem_5rem_4.5rem_3rem] md:items-center md:gap-x-1">
           <span>#</span>
           <span>Student</span>
           <span className="text-center">Asst 1</span>
@@ -37,7 +37,7 @@ export function ScoreTable({
           <span className="text-center">Pos</span>
         </div>
 
-        <div className="divide-y divide-emerald-900/30">
+        <div className="divide-y-2 divide-gray-300">
           {rows.map((row, idx) => (
             <ScoreTableRow
               key={row.studentId}

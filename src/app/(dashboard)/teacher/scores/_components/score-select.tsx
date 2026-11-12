@@ -28,18 +28,18 @@ export function ScoreSelect({
     <Select value={displayValue} onValueChange={(v) => onChange(parseFloat(v))}>
       <SelectTrigger
         className={cn(
-          "bg-[#050f08] border-emerald-900/60 text-white hover:border-emerald-600/60 focus:ring-emerald-500/30 focus:border-emerald-600 transition-colors h-7 text-xs",
-          compact ? "px-1.5" : "px-2 w-full",
+          "h-11 border-2 border-black bg-white text-base font-black text-black shadow-sm hover:border-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 data-[placeholder]:text-black",
+          compact ? "px-2" : "w-full px-3",
         )}
       >
         <SelectValue>{displayValue}</SelectValue>
       </SelectTrigger>
-      <SelectContent className="bg-[#0a1f14] border-emerald-900/60 max-h-48">
+      <SelectContent className="max-h-60 border-2 border-black bg-white text-black shadow-xl">
         {options.map((opt) => (
           <SelectItem
             key={opt}
             value={opt}
-            className="text-xs text-white hover:bg-emerald-900/40 focus:bg-emerald-900/40 cursor-pointer"
+            className="min-h-10 cursor-pointer text-sm font-bold text-black focus:bg-gray-200 focus:text-black"
           >
             {opt}
           </SelectItem>

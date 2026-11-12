@@ -126,27 +126,27 @@ export function ScoreEntrySheet({
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#050c0a]">
+    <div className="flex h-full flex-col bg-white text-black">
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div className="px-5 pt-5 pb-4 border-b border-emerald-900/30">
+      <div className="border-b-2 border-black bg-white px-4 pb-4 pt-5 sm:px-6">
         <SheetHeader>
-          <SheetTitle className="text-white text-base font-bold tracking-tight">
+          <SheetTitle className="text-lg font-black tracking-tight text-black sm:text-xl">
             Score Entry
           </SheetTitle>
         </SheetHeader>
 
         {/* Student card */}
-        <div className="mt-4 flex items-center gap-3 rounded-xl border border-emerald-900/30 bg-[#0a1f14] px-4 py-3">
-          <div className="w-9 h-9 rounded-full bg-emerald-900/40 flex items-center justify-center shrink-0">
-            <span className="text-sm font-black text-emerald-400">
+        <div className="mt-4 flex items-center gap-3 rounded-xl border-2 border-black bg-white px-4 py-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-black bg-gray-100">
+            <span className="text-base font-black text-black">
               {student.user.name.charAt(0).toUpperCase()}
             </span>
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-white truncate">
+            <p className="truncate text-base font-black text-black">
               {student.user.name}
             </p>
-            <p className="text-[11px] text-emerald-600 font-mono">
+            <p className="font-mono text-xs font-bold text-black">
               {student.admissionNo}
             </p>
           </div>
@@ -154,12 +154,12 @@ export function ScoreEntrySheet({
       </div>
 
       {/* ── Body (scrollable) ────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain bg-white px-4 py-4 sm:px-6">
         {/* No-window warning */}
         {!anyOpen && (
-          <div className="flex items-start gap-2 rounded-lg border border-yellow-900/40 bg-yellow-950/20 px-4 py-3">
-            <AlertCircle className="h-4 w-4 text-yellow-400 shrink-0 mt-0.5" />
-            <p className="text-xs text-yellow-400 leading-relaxed">
+          <div className="flex items-start gap-2 rounded-lg border-2 border-black bg-gray-100 px-4 py-3">
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-black" />
+            <p className="text-sm font-bold leading-relaxed text-black">
               No score windows are currently open. Contact your admin to unlock
               entry.
             </p>
@@ -174,13 +174,13 @@ export function ScoreEntrySheet({
           const overMax = val > f.max;
 
           return (
-            <div key={f.key} className="space-y-1.5">
+            <div key={f.key} className="space-y-2 rounded-xl border-2 border-black bg-white p-3 sm:p-4">
               {/* Label row */}
               <div className="flex items-center justify-between">
                 <label
                   className={cn(
-                    "text-xs font-semibold flex items-center gap-1.5",
-                    fieldOpen ? "text-emerald-500" : "text-emerald-900",
+                    "flex items-center gap-1.5 text-sm font-black sm:text-base",
+                    "text-black",
                   )}
                 >
                   {!fieldOpen && <Lock className="h-3 w-3" />}
@@ -188,8 +188,7 @@ export function ScoreEntrySheet({
                 </label>
                 <span
                   className={cn(
-                    "text-[10px] font-bold tabular-nums",
-                    overMax ? "text-red-400" : "text-emerald-800",
+                    "text-sm font-black tabular-nums text-black",
                   )}
                 >
                   {val.toFixed(1)} / {f.max}
@@ -210,13 +209,13 @@ export function ScoreEntrySheet({
                   onChange={(e) => handleChange(f.key, e.target.value, f.max)}
                   onBlur={() => handleBlur(f.key, f.max)}
                   className={cn(
-                    "h-11 text-center text-sm font-bold bg-[#0a1f14] border text-white",
-                    "focus-visible:ring-emerald-500/50 placeholder:text-emerald-900",
+                    "h-12 border-2 bg-white text-center text-lg font-black text-black shadow-sm",
+                    "border-black placeholder:text-gray-600 focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2",
                     !fieldOpen
-                      ? "opacity-40 cursor-not-allowed bg-[#050f0a] border-emerald-900/20"
+                      ? "cursor-not-allowed border-gray-500 bg-gray-100 text-gray-700 opacity-100"
                       : overMax
-                        ? "border-red-500/60 bg-red-950/20"
-                        : "border-emerald-900/40",
+                        ? "border-red-700 bg-red-50"
+                        : "",
                   )}
                 />
 
@@ -231,10 +230,10 @@ export function ScoreEntrySheet({
                           className={cn(
                             "flex-1 rounded-full transition-colors",
                             overMax
-                              ? "bg-red-500"
+                              ? "bg-black"
                               : filled
-                                ? "bg-emerald-500"
-                                : "bg-emerald-900/30",
+                                ? "bg-black"
+                                : "bg-gray-200",
                           )}
                         />
                       );
@@ -244,7 +243,7 @@ export function ScoreEntrySheet({
 
                 {/* Error message */}
                 {error && (
-                  <p className="text-[10px] text-red-400 flex items-center gap-1">
+                  <p className="flex items-center gap-1 text-xs font-bold text-red-800">
                     <AlertCircle className="h-3 w-3 shrink-0" />
                     {error}
                   </p>
@@ -256,10 +255,10 @@ export function ScoreEntrySheet({
       </div>
 
       {/* ── Footer (sticky) ─────────────────────────────────────────────── */}
-      <div className="border-t border-emerald-900/30 px-5 pt-4 pb-6 space-y-3 bg-[#050c0a]">
+      <div className="space-y-3 border-t-2 border-black bg-white px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:px-6">
         {/* Total */}
-        <div className="rounded-xl border border-emerald-900/30 bg-[#071510] px-4 py-3 flex items-center justify-between">
-          <span className="text-xs text-emerald-700 font-semibold uppercase tracking-wider">
+        <div className="flex items-center justify-between rounded-xl border-2 border-black bg-white px-4 py-3">
+          <span className="text-sm font-black uppercase tracking-wide text-black">
             Total Score
           </span>
           <div className="flex items-center gap-2">
@@ -271,11 +270,11 @@ export function ScoreEntrySheet({
             <span
               className={cn(
                 "text-2xl font-black tabular-nums",
-                liveTotal >= 50 ? "text-emerald-300" : "text-red-400",
+                "text-black",
               )}
             >
               {liveTotal.toFixed(1)}
-              <span className="text-sm font-normal text-emerald-700">
+              <span className="text-base font-black text-black">
                 {" "}
                 / 100
               </span>
@@ -289,9 +288,8 @@ export function ScoreEntrySheet({
           onClick={save}
           className={cn(
             "w-full gap-2 font-bold text-sm h-12 transition-all",
-            anyOpen
-              ? "bg-emerald-700 hover:bg-emerald-600 text-white"
-              : "opacity-50 cursor-not-allowed bg-emerald-900 text-emerald-700",
+            "border-2 border-black bg-black text-white hover:bg-gray-800",
+            !anyOpen && "cursor-not-allowed border-gray-600 bg-gray-500 text-white opacity-100",
           )}
         >
           <Save className="h-4 w-4" />
@@ -299,7 +297,7 @@ export function ScoreEntrySheet({
         </Button>
 
         {hasErrors && (
-          <p className="text-[10px] text-center text-red-400">
+          <p className="text-center text-xs font-bold text-red-800">
             Over-limit values will be automatically capped on save.
           </p>
         )}

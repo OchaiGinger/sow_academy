@@ -55,8 +55,8 @@ export default function ResultSheetPreview({
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border border-emerald-900/40 overflow-hidden bg-[#071510]">
-        <div className="grid grid-cols-[1.5rem_1fr_3.5rem_3rem_1rem] gap-2 px-3 py-2 bg-[#0a1f14] text-[10px] font-bold text-emerald-600 uppercase">
+      <div className="overflow-hidden rounded-xl border-2 border-black bg-white shadow-sm">
+        <div className="grid grid-cols-[2rem_1fr_4rem_3.5rem_1rem] gap-2 border-b-2 border-black bg-gray-100 px-3 py-3 text-xs font-black uppercase tracking-wide text-black sm:grid-cols-[2.5rem_1fr_5rem_4rem_1rem]">
           <span>Pos</span>
           <span>Student</span>
           <span className="text-center">Total</span>
@@ -64,9 +64,9 @@ export default function ResultSheetPreview({
           <span />
         </div>
 
-        <div className="divide-y divide-emerald-900/20">
+        <div className="divide-y divide-gray-300">
           {sorted.length === 0 ? (
-            <div className="p-8 text-center text-xs text-emerald-800">
+            <div className="p-8 text-center text-sm font-bold text-black">
               No records yet. Tap a student to enter scores.
             </div>
           ) : (
@@ -76,28 +76,28 @@ export default function ResultSheetPreview({
                 <button
                   key={row.studentId}
                   onClick={() => student && onStudentClick?.(student)}
-                  className="w-full grid grid-cols-[1.5rem_1fr_3.5rem_3rem_1rem] gap-2 px-3 py-3 items-center hover:bg-[#0a1f14]/60 transition-colors text-left"
+                  className="grid w-full grid-cols-[2rem_1fr_4rem_3.5rem_1rem] items-center gap-2 px-3 py-4 text-left text-black transition-colors hover:bg-gray-100 sm:grid-cols-[2.5rem_1fr_5rem_4rem_1rem]"
                 >
-                  <span className="text-[10px] text-emerald-500 font-bold">
+                  <span className="text-sm font-black text-black">
                     {positionMap.get(row.studentId) ?? "-"}
                   </span>
-                  <span className="text-xs text-white truncate font-medium">
+                  <span className="truncate text-sm font-bold text-black sm:text-base">
                     {row?.name ?? "Unknown"}
                   </span>
-                  <span className="text-xs font-bold text-emerald-300 text-center">
+                  <span className="text-sm font-black text-black text-center">
                     {(row?.total ?? 0).toFixed(1)}
                   </span>
                   <div className="flex justify-center">
                     <Badge
                       className={cn(
-                        "text-[9px] px-1 py-0 border",
                         gradeColor(row?.grade ?? "F9"),
+                        "border-black bg-white px-1.5 py-0 text-xs font-black text-black",
                       )}
                     >
                       {row?.grade ?? "F9"}
                     </Badge>
                   </div>
-                  <ChevronRight className="h-3 w-3 text-emerald-800" />
+                  <ChevronRight className="h-4 w-4 text-black" />
                 </button>
               );
             })
@@ -106,7 +106,7 @@ export default function ResultSheetPreview({
       </div>
 
       {onStudentClick && sorted.length > 0 && (
-        <p className="text-[10px] text-emerald-800 text-center">
+        <p className="text-center text-xs font-bold text-black">
           Tap a student to enter or edit their scores
         </p>
       )}
@@ -116,9 +116,9 @@ export default function ResultSheetPreview({
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-emerald-900/40 bg-[#071510] p-3 text-center">
-      <div className="text-lg font-bold text-emerald-300">{value}</div>
-      <div className="text-[10px] text-emerald-700 uppercase">{label}</div>
+    <div className="rounded-lg border-2 border-black bg-white p-3 text-center shadow-sm">
+      <div className="text-2xl font-black text-black">{value}</div>
+      <div className="text-xs font-black uppercase tracking-wide text-black">{label}</div>
     </div>
   );
 }

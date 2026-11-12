@@ -232,14 +232,15 @@ export function Sidebar({
     <>
       {/* SIDEBAR (Drawer on mobile, Fixed on desktop) */}
       <aside
-        className={cn(
-          "fixed inset-y-0 left-0 z-50 flex h-dvh max-h-dvh flex-col overflow-hidden bg-bg-surface border-r border-border-subtle shadow-2xl transition-transform duration-300 ease-in-out md:shadow-none",
-          // Mobile state
-          "w-[min(18rem,92vw)] md:w-auto",
+          className={cn(
+            "fixed inset-0 z-50 box-border flex h-dvh max-h-dvh w-screen max-w-[100vw] flex-col overflow-x-hidden overflow-y-hidden bg-bg-surface border-r border-border-subtle shadow-2xl transition-transform duration-300 ease-in-out md:inset-y-0 md:right-auto md:shadow-none",
+            // Mobile navigation occupies the viewport; desktop remains a fixed rail.
+            "md:w-auto md:max-w-none",
           mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
           // Desktop collapse state
           collapsed ? "md:w-[60px]" : "md:w-[220px]",
         )}
+          aria-label="Main navigation"
       >
         {/* Header */}
         <div

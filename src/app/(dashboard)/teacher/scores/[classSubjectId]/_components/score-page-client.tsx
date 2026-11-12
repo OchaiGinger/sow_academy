@@ -74,13 +74,13 @@ export function ScorePageClient({
 
   return (
     <>
-      <div className="p-6 space-y-4">
+      <div className="space-y-4 p-3 sm:p-6">
         <div>
-          <h2 className="text-xl font-bold text-white">
+          <h2 className="text-2xl font-black text-black sm:text-3xl">
             {classSubject.subject.name}
           </h2>
-          <p className="text-sm text-emerald-700">
-            {classSubject.class.name} ·
+          <p className="mt-1 text-sm font-bold text-black sm:text-base">
+            {classSubject.class.name} · {" "}
             {currentTerm.name.charAt(0) +
               currentTerm.name.slice(1).toLowerCase()}
             Term · {currentTerm.session.name}
@@ -88,7 +88,7 @@ export function ScorePageClient({
         </div>
 
         {openWindows.size === 0 && (
-          <div className="rounded-lg border border-yellow-900/40 bg-yellow-950/20 px-4 py-3 text-sm text-yellow-400">
+          <div className="rounded-lg border-2 border-black bg-gray-100 px-4 py-3 text-sm font-bold text-black">
             ⚠️ No score entry windows are currently open. Contact your admin.
           </div>
         )}
@@ -105,7 +105,7 @@ export function ScorePageClient({
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent
           side="right"
-          className="w-full sm:max-w-md bg-[#050c0a] border-emerald-900/40 p-0 overflow-y-auto"
+          className="h-dvh w-screen max-w-none overflow-hidden border-l-2 border-black bg-white p-0 text-black sm:max-w-lg"
         >
           {selectedStudent && (
             <ScoreEntrySheet

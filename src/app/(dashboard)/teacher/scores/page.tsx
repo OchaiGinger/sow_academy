@@ -25,8 +25,8 @@ export default async function TeacherScoresPage() {
 
   if (!teacher || teacher.classSubjects.length === 0) {
     return (
-      <div className="p-6">
-        <div className="rounded-lg border border-yellow-900/40 bg-yellow-950/20 px-4 py-3 text-sm text-yellow-400">
+      <div className="p-3 sm:p-6">
+        <div className="rounded-lg border-2 border-black bg-gray-100 px-4 py-3 text-sm font-bold text-black">
           No subjects assigned to you yet. Contact your admin.
         </div>
       </div>
@@ -34,10 +34,10 @@ export default async function TeacherScoresPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 p-3 sm:p-6">
       <div>
-        <h1 className="text-xl font-bold text-white">Enter Scores</h1>
-        <p className="text-sm text-emerald-700">
+        <h1 className="text-2xl font-black text-black sm:text-3xl">Enter Scores</h1>
+        <p className="mt-1 text-sm font-bold text-black sm:text-base">
           Select a subject-class below to enter scores
         </p>
       </div>
@@ -47,27 +47,27 @@ export default async function TeacherScoresPage() {
           <Link
             key={cs.id}
             href={`/teacher/scores/${cs.id}`}
-            className="flex items-center justify-between rounded-lg border border-emerald-900/40 bg-[#0a1f14] p-4 hover:bg-[#0a1f14]/60 transition-colors"
+            className="flex items-center justify-between gap-3 rounded-xl border-2 border-black bg-white p-4 text-black shadow-sm transition-colors hover:bg-gray-100 sm:p-5"
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-900/30">
-                <BookOpen className="h-5 w-5 text-emerald-500" />
+              <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-black bg-gray-100">
+                <BookOpen className="h-5 w-5 text-black" />
               </div>
               <div>
-                <p className="text-sm font-bold text-white">
+                <p className="text-base font-black text-black sm:text-lg">
                   {cs.subject.name}
                 </p>
-                <p className="text-xs text-emerald-700">
+                <p className="text-sm font-bold text-black">
                   {cs.class.name}
                   {cs.isElective ? ` · Elective · ${cs._count.studentEnrollments} enrolled` : ""}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-emerald-700">
+              <span className="hidden text-sm font-bold text-black sm:inline">
                 {cs._count.scores} scores
               </span>
-              <ArrowRight className="h-4 w-4 text-emerald-800" />
+              <ArrowRight className="h-5 w-5 shrink-0 text-black" />
             </div>
           </Link>
         ))}
