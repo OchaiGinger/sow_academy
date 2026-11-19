@@ -39,7 +39,13 @@ export type AdminStudent = {
     phone: string | null;
     image: string | null;
   };
-  class: { name: string; level: string; arm: string } | null;
+  class: {
+    name: string;
+    level: string;
+    arm: string;
+    classSubjects?: { id: string; isElective: boolean }[];
+  } | null;
+  electiveSubjects?: { classSubjectId: string }[];
 };
 
 interface Props {
@@ -69,6 +75,16 @@ function formatDob(date: Date | null) {
     month: "short",
     year: "numeric",
   });
+}
+
+function getSubjectCount(student: AdminStudent) {
+  const offerings = student.class?.classSubjects ?? [];
+  const requiredCount = offerings.filter((offering) => !offering.isElective).length;
+  const electiveIds = new Set(student.electiveSubjects?.map((entry) => entry.classSubjectId) ?? []);
+  const electiveCount = offerings.filter(
+    (offering) => offering.isElective && electiveIds.has(offering.id),
+  ).length;
+  return requiredCount + electiveCount;
 }
 
 export function StudentList({ students, classes }: Props) {
@@ -270,6 +286,9 @@ export function StudentList({ students, classes }: Props) {
                         <TableHead className="w-[170px] px-4 py-3 text-[10px] font-bold uppercase tracking-widest">
                           Guardian
                         </TableHead>
+                        <TableHead className="w-[110px] px-4 py-3 text-[10px] font-bold uppercase tracking-widest">
+                          Subjects
+                        </TableHead>
                         <TableHead className="w-[110px] px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-right">
                           Actions
                         </TableHead>
@@ -343,6 +362,12 @@ export function StudentList({ students, classes }: Props) {
                                 {student.guardianPhone ?? "—"}
                               </p>
                             </div>
+                          </TableCell>
+
+                          <TableCell className="px-4 py-4">
+                            <Badge variant="outline" className="text-xs font-bold">
+                              {getSubjectCount(student)} subject{getSubjectCount(student) === 1 ? "" : "s"}
+                            </Badge>
                           </TableCell>
 
                           <TableCell className="px-4 py-4">

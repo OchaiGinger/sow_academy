@@ -18,6 +18,7 @@ import { upsertSubject } from "@/app/actions/subject-actions";
 import { toast } from "sonner";
 import { BookOpen, Check, GraduationCap, Loader2, Search, Users } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface Props {
   initialData?: SubjectFormValues;
@@ -36,6 +37,7 @@ interface Props {
 }
 
 export function SubjectForm({ initialData, onSuccess, classes, teachers }: Props) {
+  const router = useRouter();
   const isJuniorSecondary = (className: string, level: string) =>
     /^(?:JSS|JUNIOR(?:\s+SECONDARY)?)\s*[-_]?\s*[1-3](?:\s*[A-Z])?$/i.test(level.trim()) ||
     /^(?:JSS|JUNIOR(?:\s+SECONDARY)?)\s*[-_]?\s*[1-3](?:\s*[A-Z])?$/i.test(className.trim());
@@ -43,11 +45,15 @@ export function SubjectForm({ initialData, onSuccess, classes, teachers }: Props
     resolver: zodResolver(subjectSchema),
     defaultValues: initialData ? {
       ...initialData,
-      offerings: initialData.offerings.map((offering, index) =>
-        isJuniorSecondary(classes[index]?.name ?? "", classes[index]?.level ?? "")
+      offerings: classes.map((cls) => {
+        const offering = initialData.offerings.find((item) => item.classId === cls.id);
+        if (!offering) {
+          return { classId: cls.id, enabled: false, isElective: false, studentIds: [], teacherId: null };
+        }
+        return isJuniorSecondary(cls.name, cls.level)
           ? { ...offering, isElective: false, studentIds: [] }
-          : offering,
-      ),
+          : offering;
+      }),
     } : {
       name: "",
       code: "",
@@ -71,15 +77,17 @@ export function SubjectForm({ initialData, onSuccess, classes, teachers }: Props
     try {
       const normalizedValues = {
         ...values,
-        offerings: values.offerings.map((offering, index) =>
-          isJuniorSecondary(classes[index]?.name ?? "", classes[index]?.level ?? "")
+        offerings: values.offerings.map((offering) => {
+          const cls = classes.find((item) => item.id === offering.classId);
+          return cls && isJuniorSecondary(cls.name, cls.level)
             ? { ...offering, isElective: false, studentIds: [] }
-            : offering,
-        ),
+            : offering;
+        }),
       };
       const result = await upsertSubject(normalizedValues);
       if (result.success) {
         toast.success("Saved successfully");
+        router.refresh();
         onSuccess();
       } else {
         toast.error(result.error);
