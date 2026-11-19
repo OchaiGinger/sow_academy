@@ -21,7 +21,6 @@ interface SubjectItem {
       staffId: string | null;
       user: { name: string };
     } | null;
-    studentEnrollments: { studentId: string }[];
   }[];
 }
 
@@ -194,9 +193,6 @@ export function SubjectList({ initialSubjects, classes, teachers }: SubjectListP
                   enabled: Boolean(offering),
                   isElective: offering?.isElective ?? false,
                   teacherId: offering?.teacher?.id ?? null,
-                  studentIds: offering?.studentEnrollments.map(
-                    (enrollment) => enrollment.studentId,
-                  ) ?? [],
                 };
               }),
             }}

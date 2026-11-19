@@ -210,3 +210,62 @@ export async function updateStudent(studentId: string, rawInput: unknown) {
     return { success: false, error: "Failed to update student records." };
   }
 }
+
+export async function updateStudentSubjects(studentId: string, rawClassSubjectIds: unknown) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session || (session.user.role !== "ADMIN" && session.user.role !== "SUPER_ADMIN")) {
+    return { success: false, error: "Only an administrator can update student subjects." };
+  }
+  if (!Array.isArray(rawClassSubjectIds) || rawClassSubjectIds.some((id) => typeof id !== "string")) {
+    return { success: false, error: "Invalid subject selection." };
+  }
+
+  const classSubjectIds = [...new Set(rawClassSubjectIds as string[])];
+
+  try {
+    await db.$transaction(async (tx) => {
+      const student = await tx.student.findUnique({
+        where: { id: studentId },
+        select: { classId: true },
+      });
+      if (!student) throw new Error("Student not found.");
+
+      const electiveOfferings = await tx.classSubject.findMany({
+        where: { classId: student.classId, isElective: true },
+        select: { id: true },
+      });
+      const allowedIds = new Set(electiveOfferings.map((offering) => offering.id));
+      if (classSubjectIds.some((id) => !allowedIds.has(id))) {
+        throw new Error("Selected electives must belong to the student's current class.");
+      }
+
+      const existing = await tx.studentClassSubject.findMany({
+        where: { studentId, classSubjectId: { in: electiveOfferings.map((offering) => offering.id) } },
+        select: { id: true, classSubjectId: true },
+      });
+      const removed = existing.filter((enrollment) => !classSubjectIds.includes(enrollment.classSubjectId));
+      if (removed.length > 0) {
+        const scoreCount = await tx.score.count({
+          where: { studentId, classSubjectId: { in: removed.map((enrollment) => enrollment.classSubjectId) } },
+        });
+        if (scoreCount > 0) {
+          throw new Error("A subject cannot be unchecked after scores have been recorded for it.");
+        }
+        await tx.studentClassSubject.deleteMany({ where: { id: { in: removed.map((enrollment) => enrollment.id) } } });
+      }
+
+      await tx.studentClassSubject.createMany({
+        data: classSubjectIds.map((classSubjectId) => ({ studentId, classSubjectId })),
+        skipDuplicates: true,
+      });
+    });
+
+    revalidatePath("/admin/students");
+    revalidatePath("/admin/subjects");
+    revalidatePath("/student");
+    revalidatePath("/teacher/scores");
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : "Failed to update student subjects." };
+  }
+}

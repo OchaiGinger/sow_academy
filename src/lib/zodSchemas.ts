@@ -16,7 +16,6 @@ export const subjectSchema = z.object({
     classId: z.string().min(1),
     enabled: z.boolean(),
     isElective: z.boolean(),
-    studentIds: z.array(z.string()),
     teacherId: z.string().nullable().optional(),
   })),
 }).superRefine((values, ctx) => {
@@ -31,9 +30,6 @@ export const subjectSchema = z.object({
       ctx.addIssue({ code: "custom", path: ["offerings", index, "classId"], message: "A class can only be selected once" });
     }
     seenClassIds.add(offering.classId);
-    if (offering.enabled && offering.isElective && offering.studentIds.length === 0) {
-      ctx.addIssue({ code: "custom", path: ["offerings", index, "studentIds"], message: "Select at least one student for this elective" });
-    }
   });
 });
 

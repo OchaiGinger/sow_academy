@@ -48,10 +48,10 @@ export function SubjectForm({ initialData, onSuccess, classes, teachers }: Props
       offerings: classes.map((cls) => {
         const offering = initialData.offerings.find((item) => item.classId === cls.id);
         if (!offering) {
-          return { classId: cls.id, enabled: false, isElective: false, studentIds: [], teacherId: null };
+          return { classId: cls.id, enabled: false, isElective: false, teacherId: null };
         }
         return isJuniorSecondary(cls.name, cls.level)
-          ? { ...offering, isElective: false, studentIds: [] }
+          ? { ...offering, isElective: false }
           : offering;
       }),
     } : {
@@ -61,7 +61,6 @@ export function SubjectForm({ initialData, onSuccess, classes, teachers }: Props
         classId: cls.id,
         enabled: false,
         isElective: false,
-        studentIds: [],
         teacherId: null,
       })),
     },
@@ -80,7 +79,7 @@ export function SubjectForm({ initialData, onSuccess, classes, teachers }: Props
         offerings: values.offerings.map((offering) => {
           const cls = classes.find((item) => item.id === offering.classId);
           return cls && isJuniorSecondary(cls.name, cls.level)
-            ? { ...offering, isElective: false, studentIds: [] }
+            ? { ...offering, isElective: false }
             : offering;
         }),
       };
@@ -165,7 +164,6 @@ export function SubjectForm({ initialData, onSuccess, classes, teachers }: Props
                 const isEnabled = offering?.enabled ?? false;
                 const juniorSecondary = isJuniorSecondary(cls.name, cls.level);
                 const isElective = !juniorSecondary && (offering?.isElective ?? false);
-                const studentIds = juniorSecondary ? [] : offering?.studentIds ?? [];
 
                 return (
                   <article key={cls.id} className={`min-w-0 overflow-hidden rounded-xl border transition-colors ${isEnabled ? "border-primary/40 bg-primary/[0.03]" : "bg-card"}`}>
@@ -216,7 +214,6 @@ export function SubjectForm({ initialData, onSuccess, classes, teachers }: Props
                                 checked={isElective}
                                 onCheckedChange={(checked) => {
                                   form.setValue(`offerings.${index}.isElective`, checked === true, { shouldDirty: true, shouldValidate: true });
-                                  if (checked !== true) form.setValue(`offerings.${index}.studentIds`, [], { shouldDirty: true });
                                 }}
                               />
                               <span className="font-medium">Only selected students take this subject</span>
@@ -225,28 +222,8 @@ export function SubjectForm({ initialData, onSuccess, classes, teachers }: Props
                         </div>
 
                         {isElective && (
-                          <div className="mt-3 space-y-2">
-                            <div className="flex items-center justify-between gap-2">
-                              <p className="text-xs text-muted-foreground">Select students in {cls.name}</p>
-                              <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold">{studentIds.length} selected</span>
-                            </div>
-                            <div className="max-h-48 divide-y overflow-y-auto overscroll-contain rounded-lg border bg-background">
-                              {cls.students.length ? cls.students.map((student) => (
-                                <label key={student.id} className="flex cursor-pointer items-center gap-3 px-3 py-2.5 text-sm hover:bg-muted/50">
-                                  <Checkbox
-                                    checked={studentIds.includes(student.id)}
-                                    onCheckedChange={(checked) => {
-                                      const nextIds = checked === true ? [...studentIds, student.id] : studentIds.filter((id) => id !== student.id);
-                                      form.setValue(`offerings.${index}.studentIds`, nextIds, { shouldDirty: true, shouldValidate: true });
-                                    }}
-                                  />
-                                  <span className="min-w-0 flex-1 truncate">{student.name}</span>
-                                </label>
-                              )) : <p className="p-4 text-sm text-muted-foreground">No students are currently assigned to this class.</p>}
-                            </div>
-                            {form.formState.errors.offerings?.[index]?.studentIds?.message && (
-                              <p className="text-sm font-medium text-destructive">{form.formState.errors.offerings[index]?.studentIds?.message}</p>
-                            )}
+                          <div className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                            Set which students take this elective from the Students list. This class’s enrollment is managed independently.
                           </div>
                         )}
                       </div>

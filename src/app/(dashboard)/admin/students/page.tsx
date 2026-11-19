@@ -8,7 +8,14 @@ export default async function StudentsAdminPage() {
     db.student.findMany({
       include: {
         user: { select: { name: true, email: true, phone: true, image: true } },
-        class: { include: { classSubjects: { select: { id: true, isElective: true } } } },
+        class: {
+          include: {
+            classSubjects: {
+              select: { id: true, isElective: true, subject: { select: { name: true, code: true } } },
+              orderBy: { subject: { name: "asc" } },
+            },
+          },
+        },
         electiveSubjects: { select: { classSubjectId: true } },
       },
       orderBy: { user: { name: "asc" } },

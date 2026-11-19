@@ -52,22 +52,6 @@ export async function upsertSubject(rawInput: unknown) {
         }
       }
 
-      for (const offering of selectedOfferings) {
-        const classRecord = classesById.get(offering.classId);
-        if (!offering.isElective || (classRecord && isJuniorSecondary(classRecord.name, classRecord.level))) continue;
-        const uniqueStudentIds = new Set(offering.studentIds);
-        if (uniqueStudentIds.size !== offering.studentIds.length) {
-          throw new Error("A student can only be selected once for a class elective.");
-        }
-        const students = await tx.student.findMany({
-          where: { id: { in: offering.studentIds }, classId: offering.classId },
-          select: { id: true },
-        });
-        if (students.length !== offering.studentIds.length) {
-          throw new Error("Selected students must belong to the class offering this elective.");
-        }
-      }
-
       const existingOfferings = await tx.classSubject.findMany({
         where: { subjectId: subject.id },
         select: { id: true, classId: true },
@@ -89,7 +73,7 @@ export async function upsertSubject(rawInput: unknown) {
       }
 
       for (const classOffering of selectedOfferings) {
-        const { classId, studentIds, teacherId } = classOffering;
+        const { classId, teacherId } = classOffering;
         const classRecord = classesById.get(classId);
         const juniorSecondary = classRecord
           ? isJuniorSecondary(classRecord.name, classRecord.level)
@@ -120,39 +104,7 @@ export async function upsertSubject(rawInput: unknown) {
           select: { id: true },
         });
 
-        if (isElective) {
-          const removedStudents = await tx.studentClassSubject.findMany({
-            where: {
-              classSubjectId: offering.id,
-              studentId: { notIn: studentIds },
-            },
-            select: { studentId: true },
-          });
-          if (removedStudents.length > 0) {
-            const scoreCount = await tx.score.count({
-              where: {
-                classSubjectId: offering.id,
-                studentId: { in: removedStudents.map((enrollment) => enrollment.studentId) },
-              },
-            });
-            if (scoreCount > 0) {
-              throw new Error("Cannot remove students from this elective after scores have been recorded for them.");
-            }
-          }
-          await tx.studentClassSubject.deleteMany({
-            where: {
-              classSubjectId: offering.id,
-              studentId: { notIn: studentIds },
-            },
-          });
-          await tx.studentClassSubject.createMany({
-            data: studentIds.map((studentId) => ({
-              studentId,
-              classSubjectId: offering.id,
-            })),
-            skipDuplicates: true,
-          });
-        } else {
+        if (!isElective) {
           await tx.studentClassSubject.deleteMany({
             where: { classSubjectId: offering.id },
           });

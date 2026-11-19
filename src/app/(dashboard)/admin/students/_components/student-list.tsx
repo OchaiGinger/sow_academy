@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { deleteStudent } from "@/app/actions/student-actions";
+import { StudentSubjectsButton } from "./student-subjects-button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -43,7 +44,11 @@ export type AdminStudent = {
     name: string;
     level: string;
     arm: string;
-    classSubjects?: { id: string; isElective: boolean }[];
+    classSubjects?: {
+      id: string;
+      isElective: boolean;
+      subject: { name: string; code: string | null };
+    }[];
   } | null;
   electiveSubjects?: { classSubjectId: string }[];
 };
@@ -75,16 +80,6 @@ function formatDob(date: Date | null) {
     month: "short",
     year: "numeric",
   });
-}
-
-function getSubjectCount(student: AdminStudent) {
-  const offerings = student.class?.classSubjects ?? [];
-  const requiredCount = offerings.filter((offering) => !offering.isElective).length;
-  const electiveIds = new Set(student.electiveSubjects?.map((entry) => entry.classSubjectId) ?? []);
-  const electiveCount = offerings.filter(
-    (offering) => offering.isElective && electiveIds.has(offering.id),
-  ).length;
-  return requiredCount + electiveCount;
 }
 
 export function StudentList({ students, classes }: Props) {
@@ -365,9 +360,13 @@ export function StudentList({ students, classes }: Props) {
                           </TableCell>
 
                           <TableCell className="px-4 py-4">
-                            <Badge variant="outline" className="text-xs font-bold">
-                              {getSubjectCount(student)} subject{getSubjectCount(student) === 1 ? "" : "s"}
-                            </Badge>
+                            <StudentSubjectsButton
+                              studentId={student.id}
+                              studentName={student.user.name}
+                              className={student.class?.name ?? "Unassigned"}
+                              offerings={student.class?.classSubjects ?? []}
+                              selectedElectiveIds={student.electiveSubjects?.map((entry) => entry.classSubjectId) ?? []}
+                            />
                           </TableCell>
 
                           <TableCell className="px-4 py-4">

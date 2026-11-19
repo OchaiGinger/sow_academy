@@ -40,7 +40,6 @@ export default async function AdminSubjectsPage() {
               user: { select: { name: true } },
             },
           },
-          studentEnrollments: { select: { studentId: true } },
         },
       },
     },
